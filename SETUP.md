@@ -116,9 +116,11 @@ make agents-claude-plugins \
 
 В проекте используется `direnv`:
 
-1. настройте интеграцию с вашей shell: https://direnv.net/docs/hook.html
+1. настройте интеграцию с вашей shell: [direnv hooks documentation](https://direnv.net/docs/hook.html)
 2. разрешите локальный `.envrc` в корне проекта:
 
 ```bash
 direnv allow
 ```
+
+`.envrc` подхватывает `.env` и `.env.local`, а если `PORT` не задан явно, выставляет его автоматически через `port-selector`. `make check` проверяет, что `direnv` действительно экспортирует числовой `PORT`.

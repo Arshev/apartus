@@ -143,6 +143,35 @@ check_port_selector() {
   return 1
 }
 
+check_direnv_port() {
+  local output
+
+  if ! command_exists direnv; then
+    fail "direnv installed"
+    return 1
+  fi
+
+  if [ ! -f .envrc ]; then
+    fail ".envrc present"
+    return 1
+  fi
+
+  # shellcheck disable=SC2016
+  if ! output="$(direnv exec . sh -lc 'printf "%s" "${PORT:-}"' 2>/dev/null)"; then
+    fail "direnv exports numeric PORT"
+    return 1
+  fi
+
+  if printf '%s' "$output" | tr -d '[:space:]' | grep -Eq '^[0-9]+$'; then
+    ok "direnv exports numeric PORT"
+    return 0
+  fi
+
+  fail "direnv exports numeric PORT"
+  note "PORT=${output:-<empty>}"
+  return 1
+}
+
 check_himalaya_accounts() {
   local output
 
@@ -245,6 +274,7 @@ check_command required "jq installed" jq --version
 check_command required "node installed" node --version
 check_command required "npx installed" npx --version
 check_port_selector
+check_direnv_port
 check_command required "ruby installed" ruby --version
 check_command required "tmux installed" tmux -V
 check_command required "yarn installed" yarn --version
@@ -262,7 +292,7 @@ check_json_command required "claude authenticated" '.loggedIn == true' claude au
 check_command required "codex authenticated" codex login status
 check_command required "gh authenticated" gh auth status
 check_command optional "tgcli authenticated" tgcli auth status
-check_json_command optional "gws authenticated" 'if has("token_valid") then .token_valid == true else true end' gws auth status
+check_json_command optional "gws authenticated" '(.token_valid // false) == true' gws auth status
 check_himalaya_accounts
 
 section "Optional agent extras"
