@@ -21,7 +21,7 @@ GOOGLE_WORKSPACE_SKILLS := \
 	gws-drive \
 	gws-sheets
 
-.PHONY: ai bootstrap mise-package mise-install check register
+.PHONY: ai bootstrap mise-package mise-install check check-context register
 .PHONY: agents-install agents agents-cli agents-skills agents-claude-plugins
 .PHONY: agents-skills-install agents-skills-list agents-skills-check-npx
 
@@ -34,6 +34,10 @@ check:
 	@CLAUDE_MARKETPLACE_NAMES="$(CLAUDE_MARKETPLACE_NAMES)" \
 	CLAUDE_EXPECTED_PLUGINS="$(CLAUDE_PLUGINS)" \
 	./scripts/test-setup.sh
+	@./scripts/test-context.sh
+
+check-context:
+	@./scripts/test-context.sh
 
 mise-package:
 	@set -e; \
