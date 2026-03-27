@@ -17,7 +17,7 @@ EXPECTED_SKILLS="${EXPECTED_SKILLS:-\
 adr-writing \
 docmost \
 find-skills \
-fpf-simple \
+fpf-problem-solving \
 gws-calendar \
 gws-calendar-agenda \
 gws-calendar-insert \
@@ -40,13 +40,18 @@ playwright-cli \
 playwriter \
 prompt-engeneering \
 tgcli \
-workspace-cli}"
+google-workspace-cli}"
 
 EXPECTED_MCP="${EXPECTED_MCP:-\
 plugin:playwright:playwright \
 chrome-devtools \
 tavily \
-context7}"
+context7 \
+claude.ai \
+claude.ai \
+Gmail \
+Google \
+Calendar}"
 
 EXPECTED_PLUGINS="${EXPECTED_PLUGINS:-\
 claude-md-management@claude-plugins-official \
@@ -65,7 +70,7 @@ pr-review-fix-loop@dapi \
 pr-review-toolkit@claude-plugins-official \
 ralph-loop@claude-plugins-official \
 superpowers@claude-plugins-official \
-zellij-claude-status@dapi}"
+context7@claude-plugins-official}"
 
 EXPECTED_MARKETPLACES="${EXPECTED_MARKETPLACES:-\
 claude-plugins-official \

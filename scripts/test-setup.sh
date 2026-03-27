@@ -2,7 +2,7 @@
 
 set -u
 
-PATH="${HOME}/.local/bin:/usr/local/bin:/opt/homebrew/bin:${PATH}"
+PATH="${HOME}/.local/share/mise/shims:${HOME}/.local/bin:/usr/local/bin:/opt/homebrew/bin:${PATH}"
 export PATH
 
 required_failures=0
