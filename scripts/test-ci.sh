@@ -85,7 +85,7 @@ section "Agent CLIs"
 check_mise "claude installed" claude --version
 check_mise "codex installed" codex --version
 check_mise "playwright-cli installed" playwright-cli --version
-check_mise "tgcli installed" tgcli --help
-check_mise "gws installed" gws --help
+# tgcli and gws are installed by `make extra-skills`, which CI does not run.
+# Re-add checks here if the workflow ever invokes extra-skills.
 
 printf '\nCI smoke checks passed.\n'
