@@ -52,6 +52,13 @@ These files are NOT part of every-message context. Read them when relevant:
 - `ai-docs/DECISIONS.md` — architectural decisions log. Read before proposing alternatives to existing choices.
 - `ai-docs/PLAN.md` — implementation plan with phases and checkboxes. Read to understand current progress.
 
+## Active homework — HW-1 (Spec-Driven Development)
+Currently working on HW-1: full Brief → Spec → Plan → Implement cycle on 5 features.
+**Before any work in this repo, read `homeworks/hw-1/WORKING_AGREEMENTS.md`** —
+it defines how we collaborate during HW-1 (review discipline, session strategy,
+coverage ratchet, commit rules, reference implementation pattern). Remove this
+section from CLAUDE.md when HW-1 is submitted.
+
 ## Constraints
 - Don't touch existing migrations
 - Don't implement auth (Rails 8 built-in auth)
