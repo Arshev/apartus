@@ -1,5 +1,9 @@
 # Apartus
 
+[![CI](https://github.com/Arshev/apartus/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Arshev/apartus/actions/workflows/ci.yml)
+[![Backend coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Arshev/apartus/main/.github/badges/backend-coverage.json)](backend/spec/spec_helper.rb)
+[![Frontend coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Arshev/apartus/main/.github/badges/frontend-coverage.json)](frontend/vitest.config.js)
+
 SaaS-система управления краткосрочной и долгосрочной арендой недвижимости (PMS — Property Management System).
 
 Единый центр управления объектами, бронированиями, гостями и финансами. Хаб между площадками-агрегаторами (Booking.com, Airbnb) и собственниками недвижимости.
