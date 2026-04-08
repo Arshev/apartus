@@ -85,6 +85,34 @@
 **Причина:** PMS-менеджер может управлять несколькими организациями с разными ролями
 **Влияние:** Auth, все org-scoped запросы, X-Organization-Id header
 
+## DEC-012: Class-level `authorize` in UnitsController (2026-04-08)
+
+**Решение:** `UnitsController` вызывает `authorize Unit` (класс) во всех
+экшенах, включая `show/update/destroy`, в отличие от эталона F1
+`PropertiesController`, где `show/update/destroy` используют
+`authorize property` (инстанс).
+
+**Альтернативы:** Instance-level `authorize unit` в `show/update/destroy`,
+как в F1.
+
+**Причина:** Spec F2 §4.6 фиксирует порядок обработки запроса:
+`find_property → authorize → find_unit`. Это нужно, чтобы коллизия
+«нет прав + чужой `:property_id`» давала `404` (не `403`) — инвариант
+«не раскрывать существование» сильнее семантической точности ответа.
+Instance-level `authorize unit` потребовал бы загрузить юнит **до**
+авторизации, что инвертирует порядок и ломает AC4 collision. Record-level
+изоляция реализована не в policy, а через scope
+`property.units.find_by(id: ...)` в контроллере, что согласовано с
+F1 паттерном `Current.organization.properties.find_by(...)`.
+
+**Следствие:** `UnitPolicy` намеренно не обращается к `record`. Добавление
+проверок на `record.property...` в будущем сломает §4.6 ordering и
+сделает scope-изоляцию наполовину работающей. Не добавлять без
+пересмотра §4.6.
+
+**Влияние:** HW-1 F2, потенциально F3–F5, если они введут nested ресурсы
+с тем же паттерном.
+
 ## DEC-011: Permissions as text array on Role (2026-03-27)
 
 **Решение:** Разрешения хранятся как text[] массив в модели Role, Permissions concern с константами

@@ -440,5 +440,10 @@ RSpec.describe "Api::V1::Units" do
            headers: nopriv_headers
       expect(response).to have_http_status(:not_found)
     end
+
+    it "GET index returns 404 (not 403) per Spec §4.6 ordering" do
+      get "/api/v1/properties/#{foreign_property.id}/units", headers: nopriv_headers
+      expect(response).to have_http_status(:not_found)
+    end
   end
 end
