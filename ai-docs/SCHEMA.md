@@ -111,12 +111,30 @@
 | property_type | integer (enum) | not null |
 | description | text | optional, max 5000 chars |
 
-**Associations:** belongs_to :organization
+**Associations:** belongs_to :organization, has_many :units (dependent: :destroy)
 **Enums:** property_type: { apartment: 0, hotel: 1, house: 2, hostel: 3 } (validated via `validate: true`)
 **Validations:** name/address presence + length, description length <= 5000
 **Indexes:** [organization_id], [organization_id, id]
 
 > `branch_id` intentionally omitted in F1; added in F5 (Property↔Branch).
+
+#### Unit
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| property_id | bigint | FK, not null, on_delete: cascade |
+| name | string(255) | not null, normalized strip |
+| unit_type | integer (enum) | not null |
+| capacity | integer | not null, 1..100 |
+| status | integer (enum) | not null |
+
+**Associations:** belongs_to :property
+**Enums:** unit_type: { room: 0, apartment: 1, bed: 2, studio: 3 } (validated via `validate: true`); status: { available: 0, maintenance: 1, blocked: 2 } (validated via `validate: true`)
+**Validations:** name presence + length, capacity presence + numericality 1..100
+**Indexes:** [property_id], [property_id, id]
+
+> `organization_id` intentionally not stored on Unit — derived via `unit.property.organization_id`. See Spec F2 §3.1, D3.
 
 ### Phase 3: Booking Calendar
 

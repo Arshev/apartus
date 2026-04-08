@@ -10,7 +10,7 @@ status: in-progress
 | # | Фича | Issue | Brief→Spec→Plan | Implement (чел/агент) | Качество (1–5) | Статус |
 |---|---|---|---|---|---|---|
 | 1 | Property CRUD (эталон) | #10 | 1 / 2 / 3 | ~агент (одна сессия L4) | 5 | done |
-| 2 | Unit CRUD | — | — | — | — | pending |
+| 2 | Unit CRUD | #11 | 2 / 3 / 4 | ~агент (L3 сессии) | 5 | done |
 | 3 | Amenities (M:N) | — | — | — | — | pending |
 | 4 | Branches (tree) | — | — | — | — | pending |
 | 5 | Property ↔ Branch | — | — | — | — | pending |
@@ -63,6 +63,60 @@ status: in-progress
 
 <!-- Аналогично для 02-05 -->
 
+### 02 — Unit CRUD
+
+- **Session strategy:** уровень 3 — отдельные сессии Brief / Spec / Plan,
+  Implement выполнен продолжением Plan-сессии после plan → active.
+- **Итераций ревью:** Brief 2, Spec 3, Plan 4 (3 раунда замечаний + финальная
+  проверка).
+- **Качество результата (1–5):** 5 — 52 новых примеров (48 request + 4 model),
+  все AC1–AC14 и E1–E23 покрыты, F1 follow-up (PATCH с невалидным enum)
+  закрыт отдельными тестами, coverage 55.85% → 61.24%.
+- **Что пошло хорошо:**
+  - Reference pattern F1 сработал: контроллер, policy и spec писались
+    «по форме F1» почти без переосмысления.
+  - `validate: true` на обоих enum добавлен в модели с первого коммита
+    (C1), не понадобилось ловить `ArgumentError` постфактум — прямой
+    перенос урока F1 в Spec.
+  - Spec §4.6 явно зафиксировал порядок `find_property → authorize → find_unit`,
+    и Plan добавил отдельный тест на коллизию «no-perm + foreign property → 404».
+    Это защищает от случайной перестановки `authorize` и scope-резолва
+    при будущем рефакторинге.
+  - Plan review поймал реальную проблему: §6.1 Acceptance использовал
+    `rails runner 'FactoryBot.create(...)'` — FactoryBot в `rails runner`
+    не загружается. Заменено на транзитивную проверку через model spec.
+- **Что пошло плохо / находки на ходу:**
+  - D1 risk сработал: C2 (controller+policy+routes) без тестов уронил
+    coverage до 46.32% < 54 floor, rspec упал на `minimum_coverage`.
+    Plan §0 fallback был готов — склеили C2 и C3 в один коммит. Урок:
+    для фич со значимым объёмом непокрытого production-кода C2-без-тестов
+    коммит нежизнеспособен; либо сразу планировать склейку, либо
+    допускать временный drop ratchet (не делали — честнее склеить).
+  - Handover утверждал «factory :unit уже есть» — это была ошибка,
+    `spec/factories/units.rb` отсутствовал. Поймано Plan review'ом через
+    grounding. Урок: handover-текст не доверять, grounding обязателен.
+- **Что изменить в промптах ревью:**
+  - Plan review v2 кандидат: «для каждой группы коммитов (Cn) прикинуть
+    delta coverage: сколько production-строк добавляется vs сколько
+    тестов их покрывает. Если Cn добавляет prod-код без тестов, явно
+    зафиксировать риск ratchet + fallback склейки с следующим Cn».
+  - Plan review v2 кандидат: «команды в Acceptance шага прогнать
+    мысленно через контекст их запуска (`rails runner` vs `rspec` vs
+    shell) — проверить, что зависимости доступны».
+  - Решено: перенести в `PROMPTS.md` после F3, как договаривались по
+    F1 (накопить минимум 2 фичи для обобщения).
+
+#### Reference implementation paths (F2)
+
+Форма та же, что в F1 — не становится новым эталоном, но для навигации:
+
+- CRUD controller: `backend/app/controllers/api/v1/units_controller.rb`
+- Pundit policy: `backend/app/policies/unit_policy.rb`
+- Request spec: `backend/spec/requests/api/v1/units_spec.rb`
+- Model spec (cascade + enum `validate: true`): `backend/spec/models/unit_spec.rb`
+- Factory: `backend/spec/factories/units.rb`
+- Migration: `backend/db/migrate/20260408160000_create_units.rb`
+
 ## Coverage ratchet (backend)
 
 Порог `minimum_coverage` в `backend/spec/spec_helper.rb` поднимается по мере того,
@@ -72,7 +126,7 @@ status: in-progress
 |---|---|---|---|
 | Старт HW-1 (hw-0 as-is) | 38 | 38.22% | Baseline, установлен при добавлении SimpleCov |
 | После F1 (Property CRUD) | 54 | 55.12% | +37 request specs добавили 17 п.п. coverage |
-| После F2 (Unit CRUD) | _TBD_ | _TBD_ | |
+| После F2 (Unit CRUD) | 60 | 61.24% | +52 examples (request+model), enum `validate: true` с C1, C2+C3 склеены по D1 fallback |
 | После F3 (Amenities) | _TBD_ | _TBD_ | |
 | После F4 (Branches) | _TBD_ | _TBD_ | |
 | После F5 (Property↔Branch) | 80 | _TBD_ | Финальная цель ДЗ |
