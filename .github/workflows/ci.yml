@@ -44,7 +44,9 @@ jobs:
         run: shfmt -d init.sh scripts/test-ci.sh scripts/test-setup.sh
 
       - name: Lint shell scripts
-        run: shellcheck init.sh scripts/*.sh
+        # scripts/test-context.sh is excluded for the same reason as in the
+        # shfmt step above — see Arshev/apartus#8.
+        run: shellcheck init.sh scripts/test-ci.sh scripts/test-setup.sh
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
