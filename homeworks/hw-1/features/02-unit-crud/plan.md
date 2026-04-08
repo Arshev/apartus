@@ -58,8 +58,8 @@ UnitPolicy полагается на существующий rescue.
 - `backend/config/routes.rb:18` — текущая строка `resources :properties,
   only: [ :index, :show, :create, :update, :destroy ]`, без блока.
   Меняется на форму с блоком (§4).
-- `backend/app/models/property.rb` — содержит `belongs_to :organization`
-  + enum + normalizes + validates, **нет ни одного `has_many`**. F2
+- `backend/app/models/property.rb` — содержит `belongs_to :organization`,
+  enum, normalizes, validates, **нет ни одного `has_many`**. F2
   добавляет первый `has_many :units` (§2).
 - `backend/spec/factories/` — `units.rb` **отсутствует** (есть только
   `memberships.rb`, `organizations.rb`, `properties.rb`, `roles.rb`,
