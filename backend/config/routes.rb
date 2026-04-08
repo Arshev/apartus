@@ -15,6 +15,7 @@ Rails.application.routes.draw do
       resource :organization, only: [ :show, :update ]
       resources :members, only: [ :index, :create, :update, :destroy ]
       resources :roles, only: [ :index, :create, :update, :destroy ]
+      resources :properties, only: [ :index, :show, :create, :update, :destroy ]
 
       get "health", to: "health#show"
     end
