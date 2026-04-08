@@ -100,7 +100,23 @@
 
 ### Phase 2: Properties & Units
 
-_Not yet implemented_
+#### Property
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK, not null, on_delete: cascade |
+| name | string(255) | not null, normalized strip |
+| address | string(500) | not null, normalized strip |
+| property_type | integer (enum) | not null |
+| description | text | optional, max 5000 chars |
+
+**Associations:** belongs_to :organization
+**Enums:** property_type: { apartment: 0, hotel: 1, house: 2, hostel: 3 } (validated via `validate: true`)
+**Validations:** name/address presence + length, description length <= 5000
+**Indexes:** [organization_id], [organization_id, id]
+
+> `branch_id` intentionally omitted in F1; added in F5 (Property↔Branch).
 
 ### Phase 3: Booking Calendar
 

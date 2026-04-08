@@ -62,6 +62,25 @@ These files are NOT part of every-message context. Read them when relevant:
 - `ai-docs/DECISIONS.md` — architectural decisions log. Read before proposing alternatives to existing choices.
 - `ai-docs/PLAN.md` — implementation plan with phases and checkboxes. Read to understand current progress.
 
+## Reference implementations (HW-1)
+
+Эталонные паттерны, на которые ориентируются новые фичи той же формы.
+
+**F1 — CRUD scoped to organization (reference for F2–F5):**
+
+- CRUD controller: `backend/app/controllers/api/v1/properties_controller.rb`
+- Pundit policy: `backend/app/policies/property_policy.rb`
+- Request spec: `backend/spec/requests/api/v1/properties_spec.rb`
+- Factory: `backend/spec/factories/properties.rb`
+- Migration: `backend/db/migrate/20260408155056_create_properties.rb`
+
+Ключевые решения эталона: scoping через `Current.organization.properties`,
+404 на чужой `id` (без раскрытия существования), `find_by` + `performed?`
+вместо глобального `rescue_from RecordNotFound`, единый стиль обработки
+валидаций `if .save / if .update` (без `rescue RecordInvalid`),
+`rescue_from Pundit::NotAuthorizedError → 403` в `Api::V1::BaseController`,
+`organization_id` не разрешён в `permitted_params`.
+
 ## Active homework — HW-1 (Spec-Driven Development)
 
 Currently working on HW-1: full Brief → Spec → Plan → Implement cycle on 5 features.

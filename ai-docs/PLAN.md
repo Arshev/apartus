@@ -68,14 +68,14 @@
 Ядро системы — управление объектами и юнитами.
 
 - [ ] **2.1** Модель данных
-  - [ ] 2.1.1 Модель `Property` (name, address, type, description, branch_id)
+  - [x] 2.1.1 Модель `Property` (name, address, type, description) — HW-1 F1; `branch_id` отложен в F5
   - [ ] 2.1.2 Модель `Unit` (name, unit_type, capacity, status, property_id)
   - [ ] 2.1.3 Модель `Amenity` + join-таблица `UnitAmenity`
   - [ ] 2.1.4 Модель `PropertyPhoto` / `UnitPhoto` (Active Storage)
-  - [ ] 2.1.5 Enum-типы недвижимости: apartment, hotel, house, hostel
+  - [x] 2.1.5 Enum-типы недвижимости: apartment, hotel, house, hostel — HW-1 F1 (реализован как `Property.property_type` enum с `validate: true`)
   - [ ] 2.1.6 Enum-статусы юнитов: available, maintenance, blocked
 - [ ] **2.2** API
-  - [ ] 2.2.1 CRUD `/api/v1/properties`
+  - [x] 2.2.1 CRUD `/api/v1/properties` — HW-1 F1 (+ PropertyPolicy)
   - [ ] 2.2.2 CRUD `/api/v1/properties/:id/units`
   - [ ] 2.2.3 Управление amenities
   - [ ] 2.2.4 Загрузка и управление фотографиями
