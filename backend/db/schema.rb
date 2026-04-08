@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_08_155056) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_08_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -68,6 +68,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_08_155056) do
     t.index ["organization_id"], name: "index_roles_on_organization_id"
   end
 
+  create_table "units", force: :cascade do |t|
+    t.integer "capacity", null: false
+    t.datetime "created_at", null: false
+    t.string "name", limit: 255, null: false
+    t.bigint "property_id", null: false
+    t.integer "status", null: false
+    t.integer "unit_type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["property_id", "id"], name: "index_units_on_property_id_and_id"
+    t.index ["property_id"], name: "index_units_on_property_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email", null: false
@@ -84,4 +96,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_08_155056) do
   add_foreign_key "memberships", "users"
   add_foreign_key "properties", "organizations", on_delete: :cascade
   add_foreign_key "roles", "organizations"
+  add_foreign_key "units", "properties", on_delete: :cascade
 end
