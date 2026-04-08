@@ -132,11 +132,12 @@ RSpec.describe "Api::V1::UnitAmenities" do
       expect(response).to have_http_status(:not_found)
     end
 
-    it "returns 422 on duplicate attachment" do
+    it "returns 422 on duplicate attachment with exact Spec §5.6 message" do
       UnitAmenity.create!(unit: unit, amenity: amenity)
       post "/api/v1/units/#{unit.id}/amenities",
            params: { unit_amenity: { amenity_id: amenity.id } }, headers: headers
       expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.parsed_body["error"]).to eq([ "Amenity has already been attached" ])
     end
   end
 

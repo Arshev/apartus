@@ -21,7 +21,7 @@ RSpec.describe UnitAmenity, type: :model do
       UnitAmenity.create!(unit: unit, amenity: amenity)
       dup = UnitAmenity.new(unit: unit, amenity: amenity)
       expect(dup).not_to be_valid
-      expect(dup.errors[:unit_id]).to be_present
+      expect(dup.errors[:amenity_id]).to include("has already been attached")
     end
   end
 
