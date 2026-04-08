@@ -56,4 +56,8 @@ end
 
 group :test do
   gem "shoulda-matchers", "~> 6.0"
+
+  # Code coverage. Loaded from spec_helper.rb before application code
+  # so that file-level `require`s are counted in the metric.
+  gem "simplecov", require: false
 end
