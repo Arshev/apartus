@@ -66,12 +66,14 @@ scope: homeworks/hw-1 — remove pointer from CLAUDE.md when HW-1 is closed
   Pundit policy shape, request spec structure). Всё последующее (F2–F5) делается
   «по аналогии с F1».
 - После F1 — обновить `CLAUDE.md` секцией **Reference implementations** с путями:
-  ```
+
+  ```text
   - CRUD controller: app/controllers/api/v1/properties_controller.rb
   - Pundit policy: app/policies/property_policy.rb
   - Request spec: spec/requests/api/v1/properties_spec.rb
   - Factory: spec/factories/properties.rb
   ```
+
 - При генерации F2+ в промпте к агенту обязательно указывать эти пути:
   «Структура по аналогии с `app/controllers/api/v1/properties_controller.rb`».
 

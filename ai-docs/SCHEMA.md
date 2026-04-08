@@ -24,6 +24,7 @@
 ### Phase 1: Auth & Multi-tenancy
 
 #### User
+
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
@@ -37,6 +38,7 @@
 **Validations:** email presence/uniqueness/format, name presence, password min 8
 
 #### Organization
+
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
@@ -48,6 +50,7 @@
 **Callbacks:** before_validation :generate_slug, after_create :create_preset_roles
 
 #### Membership
+
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
@@ -61,6 +64,7 @@
 **Unique index:** [user_id, organization_id]
 
 #### Role
+
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
@@ -74,6 +78,7 @@
 **Unique index:** [organization_id, code]
 
 #### JwtDenylist
+
 | Field | Type | Notes |
 |-------|------|-------|
 | id | bigint | PK |
