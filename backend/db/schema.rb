@@ -10,9 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_08_160000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_08_170100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "amenities", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", limit: 100, null: false
+    t.bigint "organization_id", null: false
+    t.datetime "updated_at", null: false
+    t.index "organization_id, lower((name)::text)", name: "index_amenities_on_org_and_lower_name", unique: true
+    t.index ["organization_id"], name: "index_amenities_on_organization_id"
+  end
 
   create_table "jwt_denylists", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -68,6 +77,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_08_160000) do
     t.index ["organization_id"], name: "index_roles_on_organization_id"
   end
 
+  create_table "unit_amenities", force: :cascade do |t|
+    t.bigint "amenity_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "unit_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["amenity_id"], name: "index_unit_amenities_on_amenity_id"
+    t.index ["unit_id", "amenity_id"], name: "index_unit_amenities_on_unit_id_and_amenity_id", unique: true
+    t.index ["unit_id"], name: "index_unit_amenities_on_unit_id"
+  end
+
   create_table "units", force: :cascade do |t|
     t.integer "capacity", null: false
     t.datetime "created_at", null: false
@@ -91,10 +110,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_08_160000) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "amenities", "organizations", on_delete: :cascade
   add_foreign_key "memberships", "organizations"
   add_foreign_key "memberships", "roles"
   add_foreign_key "memberships", "users"
   add_foreign_key "properties", "organizations", on_delete: :cascade
   add_foreign_key "roles", "organizations"
+  add_foreign_key "unit_amenities", "amenities", on_delete: :restrict
+  add_foreign_key "unit_amenities", "units", on_delete: :cascade
   add_foreign_key "units", "properties", on_delete: :cascade
 end

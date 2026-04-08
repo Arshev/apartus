@@ -13,7 +13,7 @@ SimpleCov.start "rails" do
   # Ratchet threshold: starts at the current baseline and is raised
   # with each new HW-1 feature. Final target: 80% (HW-1 requirement).
   # See homeworks/hw-1/report.md for the ratchet history.
-  minimum_coverage line: 60
+  minimum_coverage line: 67
 
   # Named command allows future merging of multiple test suites
   # (e.g. unit + system) into a single report.

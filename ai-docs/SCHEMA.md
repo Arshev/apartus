@@ -129,12 +129,40 @@
 | capacity | integer | not null, 1..100 |
 | status | integer (enum) | not null |
 
-**Associations:** belongs_to :property
+**Associations:** belongs_to :property, has_many :unit_amenities (dependent: :destroy), has_many :amenities (through: :unit_amenities)
 **Enums:** unit_type: { room: 0, apartment: 1, bed: 2, studio: 3 } (validated via `validate: true`); status: { available: 0, maintenance: 1, blocked: 2 } (validated via `validate: true`)
 **Validations:** name presence + length, capacity presence + numericality 1..100
 **Indexes:** [property_id], [property_id, id]
 
 > `organization_id` intentionally not stored on Unit — derived via `unit.property.organization_id`. See Spec F2 §3.1, D3.
+
+#### Amenity
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK, not null, on_delete: cascade |
+| name | string(100) | not null, normalized strip |
+
+**Associations:** belongs_to :organization, has_many :unit_amenities, has_many :units (through: :unit_amenities); `before_destroy` callback guards deletion when any `unit_amenities` exist (returns 409 via controller)
+**Validations:** name presence + length(<=100) + uniqueness (case-insensitive per organization)
+**Indexes:** [organization_id], unique [organization_id, LOWER(name)]
+
+> Per-org catalog. `organization_id` is immutable after create. No `description`/`icon`/`category` in HW-1 — see Spec F3 §13 D-open.
+
+#### UnitAmenity (join)
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| unit_id | bigint | FK, not null, on_delete: cascade |
+| amenity_id | bigint | FK, not null, on_delete: restrict |
+
+**Associations:** belongs_to :unit, belongs_to :amenity
+**Validations:** uniqueness of [unit_id, amenity_id]
+**Indexes:** [unit_id], [amenity_id], unique [unit_id, amenity_id]
+
+> DB-level `ON DELETE RESTRICT` on `amenity_id` is the second line of defense for the "amenity in use" invariant; the primary enforcement is `Amenity#before_destroy` for Rails-level custom error message.
 
 ### Phase 3: Booking Calendar
 

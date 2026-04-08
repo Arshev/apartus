@@ -113,6 +113,29 @@ F1 паттерном `Current.organization.properties.find_by(...)`.
 **Влияние:** HW-1 F2, потенциально F3–F5, если они введут nested ресурсы
 с тем же паттерном.
 
+## DEC-013: has_many :through for Unit <-> Amenity (2026-04-08)
+
+**Решение:** M:N связь Unit ↔ Amenity реализована через явную
+join-модель `UnitAmenity` и `has_many :through :unit_amenities`.
+
+**Альтернативы:** `has_and_belongs_to_many` (HABTM).
+
+**Причина выбора:**
+
+- HABTM устарел для нового кода в Rails 8; current best practice —
+  `has_many :through`.
+- `UnitAmenity` как полноценный ActiveRecord позволяет:
+  - явные валидации (`uniqueness [unit_id, amenity_id]`);
+  - callbacks и observers при необходимости;
+  - прямой доступ к join-атрибутам (сейчас только timestamps, в
+    будущем — `attached_at`, `source`, `confidence`);
+  - возможность для `Amenity` модели добавить `before_destroy`
+    callback с кастомным сообщением для инварианта §3.5.6 F3 Spec,
+    что невозможно в HABTM (нет модели для callback'ов).
+
+**Влияние:** HW-1 F3 реализация; паттерн для всех будущих M:N в
+проекте.
+
 ## DEC-011: Permissions as text array on Role (2026-03-27)
 
 **Решение:** Разрешения хранятся как text[] массив в модели Role, Permissions concern с константами

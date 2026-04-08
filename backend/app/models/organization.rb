@@ -3,6 +3,8 @@ class Organization < ApplicationRecord
   has_many :users, through: :memberships
   has_many :roles, dependent: :destroy
   has_many :properties, dependent: :destroy
+  has_many :units, through: :properties
+  has_many :amenities, dependent: :destroy
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true

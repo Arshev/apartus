@@ -9,6 +9,8 @@ module Permissions
     "properties.view",
     "units.manage",
     "units.view",
+    "amenities.manage",
+    "amenities.view",
     "reservations.manage",
     "reservations.view",
     "finance.manage",
@@ -28,6 +30,7 @@ module Permissions
         members.view
         properties.manage properties.view
         units.manage units.view
+        amenities.manage amenities.view
         reservations.manage reservations.view
         finance.view
       ]
@@ -39,6 +42,7 @@ module Permissions
         members.view
         properties.view
         units.view
+        amenities.view
         reservations.view
         finance.view
       ]

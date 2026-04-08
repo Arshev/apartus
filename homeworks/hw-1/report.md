@@ -11,7 +11,7 @@ status: in-progress
 |---|---|---|---|---|---|---|
 | 1 | Property CRUD (эталон) | #10 | 1 / 2 / 3 | ~агент (одна сессия L4) | 5 | done |
 | 2 | Unit CRUD | #11 | 2 / 3 / 4 | ~агент (L3 сессии) | 5 | done |
-| 3 | Amenities (M:N) | — | — | — | — | pending |
+| 3 | Amenities (M:N) | #3 | 2 / 3+3 / 4 | ~агент (L3 сессии) | 5 | done |
 | 4 | Branches (tree) | — | — | — | — | pending |
 | 5 | Property ↔ Branch | — | — | — | — | pending |
 
@@ -127,6 +127,7 @@ status: in-progress
 | Старт HW-1 (hw-0 as-is) | 38 | 38.22% | Baseline, установлен при добавлении SimpleCov |
 | После F1 (Property CRUD) | 54 | 55.12% | +37 request specs добавили 17 п.п. coverage |
 | После F2 (Unit CRUD) | 60 | 61.24% | +52 examples (request+model), enum `validate: true` с C1, C2+C3 склеены по D1 fallback |
+| После F3 (Amenities) | 67 | 68.21% | +83 examples (req amenities + req unit_amenities + model), C1+C2+C3 склеены по D1 fallback (C1 уронил coverage на 0.07% ниже floor), DEC-013, новые permission-коды, позитивный AC14 защищает F2 JSON |
 | После F3 (Amenities) | _TBD_ | _TBD_ | |
 | После F4 (Branches) | _TBD_ | _TBD_ | |
 | После F5 (Property↔Branch) | 80 | _TBD_ | Финальная цель ДЗ |

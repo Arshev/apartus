@@ -19,6 +19,13 @@ Rails.application.routes.draw do
         resources :units, only: [ :index, :show, :create, :update, :destroy ]
       end
 
+      resources :amenities, only: [ :index, :show, :create, :update, :destroy ]
+
+      resources :units, only: [] do
+        resources :amenities, only: [ :index, :create, :destroy ],
+                  controller: "unit_amenities"
+      end
+
       get "health", to: "health#show"
     end
   end

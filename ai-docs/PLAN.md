@@ -70,14 +70,14 @@
 - [ ] **2.1** Модель данных
   - [x] 2.1.1 Модель `Property` (name, address, type, description) — HW-1 F1; `branch_id` отложен в F5
   - [x] 2.1.2 Модель `Unit` (name, unit_type, capacity, status, property_id) — HW-1 F2
-  - [ ] 2.1.3 Модель `Amenity` + join-таблица `UnitAmenity`
+  - [x] 2.1.3 Модель `Amenity` + join-таблица `UnitAmenity` — HW-1 F3
   - [ ] 2.1.4 Модель `PropertyPhoto` / `UnitPhoto` (Active Storage)
   - [x] 2.1.5 Enum-типы недвижимости: apartment, hotel, house, hostel — HW-1 F1 (реализован как `Property.property_type` enum с `validate: true`)
   - [x] 2.1.6 Enum-статусы юнитов: available, maintenance, blocked — HW-1 F2 (enum с `validate: true`, без FSM)
 - [ ] **2.2** API
   - [x] 2.2.1 CRUD `/api/v1/properties` — HW-1 F1 (+ PropertyPolicy)
   - [x] 2.2.2 CRUD `/api/v1/properties/:id/units` — HW-1 F2 (nested route, UnitsController)
-  - [ ] 2.2.3 Управление amenities
+  - [x] 2.2.3 Управление amenities — HW-1 F3 (flat CRUD + nested attach/detach)
   - [ ] 2.2.4 Загрузка и управление фотографиями
   - [ ] 2.2.5 Фильтрация и поиск объектов/юнитов
   - [x] 2.2.6 Pundit-политики для properties и units — HW-1 F1 (PropertyPolicy) + F2 (UnitPolicy)
