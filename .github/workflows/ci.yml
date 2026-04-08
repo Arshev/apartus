@@ -37,7 +37,9 @@ jobs:
           sudo apt-get install -y shellcheck shfmt
 
       - name: Check shell formatting
-        run: shfmt -d init.sh scripts/*.sh
+        # test-context.sh is excluded: it contains backslash-continued string
+        # literals that shfmt cannot format idempotently (see Arshev/apartus#8).
+        run: shfmt -d init.sh $(ls scripts/*.sh | grep -v 'test-context\.sh')
 
       - name: Lint shell scripts
         run: shellcheck init.sh scripts/*.sh
