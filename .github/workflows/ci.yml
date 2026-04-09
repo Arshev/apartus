@@ -108,7 +108,8 @@ jobs:
         with:
           name: backend-coverage
           path: backend/coverage/.last_run.json
-          if-no-files-found: warn
+          if-no-files-found: error
+          include-hidden-files: true
           retention-days: 7
 
       - name: Rubocop
