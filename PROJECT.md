@@ -1,5 +1,7 @@
 # Apartus — Property Management System
 
+> **Note:** Этот файл — human-readable маркетинг-описание. **Canonical owner** продуктового контекста для агентов и разработки — [`memory-bank/domain/problem.md`](memory-bank/domain/problem.md). Этот файл может отставать от memory-bank; при расхождениях trust memory-bank.
+
 ## Что это
 
 Apartus — SaaS-система управления краткосрочной и долгосрочной арендой недвижимости (PMS). Выступает единым центром управления объектами, бронированиями, гостями и финансами, а также хабом между площадками-агрегаторами (Booking.com, Airbnb и др.) и собственниками недвижимости.

@@ -1,90 +1,41 @@
-See PROJECT.md for project description.
+# CLAUDE.md — Routing Table
 
-## Stack
+**Это routing-таблица, не носитель фактов.** Факты живут в `memory-bank/`. Этот файл — только указатель, куда смотреть.
 
-- **Backend:** Ruby on Rails 8, PostgreSQL, Pundit, RSpec
-- **Frontend:** Vue.js 3 (чистый JS, без TypeScript), Vuetify 3, Vite, Pinia, Vue Router 4
-- **Structure:** Monorepo — `/backend` (Rails API), `/frontend` (Vue SPA)
+Точка входа: [`memory-bank/README.md`](memory-bank/README.md).
 
-## Key commands
+## Куда смотреть
 
-### Backend
+| Нужно | Читай |
+|---|---|
+| Принципы документации, SSoT, frontmatter, lifecycle | [`memory-bank/dna/`](memory-bank/dna/) |
+| Продукт, users, MVP scope, capability roadmap | [`memory-bank/domain/problem.md`](memory-bank/domain/problem.md) |
+| Стек, module boundaries, API/error/data конвенции | [`memory-bank/domain/architecture.md`](memory-bank/domain/architecture.md) |
+| Текущие модели и связи | [`memory-bank/domain/schema.md`](memory-bank/domain/schema.md) |
+| Frontend стек, компоненты, i18n | [`memory-bank/domain/frontend.md`](memory-bank/domain/frontend.md) |
+| Testing policy, coverage ratchet, simplify review | [`memory-bank/engineering/testing-policy.md`](memory-bank/engineering/testing-policy.md) |
+| Coding style, reference implementations, constraints | [`memory-bank/engineering/coding-style.md`](memory-bank/engineering/coding-style.md) |
+| Git workflow, коммиты, PR | [`memory-bank/engineering/git-workflow.md`](memory-bank/engineering/git-workflow.md) |
+| Границы автономии, эскалация, запрещённые действия | [`memory-bank/engineering/autonomy-boundaries.md`](memory-bank/engineering/autonomy-boundaries.md) |
+| Локальная разработка, команды, seed | [`memory-bank/ops/development.md`](memory-bank/ops/development.md) |
+| Архитектурные решения (ADR) | [`memory-bank/adr/README.md`](memory-bank/adr/README.md) |
+| Архивные HW-1 фичи и HW-2 планы | [`memory-bank/features/README.md`](memory-bank/features/README.md) |
+| Lifecycle feature-артефактов и шаблоны | [`memory-bank/flows/README.md`](memory-bank/flows/README.md) |
+| Операционные промпты (draft/review/implement/adr/bugfix) | [`.prompts/README.md`](.prompts/README.md) |
 
-- `bin/setup` — bootstrap
-- `bin/rails s` — run server
-- `bundle exec rspec` — run tests
-- `bin/rails db:migrate` — migrate
+## Критичные правила (shortlist, canonical — в memory-bank)
 
-### Frontend
+- **Язык общения** — русский. Код и commit messages — английский. Детали: `memory-bank/engineering/coding-style.md`.
+- **Не добавлять gems/npm пакеты** без явного согласования. Детали: `memory-bank/engineering/autonomy-boundaries.md`.
+- **Не трогать существующие миграции.** Пишем новые.
+- **Не реализовывать auth** — уже в hw-0.
+- **Не добавлять TypeScript** на frontend.
+- **Fine-grained коммиты.** Не молча коммитить — показать diff перед коммитом.
+- **Upstream-first docs sync** — меняешь код → сначала обнови canonical owner в `memory-bank/`. Детали: `memory-bank/dna/lifecycle.md`.
+- **Feature flow** — каждая новая фича проходит через `memory-bank/features/FT-*/` по lifecycle из `flows/feature-flow.md`. Brief/Spec/Plan трёхчастная SDD-форма HW-1 больше не используется — её заменяет `feature.md` + `implementation-plan.md`.
 
-- `yarn install` — install dependencies
-- `yarn dev` — run dev server (Vite)
-- `yarn build` — production build
+## Current Date & Project Phase
 
-## Conventions
-
-- Standard Rails MVC, no service objects yet
-- REST API at `/api/v1`
-- RSpec for tests, FactoryBot for fixtures
-- Pundit for authorization policies
-- Money fields use `_cents` suffix (integer storage)
-- Vue 3 Composition API, Pinia for state management
-- No new gems/npm packages without explicit request
-
-## Language
-
-- Always respond in Russian
-- Code comments in English
-- Git commits in English
-
-## Documentation sync
-
-AI-specific docs live in `ai-docs/`. Keep them always up to date:
-
-**Before implementation:**
-
-- If a requested feature is not in `ai-docs/PLAN.md` — add it to the appropriate phase before writing code
-
-**After implementation:**
-
-- **ai-docs/PLAN.md** — mark completed items `[x]`, add new items if scope changed
-- **PROJECT.md** — update if the change affects module descriptions, architecture, or supported features
-- **ai-docs/SCHEMA.md** — update when any model, field, or association is added/changed/removed
-- **ai-docs/DECISIONS.md** — add entry when a non-obvious architectural choice is made (new DEC-NNN)
-
-This is mandatory — no task is considered done until docs are in sync.
-
-## Reference docs (read on demand, not always)
-
-These files are NOT part of every-message context. Read them when relevant:
-
-- `ai-docs/SCHEMA.md` — data models, fields, associations, ER diagram. Read before creating/modifying models.
-- `ai-docs/DECISIONS.md` — architectural decisions log. Read before proposing alternatives to existing choices.
-- `ai-docs/PLAN.md` — implementation plan with phases and checkboxes. Read to understand current progress.
-
-## Reference implementations (HW-1)
-
-Эталонные паттерны, на которые ориентируются новые фичи той же формы.
-
-**F1 — CRUD scoped to organization (reference for F2–F5):**
-
-- CRUD controller: `backend/app/controllers/api/v1/properties_controller.rb`
-- Pundit policy: `backend/app/policies/property_policy.rb`
-- Request spec: `backend/spec/requests/api/v1/properties_spec.rb`
-- Factory: `backend/spec/factories/properties.rb`
-- Migration: `backend/db/migrate/20260408155056_create_properties.rb`
-
-Ключевые решения эталона: scoping через `Current.organization.properties`,
-404 на чужой `id` (без раскрытия существования), `find_by` + `performed?`
-вместо глобального `rescue_from RecordNotFound`, единый стиль обработки
-валидаций `if .save / if .update` (без `rescue RecordInvalid`),
-`rescue_from Pundit::NotAuthorizedError → 403` в `Api::V1::BaseController`,
-`organization_id` не разрешён в `permitted_params`.
-
-## Constraints
-
-- Don't touch existing migrations
-- Don't implement auth (Rails 8 built-in auth)
-- Don't add TypeScript to frontend
-- Don't change monorepo structure (`/backend`, `/frontend`)
-- Use yarn, not npm
+- Дата на момент миграции: 2026-04-09
+- HW-1 completed (PR #6). HW-2 — migration to memory-bank + frontend catch-up for HW-1 features.
+- Активная ветка: `hw-2` (от `main`).

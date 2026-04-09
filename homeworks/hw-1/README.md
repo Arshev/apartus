@@ -1,7 +1,9 @@
 ---
-name: HW-1 — Полный цикл SDD
-status: in-progress
+name: HW-1 — Полный цикл SDD (archived)
+status: archived
 ---
+
+> **Archived 2026-04-09.** HW-1 завершён (PR #6). Canonical owner архивных фич теперь — [`../../memory-bank/features/FT-HW1-*/`](../../memory-bank/features/). Оригинальные Brief/Spec/Plan артефакты остаются в `features/` этого каталога как исторический снимок SDD-процесса HW-1. Для текущей работы читай `memory-bank/`.
 
 # Homework 1 — Spec-Driven Development end-to-end
 
