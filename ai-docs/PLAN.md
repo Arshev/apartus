@@ -55,10 +55,10 @@
   - [x] 1.3.4 API: CRUD ролей с проверкой разрешений
   - [ ] 1.3.5 Frontend: UI управления ролями
 - [ ] **1.4** Подразделения (Branches) — отложено до Phase 2
-  - [ ] 1.4.1 Модель `Branch` (name, parent_id, timezone)
-  - [ ] 1.4.2 Иерархия с parent/children
+  - [x] 1.4.1 Модель `Branch` (name, parent_id, timezone) — HW-1 F4 (без `timezone` — отложено)
+  - [x] 1.4.2 Иерархия с parent/children — HW-1 F4 (adjacency list, DEC-014)
   - [ ] 1.4.3 Scope видимости сотрудников по подразделениям
-  - [ ] 1.4.4 API: CRUD подразделений
+  - [x] 1.4.4 API: CRUD подразделений — HW-1 F4 (+ BranchPolicy)
   - [ ] 1.4.5 Frontend: дерево подразделений, привязка сотрудников
 
 ---

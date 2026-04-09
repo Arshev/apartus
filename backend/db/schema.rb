@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_08_170100) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_09_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -21,6 +21,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_08_170100) do
     t.datetime "updated_at", null: false
     t.index "organization_id, lower((name)::text)", name: "index_amenities_on_org_and_lower_name", unique: true
     t.index ["organization_id"], name: "index_amenities_on_organization_id"
+  end
+
+  create_table "branches", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", limit: 100, null: false
+    t.bigint "organization_id", null: false
+    t.bigint "parent_branch_id"
+    t.datetime "updated_at", null: false
+    t.index "organization_id, lower((name)::text)", name: "index_branches_on_org_lower_name_root", unique: true, where: "(parent_branch_id IS NULL)"
+    t.index "organization_id, parent_branch_id, lower((name)::text)", name: "index_branches_on_org_parent_lower_name", unique: true, where: "(parent_branch_id IS NOT NULL)"
+    t.index ["organization_id"], name: "index_branches_on_organization_id"
+    t.index ["parent_branch_id"], name: "index_branches_on_parent_branch_id"
   end
 
   create_table "jwt_denylists", force: :cascade do |t|
@@ -111,6 +123,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_08_170100) do
   end
 
   add_foreign_key "amenities", "organizations", on_delete: :cascade
+  add_foreign_key "branches", "branches", column: "parent_branch_id", on_delete: :restrict
+  add_foreign_key "branches", "organizations", on_delete: :cascade
   add_foreign_key "memberships", "organizations"
   add_foreign_key "memberships", "roles"
   add_foreign_key "memberships", "users"

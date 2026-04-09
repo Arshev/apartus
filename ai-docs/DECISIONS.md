@@ -113,6 +113,37 @@ F1 паттерном `Current.organization.properties.find_by(...)`.
 **Влияние:** HW-1 F2, потенциально F3–F5, если они введут nested ресурсы
 с тем же паттерном.
 
+## DEC-014: Adjacency list for Branch tree (2026-04-09)
+
+**Решение:** Branch-дерево реализовано через adjacency list — один
+столбец `parent_branch_id` (self-referential FK). Иерархия обходится
+Ruby-кодом в custom-валидациях (cycle check) или PostgreSQL
+`WITH RECURSIVE` по мере необходимости.
+
+**Альтернативы:**
+
+- Closure table (`branch_ancestries` join с depth).
+- Gem `ancestry` / `closure_tree`.
+
+**Причина выбора:**
+
+- Adjacency list — Rails standard для tree-structures, минимум
+  кода, без новых зависимостей.
+- Ожидаемый размер дерева на организацию — десятки узлов, глубина
+  3–5 уровней. На этом масштабе разница в производительности
+  несущественна.
+- CLAUDE.md запрещает новые gem'ы без явного согласования, поэтому
+  `ancestry`/`closure_tree` вне scope HW-1.
+- Closure table удваивает сложность writes (каждое перемещение
+  пересчитывает поддерево), что не оправдано для HW-1 объёмов.
+- Custom-валидации F4 (`parent_is_not_self`, `parent_is_not_descendant`
+  через upward walk, `parent_branch_must_exist_in_org`,
+  `before_destroy`) реализуются в adjacency list elegantly.
+
+**Влияние:** HW-1 F4 реализация. При росте до тысяч узлов на
+организацию — может понадобиться пересмотр в пользу closure table,
+но это отдельная фича за пределами HW-1.
+
 ## DEC-013: has_many :through for Unit <-> Amenity (2026-04-08)
 
 **Решение:** M:N связь Unit ↔ Amenity реализована через явную

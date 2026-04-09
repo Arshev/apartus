@@ -46,7 +46,7 @@
 | slug | string | unique, not null, auto-generated |
 | settings | jsonb | default: {} |
 
-**Associations:** has_many :memberships, has_many :users through :memberships, has_many :roles
+**Associations:** has_many :memberships, has_many :users through :memberships, has_many :roles, has_many :properties, has_many :units through :properties, has_many :amenities, has_many :branches
 **Callbacks:** before_validation :generate_slug, after_create :create_preset_roles
 
 #### Membership
@@ -86,6 +86,21 @@
 | exp | datetime | not null |
 
 **Unique index:** jti
+
+#### Branch
+
+| Field | Type | Notes |
+|-------|------|-------|
+| id | bigint | PK |
+| organization_id | bigint | FK, not null, on_delete: cascade |
+| parent_branch_id | bigint | self-FK, nullable, on_delete: restrict |
+| name | string(100) | not null, normalized strip |
+
+**Associations:** belongs_to :organization, belongs_to :parent_branch (class_name: "Branch", optional: true), has_many :children (class_name: "Branch", foreign_key: :parent_branch_id); `before_destroy` guards deletion when `children.exists?`
+**Validations:** name presence + length + uniqueness (case-insensitive per `[organization_id, parent_branch_id]`); `parent_branch_must_exist_in_org`; `parent_is_not_self`; `parent_is_not_descendant` (on :update)
+**Indexes:** [organization_id], [parent_branch_id], two partial unique indexes: `(organization_id, parent_branch_id, LOWER(name)) WHERE parent_branch_id IS NOT NULL` and `(organization_id, LOWER(name)) WHERE parent_branch_id IS NULL`
+
+> Adjacency list tree (DEC-014). Cross-org isolation of `parent_branch_id` enforced at the controller level via scope resolution — see Spec F4 §5.3 ANTI-PATTERN.
 
 <!-- Template:
 #### ModelName

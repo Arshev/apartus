@@ -26,6 +26,8 @@ Rails.application.routes.draw do
                   controller: "unit_amenities"
       end
 
+      resources :branches, only: [ :index, :show, :create, :update, :destroy ]
+
       get "health", to: "health#show"
     end
   end

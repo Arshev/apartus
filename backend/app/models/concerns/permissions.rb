@@ -11,6 +11,8 @@ module Permissions
     "units.view",
     "amenities.manage",
     "amenities.view",
+    "branches.manage",
+    "branches.view",
     "reservations.manage",
     "reservations.view",
     "finance.manage",
@@ -31,6 +33,7 @@ module Permissions
         properties.manage properties.view
         units.manage units.view
         amenities.manage amenities.view
+        branches.manage branches.view
         reservations.manage reservations.view
         finance.view
       ]
@@ -43,6 +46,7 @@ module Permissions
         properties.view
         units.view
         amenities.view
+        branches.view
         reservations.view
         finance.view
       ]

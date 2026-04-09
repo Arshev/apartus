@@ -12,7 +12,7 @@ status: in-progress
 | 1 | Property CRUD (эталон) | #10 | 1 / 2 / 3 | ~агент (одна сессия L4) | 5 | done |
 | 2 | Unit CRUD | #11 | 2 / 3 / 4 | ~агент (L3 сессии) | 5 | done |
 | 3 | Amenities (M:N) | #3 | 2 / 3+3 / 4 | ~агент (L3 сессии) | 5 | done |
-| 4 | Branches (tree) | — | — | — | — | pending |
+| 4 | Branches (tree) | #4 | 2 / 4 / 4 | ~агент (L3 сессии) | 5 | done |
 | 5 | Property ↔ Branch | — | — | — | — | pending |
 
 ## По каждой фиче
@@ -128,6 +128,7 @@ status: in-progress
 | После F1 (Property CRUD) | 54 | 55.12% | +37 request specs добавили 17 п.п. coverage |
 | После F2 (Unit CRUD) | 60 | 61.24% | +52 examples (request+model), enum `validate: true` с C1, C2+C3 склеены по D1 fallback |
 | После F3 (Amenities) | 67 | 68.21% | +83 examples (req amenities + req unit_amenities + model), C1+C2+C3 склеены по D1 fallback (C1 уронил coverage на 0.07% ниже floor), DEC-013, новые permission-коды, позитивный AC14 защищает F2 JSON |
+| После F4 (Branches) | 71 | 72.38% | +70 examples (req branches + model), C1+C2+C3 склеены по D1 fallback (C1 уронил до 64.08%), DEC-014 adjacency list, tree custom-validations (self-ref, cycle, parent_must_exist_in_org), security ANTI-PATTERN урок (resolve_parent с возвратом `:not_in_scope` чтобы обойти Rails belongs_to optional глобальный резолв), AC15 N+1 тест через ActiveSupport::Notifications без новых gem'ов |
 | После F3 (Amenities) | _TBD_ | _TBD_ | |
 | После F4 (Branches) | _TBD_ | _TBD_ | |
 | После F5 (Property↔Branch) | 80 | _TBD_ | Финальная цель ДЗ |
