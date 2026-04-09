@@ -99,7 +99,7 @@ RSpec.describe Branch, type: :model do
     end
   end
 
-  describe "before_destroy :prevent_destroy_if_has_children" do
+  describe "before_destroy :prevent_destroy_if_has_dependents" do
     it "allows destroy of leaf branch" do
       leaf = create(:branch, organization: organization)
       expect(leaf.destroy).to be_truthy
@@ -116,7 +116,21 @@ RSpec.describe Branch, type: :model do
       parent = create(:branch, organization: organization)
       create(:branch, organization: organization, parent_branch: parent)
       parent.destroy
-      expect(parent.errors[:base]).to include("Branch has children and cannot be deleted")
+      expect(parent.errors[:base]).to include("Branch has dependents and cannot be deleted")
+    end
+
+    it "returns false on destroy when properties exist (F5)" do
+      branch = create(:branch, organization: organization)
+      create(:property, organization: organization, branch: branch)
+      expect(branch.destroy).to be false
+      expect { branch.reload }.not_to raise_error
+    end
+
+    it "populates errors[:base] with same message when properties exist (F5)" do
+      branch = create(:branch, organization: organization)
+      create(:property, organization: organization, branch: branch)
+      branch.destroy
+      expect(branch.errors[:base]).to include("Branch has dependents and cannot be deleted")
     end
   end
 end

@@ -46,7 +46,7 @@
 | slug | string | unique, not null, auto-generated |
 | settings | jsonb | default: {} |
 
-**Associations:** has_many :memberships, has_many :users through :memberships, has_many :roles, has_many :properties, has_many :units through :properties, has_many :amenities, has_many :branches
+**Associations:** has_many :memberships, has_many :users through :memberships, has_many :roles, has_many :properties, has_many :units through :properties, has_many :amenities, has_many :branches (F4)
 **Callbacks:** before_validation :generate_slug, after_create :create_preset_roles
 
 #### Membership
@@ -96,7 +96,7 @@
 | parent_branch_id | bigint | self-FK, nullable, on_delete: restrict |
 | name | string(100) | not null, normalized strip |
 
-**Associations:** belongs_to :organization, belongs_to :parent_branch (class_name: "Branch", optional: true), has_many :children (class_name: "Branch", foreign_key: :parent_branch_id); `before_destroy` guards deletion when `children.exists?`
+**Associations:** belongs_to :organization, belongs_to :parent_branch (class_name: "Branch", optional: true), has_many :children (class_name: "Branch", foreign_key: :parent_branch_id), has_many :properties (F5); `before_destroy :prevent_destroy_if_has_dependents` guards deletion when `children.exists? || properties.exists?` (F5 — unified dependents check)
 **Validations:** name presence + length + uniqueness (case-insensitive per `[organization_id, parent_branch_id]`); `parent_branch_must_exist_in_org`; `parent_is_not_self`; `parent_is_not_descendant` (on :update)
 **Indexes:** [organization_id], [parent_branch_id], two partial unique indexes: `(organization_id, parent_branch_id, LOWER(name)) WHERE parent_branch_id IS NOT NULL` and `(organization_id, LOWER(name)) WHERE parent_branch_id IS NULL`
 
@@ -121,15 +121,16 @@
 |-------|------|-------|
 | id | bigint | PK |
 | organization_id | bigint | FK, not null, on_delete: cascade |
+| branch_id | bigint | FK, nullable, on_delete: restrict (F5) |
 | name | string(255) | not null, normalized strip |
 | address | string(500) | not null, normalized strip |
 | property_type | integer (enum) | not null |
 | description | text | optional, max 5000 chars |
 
-**Associations:** belongs_to :organization, has_many :units (dependent: :destroy)
+**Associations:** belongs_to :organization, belongs_to :branch (optional, F5), has_many :units (dependent: :destroy)
 **Enums:** property_type: { apartment: 0, hotel: 1, house: 2, hostel: 3 } (validated via `validate: true`)
-**Validations:** name/address presence + length, description length <= 5000
-**Indexes:** [organization_id], [organization_id, id]
+**Validations:** name/address presence + length, description length <= 5000, branch_must_exist_in_org (F5 — custom validation checking organization match, not just presence)
+**Indexes:** [organization_id], [organization_id, id], [branch_id] (F5)
 
 > `branch_id` intentionally omitted in F1; added in F5 (Property↔Branch).
 

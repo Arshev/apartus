@@ -13,7 +13,7 @@ status: in-progress
 | 2 | Unit CRUD | #11 | 2 / 3 / 4 | ~агент (L3 сессии) | 5 | done |
 | 3 | Amenities (M:N) | #3 | 2 / 3+3 / 4 | ~агент (L3 сессии) | 5 | done |
 | 4 | Branches (tree) | #4 | 2 / 4 / 4 | ~агент (L3 сессии) | 5 | done |
-| 5 | Property ↔ Branch | — | — | — | — | pending |
+| 5 | Property ↔ Branch | #5 | 2 / 4 / 3 | ~агент (L3 сессии) | 5 | done |
 
 ## По каждой фиче
 
@@ -131,7 +131,7 @@ status: in-progress
 | После F4 (Branches) | 71 | 72.38% | +70 examples (req branches + model), C1+C2+C3 склеены по D1 fallback (C1 уронил до 64.08%), DEC-014 adjacency list, tree custom-validations (self-ref, cycle, parent_must_exist_in_org), security ANTI-PATTERN урок (resolve_parent с возвратом `:not_in_scope` чтобы обойти Rails belongs_to optional глобальный резолв), AC15 N+1 тест через ActiveSupport::Notifications без новых gem'ов |
 | После F3 (Amenities) | _TBD_ | _TBD_ | |
 | После F4 (Branches) | _TBD_ | _TBD_ | |
-| После F5 (Property↔Branch) | 80 | _TBD_ | Финальная цель ДЗ |
+| После F5 (Property↔Branch, финал HW-1) | **87** | **88.28%** | **Финальная цель 80 достигнута и превышена.** +35 examples (F5 request + model + hw-0 regression coverage для organizations/members controllers). DEC-015 «F5 owns retrospective patches» — первое ретроспективное изменение F1 и F4 Spec'ов (JSON branch_id и сообщение `before_destroy`). Реальный defense-in-depth через `branch.organization_id == organization_id` (а не naive `branch.present?` — F5 урок про `belongs_to optional: true`). F4 `prevent_destroy_if_has_children` → `prevent_destroy_if_has_dependents` с единым сообщением «Branch has dependents and cannot be deleted». |
 
 **Правило подъёма:** после merge каждой feature PR смотрим фактическое покрытие в CI
 и поднимаем `minimum_coverage` до `floor(actual) - 1`, чтобы оставался маленький

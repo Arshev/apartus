@@ -311,12 +311,31 @@ RSpec.describe "Api::V1::Branches" do
         delete "/api/v1/branches/#{parent.id}", headers: headers
       end.not_to change(Branch, :count)
       expect(response).to have_http_status(:conflict)
-      expect(response.parsed_body["error"]).to eq([ "Branch has children and cannot be deleted" ])
+      expect(response.parsed_body["error"]).to eq([ "Branch has dependents and cannot be deleted" ])
     end
 
     it "returns 404 for non-existing id" do
       delete "/api/v1/branches/999999", headers: headers
       expect(response).to have_http_status(:not_found)
+    end
+
+    it "AC9 (F5) — returns 409 when branch has properties" do
+      branch = create(:branch, organization: organization)
+      create(:property, organization: organization, branch: branch)
+      expect do
+        delete "/api/v1/branches/#{branch.id}", headers: headers
+      end.not_to change(Branch, :count)
+      expect(response).to have_http_status(:conflict)
+      expect(response.parsed_body["error"]).to eq([ "Branch has dependents and cannot be deleted" ])
+    end
+
+    it "AC11 (F5) — returns 409 when branch has children AND properties" do
+      parent = create(:branch, organization: organization, name: "Parent")
+      create(:branch, organization: organization, parent_branch: parent, name: "Child")
+      create(:property, organization: organization, branch: parent)
+      delete "/api/v1/branches/#{parent.id}", headers: headers
+      expect(response).to have_http_status(:conflict)
+      expect(response.parsed_body["error"]).to eq([ "Branch has dependents and cannot be deleted" ])
     end
   end
 

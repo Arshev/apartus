@@ -81,14 +81,6 @@ These files are NOT part of every-message context. Read them when relevant:
 `rescue_from Pundit::NotAuthorizedError → 403` в `Api::V1::BaseController`,
 `organization_id` не разрешён в `permitted_params`.
 
-## Active homework — HW-1 (Spec-Driven Development)
-
-Currently working on HW-1: full Brief → Spec → Plan → Implement cycle on 5 features.
-**Before any work in this repo, read `homeworks/hw-1/WORKING_AGREEMENTS.md`** —
-it defines how we collaborate during HW-1 (review discipline, session strategy,
-coverage ratchet, commit rules, reference implementation pattern). Remove this
-section from CLAUDE.md when HW-1 is submitted.
-
 ## Constraints
 
 - Don't touch existing migrations

@@ -133,7 +133,7 @@ RSpec.describe "Api::V1::Properties" do
 
     it "returns JSON with exactly the documented set of keys" do
       post "/api/v1/properties", params: { property: valid_attrs }, headers: headers
-      expected_keys = %w[id organization_id name address property_type description created_at updated_at]
+      expected_keys = %w[id organization_id branch_id name address property_type description created_at updated_at]
       expect(response.parsed_body.keys).to match_array(expected_keys)
     end
 
@@ -324,6 +324,124 @@ RSpec.describe "Api::V1::Properties" do
            params: { property: { name: "X", address: "Y", property_type: "apartment" } },
            headers: nopriv_headers
       expect(response).to have_http_status(:forbidden)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # F5 — Property ↔ Branch link
+  # ---------------------------------------------------------------------------
+  describe "POST /api/v1/properties with branch_id (F5)" do
+    let(:valid_attrs) do
+      { name: "Test", address: "1 Test St", property_type: "apartment" }
+    end
+    let(:branch) { create(:branch, organization: organization) }
+
+    it "AC1 — creates property with valid branch_id → 201" do
+      post "/api/v1/properties",
+           params: { property: valid_attrs.merge(branch_id: branch.id) },
+           headers: headers
+      expect(response).to have_http_status(:created)
+      expect(response.parsed_body["branch_id"]).to eq(branch.id)
+    end
+
+    it "E1 — creates property without branch_id → 201, branch_id: null" do
+      post "/api/v1/properties", params: { property: valid_attrs }, headers: headers
+      expect(response).to have_http_status(:created)
+      expect(response.parsed_body["branch_id"]).to be_nil
+    end
+
+    it "E2 — creates property with branch_id: null → 201" do
+      post "/api/v1/properties",
+           params: { property: valid_attrs.merge(branch_id: nil) },
+           headers: headers
+      expect(response).to have_http_status(:created)
+      expect(response.parsed_body["branch_id"]).to be_nil
+    end
+
+    it "AC5 — returns 422 for cross-org branch_id (security)" do
+      other_org = create(:organization)
+      foreign_branch = create(:branch, organization: other_org)
+      expect do
+        post "/api/v1/properties",
+             params: { property: valid_attrs.merge(branch_id: foreign_branch.id) },
+             headers: headers
+      end.not_to change(Property, :count)
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.parsed_body["error"]).to eq([ "Branch must exist" ])
+    end
+
+    it "E4 — returns 422 for non-existing branch_id" do
+      post "/api/v1/properties",
+           params: { property: valid_attrs.merge(branch_id: 999_999) },
+           headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.parsed_body["error"]).to eq([ "Branch must exist" ])
+    end
+  end
+
+  describe "PATCH /api/v1/properties/:id with branch_id (F5)" do
+    let!(:branch_a) { create(:branch, organization: organization, name: "A") }
+    let!(:branch_b) { create(:branch, organization: organization, name: "B") }
+    let!(:property) { create(:property, organization: organization, branch: branch_a) }
+
+    it "AC2 — updates branch_id to another valid branch → 200" do
+      patch "/api/v1/properties/#{property.id}",
+            params: { property: { branch_id: branch_b.id } }, headers: headers
+      expect(response).to have_http_status(:ok)
+      expect(property.reload.branch_id).to eq(branch_b.id)
+    end
+
+    it "AC3 — unlinks branch via {branch_id: null} → 200" do
+      patch "/api/v1/properties/#{property.id}",
+            params: { property: { branch_id: nil } }, headers: headers
+      expect(response).to have_http_status(:ok)
+      expect(property.reload.branch_id).to be_nil
+    end
+
+    it "AC4a — branch_id preserved when key absent (integer)" do
+      patch "/api/v1/properties/#{property.id}",
+            params: { property: { name: "New Name" } }, headers: headers
+      expect(response).to have_http_status(:ok)
+      expect(property.reload.branch_id).to eq(branch_a.id)
+    end
+
+    it "AC4b — branch_id preserved when key absent (null)" do
+      property_null = create(:property, organization: organization)
+      patch "/api/v1/properties/#{property_null.id}",
+            params: { property: { name: "New" } }, headers: headers
+      expect(response).to have_http_status(:ok)
+      expect(property_null.reload.branch_id).to be_nil
+    end
+
+    it "AC6 — returns 422 for cross-org branch_id, mine.branch_id unchanged" do
+      other_org = create(:organization)
+      foreign_branch = create(:branch, organization: other_org)
+      patch "/api/v1/properties/#{property.id}",
+            params: { property: { branch_id: foreign_branch.id } }, headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(property.reload.branch_id).to eq(branch_a.id)
+    end
+
+    it "E9 — returns 422 for non-existing branch_id" do
+      patch "/api/v1/properties/#{property.id}",
+            params: { property: { branch_id: 999_999 } }, headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
+  describe "GET /api/v1/properties/:id (F5 JSON contract)" do
+    it "AC7 — response includes branch_id key (null for unlinked)" do
+      property = create(:property, organization: organization)
+      get "/api/v1/properties/#{property.id}", headers: headers
+      expect(response.parsed_body).to have_key("branch_id")
+      expect(response.parsed_body["branch_id"]).to be_nil
+    end
+
+    it "AC7 — response includes branch_id key (integer for linked)" do
+      branch = create(:branch, organization: organization)
+      property = create(:property, organization: organization, branch: branch)
+      get "/api/v1/properties/#{property.id}", headers: headers
+      expect(response.parsed_body["branch_id"]).to eq(branch.id)
     end
   end
 end

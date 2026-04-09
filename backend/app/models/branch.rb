@@ -4,6 +4,7 @@ class Branch < ApplicationRecord
   has_many :children,
            class_name: "Branch",
            foreign_key: :parent_branch_id
+  has_many :properties
 
   normalizes :name, with: ->(v) { v.to_s.strip }
 
@@ -17,7 +18,7 @@ class Branch < ApplicationRecord
   validate :parent_is_not_self
   validate :parent_is_not_descendant, on: :update
 
-  before_destroy :prevent_destroy_if_has_children
+  before_destroy :prevent_destroy_if_has_dependents
 
   private
 
@@ -49,10 +50,10 @@ class Branch < ApplicationRecord
     end
   end
 
-  def prevent_destroy_if_has_children
-    return unless children.exists?
+  def prevent_destroy_if_has_dependents
+    return unless children.exists? || properties.exists?
 
-    errors.add(:base, "Branch has children and cannot be deleted")
+    errors.add(:base, "Branch has dependents and cannot be deleted")
     throw(:abort)
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_09_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_09_110000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -67,12 +67,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_100000) do
 
   create_table "properties", force: :cascade do |t|
     t.string "address", limit: 500, null: false
+    t.bigint "branch_id"
     t.datetime "created_at", null: false
     t.text "description"
     t.string "name", limit: 255, null: false
     t.bigint "organization_id", null: false
     t.integer "property_type", null: false
     t.datetime "updated_at", null: false
+    t.index ["branch_id"], name: "index_properties_on_branch_id"
     t.index ["organization_id", "id"], name: "index_properties_on_organization_id_and_id"
     t.index ["organization_id"], name: "index_properties_on_organization_id"
   end
@@ -128,6 +130,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_100000) do
   add_foreign_key "memberships", "organizations"
   add_foreign_key "memberships", "roles"
   add_foreign_key "memberships", "users"
+  add_foreign_key "properties", "branches", on_delete: :restrict
   add_foreign_key "properties", "organizations", on_delete: :cascade
   add_foreign_key "roles", "organizations"
   add_foreign_key "unit_amenities", "amenities", on_delete: :restrict
