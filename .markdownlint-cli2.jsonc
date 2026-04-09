@@ -1,0 +1,24 @@
+{
+  // Markdown lint config. Disables a few stylistic rules that produce huge
+  // diffs without improving readability. Everything else stays default.
+  "config": {
+    "default": true,
+    // Disable by both rule ID and alias — different versions use different keys.
+    "MD060": false,
+    "table-column-style": false,
+    "MD041": false,
+    "first-line-heading": false,
+    "first-line-h1": false,
+    "MD036": false,
+    "no-emphasis-as-heading": false,
+    "MD013": false,
+    "line-length": false
+  },
+  "ignores": [
+    "backend/**",
+    "frontend/node_modules/**",
+    "node_modules/**",
+    "Материалы1.md",
+    ".github/PULL_REQUEST_TEMPLATE.md"
+  ]
+}

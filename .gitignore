@@ -1,3 +1,13 @@
 .obsidian/
 apartus.code-workspace
 .claude/settings.json
+
+# Homework source materials (personal reference, not part of repo)
+Материалы1.md
+
+.env.local
+.env.*.local
+.idea/
+*.swp
+*.swo
+План ревью.png

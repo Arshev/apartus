@@ -1,6 +1,7 @@
 See PROJECT.md for project description.
 
 ## Stack
+
 - **Backend:** Ruby on Rails 8, PostgreSQL, Pundit, RSpec
 - **Frontend:** Vue.js 3 (чистый JS, без TypeScript), Vuetify 3, Vite, Pinia, Vue Router 4
 - **Structure:** Monorepo — `/backend` (Rails API), `/frontend` (Vue SPA)
@@ -8,17 +9,20 @@ See PROJECT.md for project description.
 ## Key commands
 
 ### Backend
+
 - `bin/setup` — bootstrap
 - `bin/rails s` — run server
 - `bundle exec rspec` — run tests
 - `bin/rails db:migrate` — migrate
 
 ### Frontend
+
 - `yarn install` — install dependencies
 - `yarn dev` — run dev server (Vite)
 - `yarn build` — production build
 
 ## Conventions
+
 - Standard Rails MVC, no service objects yet
 - REST API at `/api/v1`
 - RSpec for tests, FactoryBot for fixtures
@@ -28,17 +32,21 @@ See PROJECT.md for project description.
 - No new gems/npm packages without explicit request
 
 ## Language
+
 - Always respond in Russian
 - Code comments in English
 - Git commits in English
 
 ## Documentation sync
+
 AI-specific docs live in `ai-docs/`. Keep them always up to date:
 
 **Before implementation:**
+
 - If a requested feature is not in `ai-docs/PLAN.md` — add it to the appropriate phase before writing code
 
 **After implementation:**
+
 - **ai-docs/PLAN.md** — mark completed items `[x]`, add new items if scope changed
 - **PROJECT.md** — update if the change affects module descriptions, architecture, or supported features
 - **ai-docs/SCHEMA.md** — update when any model, field, or association is added/changed/removed
@@ -47,12 +55,34 @@ AI-specific docs live in `ai-docs/`. Keep them always up to date:
 This is mandatory — no task is considered done until docs are in sync.
 
 ## Reference docs (read on demand, not always)
+
 These files are NOT part of every-message context. Read them when relevant:
+
 - `ai-docs/SCHEMA.md` — data models, fields, associations, ER diagram. Read before creating/modifying models.
 - `ai-docs/DECISIONS.md` — architectural decisions log. Read before proposing alternatives to existing choices.
 - `ai-docs/PLAN.md` — implementation plan with phases and checkboxes. Read to understand current progress.
 
+## Reference implementations (HW-1)
+
+Эталонные паттерны, на которые ориентируются новые фичи той же формы.
+
+**F1 — CRUD scoped to organization (reference for F2–F5):**
+
+- CRUD controller: `backend/app/controllers/api/v1/properties_controller.rb`
+- Pundit policy: `backend/app/policies/property_policy.rb`
+- Request spec: `backend/spec/requests/api/v1/properties_spec.rb`
+- Factory: `backend/spec/factories/properties.rb`
+- Migration: `backend/db/migrate/20260408155056_create_properties.rb`
+
+Ключевые решения эталона: scoping через `Current.organization.properties`,
+404 на чужой `id` (без раскрытия существования), `find_by` + `performed?`
+вместо глобального `rescue_from RecordNotFound`, единый стиль обработки
+валидаций `if .save / if .update` (без `rescue RecordInvalid`),
+`rescue_from Pundit::NotAuthorizedError → 403` в `Api::V1::BaseController`,
+`organization_id` не разрешён в `permitted_params`.
+
 ## Constraints
+
 - Don't touch existing migrations
 - Don't implement auth (Rails 8 built-in auth)
 - Don't add TypeScript to frontend

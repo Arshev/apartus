@@ -24,6 +24,9 @@ GOOGLE_WORKSPACE_SKILLS := \
 .PHONY: ai bootstrap mise-package mise-install check check-context register
 .PHONY: agents-install agents agents-cli agents-skills extra-skills
 .PHONY: agents-skills-install agents-skills-list agents-skills-check-npx
+.PHONY: setup dev db-setup db-migrate db-reset
+.PHONY: backend-console backend-test backend-lint
+.PHONY: frontend-dev frontend-build
 
 ai: bootstrap
 	@$(MAKE) agents-install
@@ -129,6 +132,42 @@ CLAUDE_PLUGINS ?= \
 	pr-review-fix-loop@$(CLAUDE_PLUGIN_NAMESPACE) \
 	spec-reviewer@$(CLAUDE_PLUGIN_NAMESPACE) \
 	zellij-workflow@$(CLAUDE_PLUGIN_NAMESPACE) \
+
+# --- Project Development ---
+
+setup:
+	cd backend && bundle install
+	cd backend && bin/rails db:prepare
+	cd frontend && yarn install
+
+dev:
+	@echo "Start in separate terminals:"
+	@echo "  cd backend && bin/rails s"
+	@echo "  cd frontend && yarn dev"
+
+db-setup:
+	cd backend && bin/rails db:create db:migrate
+
+db-migrate:
+	cd backend && bin/rails db:migrate
+
+db-reset:
+	cd backend && bin/rails db:drop db:create db:migrate
+
+backend-console:
+	cd backend && bin/rails console
+
+backend-test:
+	cd backend && bundle exec rspec
+
+backend-lint:
+	cd backend && bundle exec rubocop
+
+frontend-dev:
+	cd frontend && yarn dev
+
+frontend-build:
+	cd frontend && yarn build
 
 # --- Registry ---
 

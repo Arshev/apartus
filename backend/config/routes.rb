@@ -1,0 +1,34 @@
+Rails.application.routes.draw do
+  get "up" => "rails/health#show", as: :rails_health_check
+
+  namespace :api do
+    namespace :v1 do
+      namespace :auth do
+        post "sign_up", to: "registrations#create"
+        post "sign_in", to: "sessions#create"
+        post "refresh", to: "sessions#refresh"
+        delete "sign_out", to: "sessions#destroy"
+        get "me", to: "sessions#show"
+      end
+
+      resources :organizations, only: [ :index ]
+      resource :organization, only: [ :show, :update ]
+      resources :members, only: [ :index, :create, :update, :destroy ]
+      resources :roles, only: [ :index, :create, :update, :destroy ]
+      resources :properties, only: [ :index, :show, :create, :update, :destroy ] do
+        resources :units, only: [ :index, :show, :create, :update, :destroy ]
+      end
+
+      resources :amenities, only: [ :index, :show, :create, :update, :destroy ]
+
+      resources :units, only: [] do
+        resources :amenities, only: [ :index, :create, :destroy ],
+                  controller: "unit_amenities"
+      end
+
+      resources :branches, only: [ :index, :show, :create, :update, :destroy ]
+
+      get "health", to: "health#show"
+    end
+  end
+end

@@ -37,10 +37,16 @@ jobs:
           sudo apt-get install -y shellcheck shfmt
 
       - name: Check shell formatting
-        run: shfmt -d init.sh scripts/*.sh
+        # scripts/test-context.sh is intentionally excluded: it contains
+        # backslash-continued string literals that shfmt cannot format
+        # idempotently (see Arshev/apartus#8). New shell scripts must be
+        # added to this list explicitly.
+        run: shfmt -d init.sh scripts/test-ci.sh scripts/test-setup.sh
 
       - name: Lint shell scripts
-        run: shellcheck init.sh scripts/*.sh
+        # scripts/test-context.sh is excluded for the same reason as in the
+        # shfmt step above — see Arshev/apartus#8.
+        run: shellcheck init.sh scripts/test-ci.sh scripts/test-setup.sh
 
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
@@ -49,6 +55,142 @@ jobs:
 
       - name: Lint Markdown
         run: npx --yes markdownlint-cli2 "**/*.md"
+
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: apartus
+          POSTGRES_PASSWORD: apartus
+          POSTGRES_DB: apartus_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      RAILS_ENV: test
+      DB_HOST: localhost
+      DB_USERNAME: apartus
+      DB_PASSWORD: apartus
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.8'
+          bundler-cache: true
+          working-directory: backend
+
+      - name: Setup DB
+        run: bin/rails db:create db:migrate
+
+      - name: RSpec
+        run: bundle exec rspec
+
+      - name: Upload backend coverage
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: backend-coverage
+          path: backend/coverage/.last_run.json
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Rubocop
+        run: bundle exec rubocop
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: 22
+          cache: yarn
+          cache-dependency-path: frontend/yarn.lock
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Test with coverage
+        run: yarn test:coverage
+
+      - name: Upload frontend coverage
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: frontend-coverage
+          path: frontend/coverage/coverage-summary.json
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Build
+        run: yarn build
+
+  coverage-badges:
+    name: Coverage badges
+    # Only refresh badges on pushes to main. On feature branches (hw-1 etc.)
+    # the badges would be noise, and we don't want auto-commits outside main.
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          # persist-credentials: true is required so git-auto-commit-action
+          # can push the regenerated badge JSON back to main.
+          persist-credentials: true
+
+      - name: Download backend coverage
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: backend-coverage
+          path: backend/coverage
+
+      - name: Download frontend coverage
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: frontend-coverage
+          path: frontend/coverage
+
+      - name: Regenerate badges
+        run: node scripts/coverage-badge.mjs
+
+      - name: Auto-commit badges
+        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
+        with:
+          commit_message: "chore(ci): refresh coverage badges [skip ci]"
+          file_pattern: .github/badges/*.json
+          commit_user_name: github-actions[bot]
+          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
 
   smoke-bootstrap:
     name: Smoke (${{ matrix.os }})

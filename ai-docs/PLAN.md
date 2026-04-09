@@ -55,10 +55,10 @@
   - [x] 1.3.4 API: CRUD ролей с проверкой разрешений
   - [ ] 1.3.5 Frontend: UI управления ролями
 - [ ] **1.4** Подразделения (Branches) — отложено до Phase 2
-  - [ ] 1.4.1 Модель `Branch` (name, parent_id, timezone)
-  - [ ] 1.4.2 Иерархия с parent/children
+  - [x] 1.4.1 Модель `Branch` (name, parent_id, timezone) — HW-1 F4 (без `timezone` — отложено)
+  - [x] 1.4.2 Иерархия с parent/children — HW-1 F4 (adjacency list, DEC-014)
   - [ ] 1.4.3 Scope видимости сотрудников по подразделениям
-  - [ ] 1.4.4 API: CRUD подразделений
+  - [x] 1.4.4 API: CRUD подразделений — HW-1 F4 (+ BranchPolicy)
   - [ ] 1.4.5 Frontend: дерево подразделений, привязка сотрудников
 
 ---
@@ -68,19 +68,19 @@
 Ядро системы — управление объектами и юнитами.
 
 - [ ] **2.1** Модель данных
-  - [ ] 2.1.1 Модель `Property` (name, address, type, description, branch_id)
-  - [ ] 2.1.2 Модель `Unit` (name, unit_type, capacity, status, property_id)
-  - [ ] 2.1.3 Модель `Amenity` + join-таблица `UnitAmenity`
+  - [x] 2.1.1 Модель `Property` (name, address, type, description) — HW-1 F1; `branch_id` отложен в F5
+  - [x] 2.1.2 Модель `Unit` (name, unit_type, capacity, status, property_id) — HW-1 F2
+  - [x] 2.1.3 Модель `Amenity` + join-таблица `UnitAmenity` — HW-1 F3
   - [ ] 2.1.4 Модель `PropertyPhoto` / `UnitPhoto` (Active Storage)
-  - [ ] 2.1.5 Enum-типы недвижимости: apartment, hotel, house, hostel
-  - [ ] 2.1.6 Enum-статусы юнитов: available, maintenance, blocked
+  - [x] 2.1.5 Enum-типы недвижимости: apartment, hotel, house, hostel — HW-1 F1 (реализован как `Property.property_type` enum с `validate: true`)
+  - [x] 2.1.6 Enum-статусы юнитов: available, maintenance, blocked — HW-1 F2 (enum с `validate: true`, без FSM)
 - [ ] **2.2** API
-  - [ ] 2.2.1 CRUD `/api/v1/properties`
-  - [ ] 2.2.2 CRUD `/api/v1/properties/:id/units`
-  - [ ] 2.2.3 Управление amenities
+  - [x] 2.2.1 CRUD `/api/v1/properties` — HW-1 F1 (+ PropertyPolicy)
+  - [x] 2.2.2 CRUD `/api/v1/properties/:id/units` — HW-1 F2 (nested route, UnitsController)
+  - [x] 2.2.3 Управление amenities — HW-1 F3 (flat CRUD + nested attach/detach)
   - [ ] 2.2.4 Загрузка и управление фотографиями
   - [ ] 2.2.5 Фильтрация и поиск объектов/юнитов
-  - [ ] 2.2.6 Pundit-политики для properties и units
+  - [x] 2.2.6 Pundit-политики для properties и units — HW-1 F1 (PropertyPolicy) + F2 (UnitPolicy)
 - [ ] **2.3** Frontend
   - [ ] 2.3.1 Список объектов с фильтрами и поиском
   - [ ] 2.3.2 Карточка объекта: инфо, юниты, фото
