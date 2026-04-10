@@ -40,6 +40,13 @@ export const VUETIFY_STUBS = {
     template: '<div class="v-progress-linear-stub" />',
   },
   'v-container': passthrough('v-container'),
+  'v-chip-group': passthrough('v-chip-group'),
+  'v-chip': {
+    name: 'v-chip',
+    props: ['color', 'variant', 'disabled'],
+    emits: ['click'],
+    template: '<span data-stub="v-chip" @click="$emit(\'click\')"><slot /></span>',
+  },
   'v-row': passthrough('v-row'),
   'v-col': passthrough('v-col'),
   'v-card': passthrough('v-card'),

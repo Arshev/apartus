@@ -3,10 +3,19 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 vi.mock('../../api/units', () => ({
   list: vi.fn(), get: vi.fn(), create: vi.fn(), update: vi.fn(), destroy: vi.fn(),
 }))
+vi.mock('../../api/amenities', () => ({
+  list: vi.fn().mockResolvedValue([{ id: 1, name: 'WiFi' }, { id: 2, name: 'Pool' }]),
+}))
+vi.mock('../../api/unitAmenities', () => ({
+  list: vi.fn().mockResolvedValue([{ id: 1, name: 'WiFi' }]),
+  attach: vi.fn().mockResolvedValue({ id: 10 }),
+  detach: vi.fn().mockResolvedValue({}),
+}))
 
 import { mountWithVuetify, mountWithVuetifyAsync } from '../helpers/mountWithVuetify'
 import UnitFormView from '../../views/UnitFormView.vue'
 import * as unitsApi from '../../api/units'
+import * as unitAmenitiesApi from '../../api/unitAmenities'
 
 const ROUTES = [
   { path: '/properties/:propertyId/units', component: { template: '<div/>' } },
@@ -101,5 +110,61 @@ describe('UnitFormView', () => {
     expect(wrapper.vm.rules.capacityRange(0)).toBe('От 1 до 100')
     expect(wrapper.vm.rules.capacityRange(101)).toBe('От 1 до 100')
     expect(wrapper.vm.rules.capacityRange(50)).toBe(true)
+  })
+
+  it('loadAmenities fetches all + attached in edit mode', async () => {
+    unitsApi.get.mockResolvedValue({ id: 1, name: 'R1', unit_type: 'room', capacity: 2, status: 'available' })
+    const wrapper = await mountWithVuetifyAsync(UnitFormView, {
+      routes: ROUTES,
+      initialRoute: '/properties/10/units/1/edit',
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.vm.loadAmenities()
+    expect(wrapper.vm.allAmenities).toHaveLength(2)
+    expect(wrapper.vm.attachedAmenityIds).toEqual([1])
+  })
+
+  it('isAmenityAttached returns true for attached ids', async () => {
+    const wrapper = mountWithVuetify(UnitFormView, {
+      routes: ROUTES,
+      initialRoute: '/properties/10/units/new',
+    })
+    wrapper.vm.attachedAmenityIds = [1, 3]
+    expect(wrapper.vm.isAmenityAttached(1)).toBe(true)
+    expect(wrapper.vm.isAmenityAttached(2)).toBe(false)
+  })
+
+  it('toggleAmenity attaches when not attached', async () => {
+    const wrapper = await mountWithVuetifyAsync(UnitFormView, {
+      routes: ROUTES,
+      initialRoute: '/properties/10/units/1/edit',
+    })
+    wrapper.vm.attachedAmenityIds = []
+    await wrapper.vm.toggleAmenity(2)
+    expect(unitAmenitiesApi.attach).toHaveBeenCalledWith('1', 2)
+    expect(wrapper.vm.attachedAmenityIds).toContain(2)
+  })
+
+  it('toggleAmenity detaches when already attached', async () => {
+    const wrapper = await mountWithVuetifyAsync(UnitFormView, {
+      routes: ROUTES,
+      initialRoute: '/properties/10/units/1/edit',
+    })
+    wrapper.vm.attachedAmenityIds = [2]
+    await wrapper.vm.toggleAmenity(2)
+    expect(unitAmenitiesApi.detach).toHaveBeenCalledWith('1', 2)
+    expect(wrapper.vm.attachedAmenityIds).not.toContain(2)
+  })
+
+  it('toggleAmenity error sets amenitiesError', async () => {
+    unitAmenitiesApi.attach.mockRejectedValueOnce(new Error('fail'))
+    const wrapper = await mountWithVuetifyAsync(UnitFormView, {
+      routes: ROUTES,
+      initialRoute: '/properties/10/units/1/edit',
+    })
+    wrapper.vm.attachedAmenityIds = []
+    await wrapper.vm.toggleAmenity(2)
+    expect(wrapper.vm.amenitiesError).toBe('Не удалось обновить удобства')
+    expect(wrapper.vm.togglingAmenity).toBeNull()
   })
 })

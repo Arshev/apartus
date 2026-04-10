@@ -39,8 +39,25 @@
         item-title="label"
         item-value="value"
         :rules="[rules.required]"
-        class="mb-4"
+        class="mb-2"
       />
+
+      <div v-if="isEdit" class="mb-4">
+        <label class="text-subtitle-2 text-medium-emphasis mb-1 d-block">Удобства</label>
+        <v-chip-group>
+          <v-chip
+            v-for="amenity in allAmenities"
+            :key="amenity.id"
+            :color="isAmenityAttached(amenity.id) ? 'primary' : undefined"
+            :variant="isAmenityAttached(amenity.id) ? 'elevated' : 'outlined'"
+            @click="toggleAmenity(amenity.id)"
+            :disabled="togglingAmenity === amenity.id"
+          >
+            {{ amenity.name }}
+          </v-chip>
+        </v-chip-group>
+        <p v-if="amenitiesError" class="text-error text-caption">{{ amenitiesError }}</p>
+      </div>
 
       <div class="d-flex ga-2">
         <v-btn type="submit" color="primary" :loading="submitting">
@@ -61,6 +78,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUnitsStore } from '../stores/units'
 import * as unitsApi from '../api/units'
+import * as amenitiesApi from '../api/amenities'
+import * as unitAmenitiesApi from '../api/unitAmenities'
 
 const route = useRoute()
 const router = useRouter()
@@ -73,6 +92,11 @@ const submitting = ref(false)
 const formError = ref(null)
 const snackbar = ref(false)
 const snackbarText = ref('')
+
+const allAmenities = ref([])
+const attachedAmenityIds = ref([])
+const amenitiesError = ref(null)
+const togglingAmenity = ref(null)
 
 const form = ref({
   name: '',
@@ -140,7 +164,50 @@ async function handleSubmit() {
   }
 }
 
-onMounted(() => loadUnit())
+function isAmenityAttached(amenityId) {
+  return attachedAmenityIds.value.includes(amenityId)
+}
 
-defineExpose({ form, formError, handleSubmit, isEdit, rules, submitting, loadUnit, propertyId })
+async function toggleAmenity(amenityId) {
+  togglingAmenity.value = amenityId
+  amenitiesError.value = null
+  try {
+    if (isAmenityAttached(amenityId)) {
+      await unitAmenitiesApi.detach(route.params.id, amenityId)
+      attachedAmenityIds.value = attachedAmenityIds.value.filter((id) => id !== amenityId)
+    } else {
+      await unitAmenitiesApi.attach(route.params.id, amenityId)
+      attachedAmenityIds.value.push(amenityId)
+    }
+  } catch {
+    amenitiesError.value = 'Не удалось обновить удобства'
+  } finally {
+    togglingAmenity.value = null
+  }
+}
+
+async function loadAmenities() {
+  if (!isEdit.value) return
+  try {
+    const [all, attached] = await Promise.all([
+      amenitiesApi.list(),
+      unitAmenitiesApi.list(route.params.id),
+    ])
+    allAmenities.value = all
+    attachedAmenityIds.value = attached.map((a) => a.id)
+  } catch {
+    amenitiesError.value = 'Не удалось загрузить удобства'
+  }
+}
+
+onMounted(() => {
+  loadUnit()
+  loadAmenities()
+})
+
+defineExpose({
+  form, formError, handleSubmit, isEdit, rules, submitting, loadUnit, propertyId,
+  allAmenities, attachedAmenityIds, amenitiesError, togglingAmenity,
+  isAmenityAttached, toggleAmenity, loadAmenities,
+})
 </script>
