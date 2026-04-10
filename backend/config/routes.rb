@@ -39,6 +39,8 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :expenses, only: [ :index, :create, :update, :destroy ]
+      get "reports/financial", to: "reports#financial"
       get "dashboard", to: "dashboard#show"
       get "health", to: "health#show"
     end

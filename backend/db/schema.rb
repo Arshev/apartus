@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_10_105945) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_10_152232) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -62,6 +62,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_105945) do
     t.index "organization_id, parent_branch_id, lower((name)::text)", name: "index_branches_on_org_parent_lower_name", unique: true, where: "(parent_branch_id IS NOT NULL)"
     t.index ["organization_id"], name: "index_branches_on_organization_id"
     t.index ["parent_branch_id"], name: "index_branches_on_parent_branch_id"
+  end
+
+  create_table "expenses", force: :cascade do |t|
+    t.integer "amount_cents", null: false
+    t.integer "category", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.date "expense_date", null: false
+    t.bigint "organization_id", null: false
+    t.bigint "property_id"
+    t.datetime "updated_at", null: false
+    t.index ["category"], name: "index_expenses_on_category"
+    t.index ["organization_id", "expense_date"], name: "index_expenses_on_organization_id_and_expense_date"
+    t.index ["organization_id"], name: "index_expenses_on_organization_id"
+    t.index ["property_id"], name: "index_expenses_on_property_id"
   end
 
   create_table "guests", force: :cascade do |t|
@@ -201,6 +216,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_105945) do
   add_foreign_key "amenities", "organizations", on_delete: :cascade
   add_foreign_key "branches", "branches", column: "parent_branch_id", on_delete: :restrict
   add_foreign_key "branches", "organizations", on_delete: :cascade
+  add_foreign_key "expenses", "organizations", on_delete: :cascade
+  add_foreign_key "expenses", "properties", on_delete: :nullify
   add_foreign_key "guests", "organizations", on_delete: :cascade
   add_foreign_key "memberships", "organizations"
   add_foreign_key "memberships", "roles"
