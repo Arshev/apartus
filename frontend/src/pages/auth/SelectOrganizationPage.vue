@@ -31,8 +31,10 @@ import { useAuthStore } from '../../stores/auth'
 const router = useRouter()
 const authStore = useAuthStore()
 
-function selectOrganization(org) {
-  authStore.switchOrganization(org)
+async function selectOrganization(org) {
+  await authStore.switchOrganization(org)
   router.push('/')
 }
+
+defineExpose({ selectOrganization })
 </script>

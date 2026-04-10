@@ -121,4 +121,6 @@ async function handleRegister() {
     // error handled by store
   }
 }
+
+defineExpose({ form, formValid, showPassword, rules, handleRegister })
 </script>

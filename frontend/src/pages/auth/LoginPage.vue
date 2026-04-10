@@ -85,4 +85,6 @@ async function handleLogin() {
     // error handled by store
   }
 }
+
+defineExpose({ form, formValid, showPassword, rules, handleLogin })
 </script>

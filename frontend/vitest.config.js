@@ -35,8 +35,9 @@ export default mergeConfig(
         ],
         thresholds: {
           // Coverage ratchet — raise after each feature, never lower without ADR.
-          // FE5 actual: 68.5%. HW-0 legacy still 0% in denominator.
-          lines: 67,
+          // HW-0 coverage pass: 83.94%. Remaining gaps: client.js interceptors,
+          // router/index.js (tested via buildRouter in guards spec).
+          lines: 82,
         },
       },
     },

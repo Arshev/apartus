@@ -40,6 +40,8 @@ export const VUETIFY_STUBS = {
     template: '<div class="v-progress-linear-stub" />',
   },
   'v-container': passthrough('v-container'),
+  'v-row': passthrough('v-row'),
+  'v-col': passthrough('v-col'),
   'v-card': passthrough('v-card'),
   'v-card-title': passthrough('v-card-title'),
   'v-card-text': passthrough('v-card-text'),
