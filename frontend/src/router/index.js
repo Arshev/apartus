@@ -99,6 +99,12 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/tasks',
+    name: 'Tasks',
+    component: () => import('../views/TaskBoardView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/expenses',
     name: 'Expenses',
     component: () => import('../views/ExpenseListView.vue'),
