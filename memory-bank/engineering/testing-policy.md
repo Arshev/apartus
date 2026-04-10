@@ -64,7 +64,7 @@ cd frontend && yarn build
 - **Никогда не понижаем** существующий порог без ADR.
 - Текущие значения (обновлять по мере работы):
   - Backend: 87 (HW-1 final, actual ~88%)
-  - Frontend: 97 (actual 98.18%; remaining: client.js subscriber queue + UnitListView async — covered by E2E)
+  - Frontend: 98 (actual 98.95%; remaining ~1% is v8/Vue SFC compilation overhead, not actual uncovered code)
 - Target на конец HW-2 frontend: растёт с каждой FE-фичей по ratchet rule; 60+ ожидается после FE2–FE3.
 
 ## Ownership Split

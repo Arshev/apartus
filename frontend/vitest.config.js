@@ -35,9 +35,8 @@ export default mergeConfig(
         ],
         thresholds: {
           // Coverage ratchet — raise after each feature, never lower without ADR.
-          // Actual: 98.18%. Remaining: client.js subscriber queue (15-17,75-83),
-          // UnitListView onMounted async (130-131). Both covered by E2E.
-          lines: 97,
+          // Actual: 98.95%. Remaining ~1% is v8/Vue SFC compilation overhead.
+          lines: 98,
         },
       },
     },

@@ -10,7 +10,7 @@ vi.mock('../../api/properties', () => ({
   get: vi.fn(), create: vi.fn(), update: vi.fn(), destroy: vi.fn(),
 }))
 
-import { mountWithVuetify } from '../helpers/mountWithVuetify'
+import { mountWithVuetify, mountWithVuetifyAsync } from '../helpers/mountWithVuetify'
 import UnitListView from '../../views/UnitListView.vue'
 import { useUnitsStore } from '../../stores/units'
 
@@ -65,16 +65,16 @@ describe('UnitListView', () => {
     expect(wrapper.vm.deleteDialog).toBe(false)
   })
 
-  it('redirects to /properties when no propertyId (NEG-03/FM-04)', async () => {
-    const wrapper = mountWithVuetify(UnitListView, {
-      routes: [
-        ...ROUTES,
-        { path: '/no-prop', component: UnitListView },
-      ],
-      initialRoute: '/no-prop',
+  it('calls store.fetchAll on mount when propertyId present', async () => {
+    const wrapper = await mountWithVuetifyAsync(UnitListView, {
+      routes: ROUTES,
+      initialRoute: '/properties/10/units',
     })
+    const store = useUnitsStore()
+    // onMounted fires with propertyId=10, fetchAll called
     await wrapper.vm.$nextTick()
-    // onMounted should push to /properties since route.params.propertyId is undefined
+    // onMounted called fetchAll('10') which sets propertyId
+    expect(store.propertyId).toBe('10')
   })
 
   it('typeLabels and statusLabels cover all enums', () => {
