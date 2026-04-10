@@ -45,6 +45,11 @@ Rails.application.routes.draw do
       get "reports/financial", to: "reports#financial"
       get "dashboard", to: "dashboard#show"
       get "health", to: "health#show"
+
+      namespace :public do
+        get "properties/:slug/availability", to: "bookings#availability"
+        post "properties/:slug/bookings", to: "bookings#create"
+      end
     end
   end
 end
