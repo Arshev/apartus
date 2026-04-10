@@ -178,6 +178,25 @@ DB-level `ON DELETE RESTRICT` на `amenity_id` — второй рубеж ин
 **Validations:** first_name/last_name presence + length, email uniqueness per org (case-insensitive, allow_blank), phone length
 **Indexes:** `[organization_id]`, partial unique `[organization_id, LOWER(email)] WHERE email IS NOT NULL`
 
+## Reservation
+
+| Field | Type | Notes |
+|---|---|---|
+| id | bigint | PK |
+| unit_id | bigint | FK, not null, on_delete: cascade |
+| guest_id | bigint | FK, nullable, on_delete: nullify |
+| check_in | date | not null |
+| check_out | date | not null, > check_in |
+| status | integer (enum) | not null, default: confirmed |
+| guests_count | integer | not null, default: 1, ≥1 |
+| total_price_cents | integer | not null, default: 0, ≥0 |
+| notes | text | optional |
+
+**Associations:** `belongs_to :unit`, `belongs_to :guest (optional)`
+**Enums:** `status: { confirmed: 0, checked_in: 1, checked_out: 2, cancelled: 3 }`
+**Validations:** check_out > check_in, no overlapping active reservations per unit
+**DB constraint:** `EXCLUDE USING gist (unit_id WITH =, daterange(check_in, check_out) WITH &&) WHERE (status IN (0, 1))`
+
 ## ER diagram
 
 ```mermaid
@@ -190,6 +209,8 @@ erDiagram
     Organization ||--o{ Property : has
     Organization ||--o{ Amenity : has
     Organization ||--o{ Guest : has
+    Unit ||--o{ Reservation : has
+    Guest ||--o{ Reservation : has
     Branch ||--o{ Property : has
     Branch ||--o{ Branch : parent
     Property ||--o{ Unit : has

@@ -87,7 +87,7 @@ Apartus — SaaS Property Management System (PMS) для управления к
 | Property↔Branch link | yes | done full-stack (HW-1 backend + branch selector in FE2) | `features/FT-HW1-05-property-branch-link/` |
 | Organization settings | yes | done full-stack (HW-2 Settings: org/members/roles) | — |
 | Guests (minimum CRM) | yes | done full-stack (FT-001) | `features/FT-001-guests/` |
-| Reservation calendar | yes | not started | — |
+| Reservation calendar | yes | done full-stack (FT-002) | `features/FT-002-reservations/` |
 | Pricing (base + seasonal) | yes | not started | — |
 | Property/Unit photos | yes | not started | — |
 | Channel Manager, Widget, Finances, Owners, CRM full, Tasks, Communications, Loyalty, Dynamic pricing | no (post-MVP) | not started | — |
