@@ -60,6 +60,8 @@ const navItems = [
   { title: 'Branches', icon: 'mdi-source-branch', to: '/branches' },
   { title: 'Reservations', icon: 'mdi-calendar-check', to: '/reservations' },
   { title: 'Guests', icon: 'mdi-account-group', to: '/guests' },
+  { title: 'Expenses', icon: 'mdi-cash-minus', to: '/expenses' },
+  { title: 'Reports', icon: 'mdi-chart-bar', to: '/reports' },
   { title: 'Settings', icon: 'mdi-cog', to: '/settings' },
 ]
 
