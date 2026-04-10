@@ -9,6 +9,30 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/properties',
+    name: 'Properties',
+    component: () => import('../views/PlaceholderView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/units',
+    name: 'Units',
+    component: () => import('../views/PlaceholderView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/amenities',
+    name: 'Amenities',
+    component: () => import('../views/PlaceholderView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/branches',
+    name: 'Branches',
+    component: () => import('../views/PlaceholderView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/auth/login',
     name: 'login',
     component: () => import('../pages/auth/LoginPage.vue'),
