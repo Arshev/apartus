@@ -28,6 +28,13 @@ Rails.application.routes.draw do
 
       resources :branches, only: [ :index, :show, :create, :update, :destroy ]
       resources :guests, only: [ :index, :show, :create, :update, :destroy ]
+      resources :reservations, only: [ :index, :show, :create, :update, :destroy ] do
+        member do
+          patch :check_in
+          patch :check_out
+          patch :cancel
+        end
+      end
 
       get "health", to: "health#show"
     end

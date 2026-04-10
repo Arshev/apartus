@@ -10,8 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_10_095233) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_10_100249) do
   # These are extensions that must be enabled in order to support this database
+  enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
 
   create_table "amenities", force: :cascade do |t|
@@ -92,6 +93,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_095233) do
     t.index ["organization_id"], name: "index_properties_on_organization_id"
   end
 
+  create_table "reservations", force: :cascade do |t|
+    t.date "check_in", null: false
+    t.date "check_out", null: false
+    t.datetime "created_at", null: false
+    t.bigint "guest_id"
+    t.integer "guests_count", default: 1, null: false
+    t.text "notes"
+    t.integer "status", default: 0, null: false
+    t.integer "total_price_cents", default: 0, null: false
+    t.bigint "unit_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["guest_id"], name: "index_reservations_on_guest_id"
+    t.index ["status"], name: "index_reservations_on_status"
+    t.index ["unit_id", "check_in", "check_out"], name: "index_reservations_on_unit_id_and_check_in_and_check_out"
+    t.index ["unit_id"], name: "index_reservations_on_unit_id"
+    t.exclusion_constraint "unit_id WITH =, daterange(check_in, check_out) WITH &&", where: "status = ANY (ARRAY[0, 1])", using: :gist, name: "no_overlapping_reservations"
+  end
+
   create_table "roles", force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
@@ -146,6 +165,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_095233) do
   add_foreign_key "memberships", "users"
   add_foreign_key "properties", "branches", on_delete: :restrict
   add_foreign_key "properties", "organizations", on_delete: :cascade
+  add_foreign_key "reservations", "guests", on_delete: :nullify
+  add_foreign_key "reservations", "units", on_delete: :cascade
   add_foreign_key "roles", "organizations"
   add_foreign_key "unit_amenities", "amenities", on_delete: :restrict
   add_foreign_key "unit_amenities", "units", on_delete: :cascade

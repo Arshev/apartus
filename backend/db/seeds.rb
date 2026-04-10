@@ -117,6 +117,20 @@ ActiveRecord::Base.transaction do
   end
   puts "  ✓ Guests: Иван Петров, Мария Сидорова, Алексей Козлов"
 
+  # ---- Reservations ----
+  ivan = organization.guests.find_by(email: "ivan@example.com")
+  maria = organization.guests.find_by(email: "maria@example.com")
+
+  unless Reservation.joins(unit: :property).where(properties: { organization_id: organization.id }).exists?
+    Reservation.create!(unit: apt_studio, guest: ivan, check_in: Date.today + 1, check_out: Date.today + 4,
+                        status: :confirmed, guests_count: 2, total_price_cents: 15_000)
+    Reservation.create!(unit: hostel_room_a, guest: maria, check_in: Date.today + 2, check_out: Date.today + 5,
+                        status: :checked_in, guests_count: 1, total_price_cents: 9_000)
+    Reservation.create!(unit: apt_studio, check_in: Date.today + 10, check_out: Date.today + 12,
+                        status: :confirmed, guests_count: 1, total_price_cents: 0, notes: "Блокировка для ремонта")
+  end
+  puts "  ✓ Reservations: 3 demo bookings"
+
   puts
   puts "Done. Sign in with:"
   puts "  email:    demo@apartus.local"

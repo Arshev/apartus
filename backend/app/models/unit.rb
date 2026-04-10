@@ -2,6 +2,7 @@ class Unit < ApplicationRecord
   belongs_to :property
   has_many :unit_amenities, dependent: :destroy
   has_many :amenities, through: :unit_amenities
+  has_many :reservations, dependent: :destroy
 
   enum :unit_type, { room: 0, apartment: 1, bed: 2, studio: 3 }, validate: true
   enum :status,    { available: 0, maintenance: 1, blocked: 2 }, validate: true
