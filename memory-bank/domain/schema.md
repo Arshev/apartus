@@ -197,6 +197,19 @@ DB-level `ON DELETE RESTRICT` на `amenity_id` — второй рубеж ин
 **Validations:** check_out > check_in, no overlapping active reservations per unit
 **DB constraint:** `EXCLUDE USING gist (unit_id WITH =, daterange(check_in, check_out) WITH &&) WHERE (status IN (0, 1))`
 
+## SeasonalPrice
+
+| Field | Type | Notes |
+|---|---|---|
+| id | bigint | PK |
+| unit_id | bigint | FK, not null, on_delete: cascade |
+| start_date | date | not null |
+| end_date | date | not null, > start_date |
+| price_cents | integer | not null, default: 0, ≥0 |
+
+**Associations:** `belongs_to :unit`
+**Note:** Unit also has `base_price_cents` (integer, default 0) — fallback when no seasonal price matches a night.
+
 ## ER diagram
 
 ```mermaid
@@ -210,6 +223,7 @@ erDiagram
     Organization ||--o{ Amenity : has
     Organization ||--o{ Guest : has
     Unit ||--o{ Reservation : has
+    Unit ||--o{ SeasonalPrice : has
     Guest ||--o{ Reservation : has
     Branch ||--o{ Property : has
     Branch ||--o{ Branch : parent
