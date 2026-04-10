@@ -11,7 +11,7 @@ derived_from:
   - ../FT-HW1-01-property-crud/feature.md
   - ../FT-HW2-FE1-organization-shell/feature.md
 status: active
-delivery_status: in_progress
+delivery_status: done
 audience: humans_and_agents
 must_not_define:
   - implementation_sequence

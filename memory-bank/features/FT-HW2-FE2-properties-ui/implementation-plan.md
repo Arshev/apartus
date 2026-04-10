@@ -5,7 +5,7 @@ doc_function: derived
 purpose: "Execution-план реализации Properties UI. Discovery context, шаги, test strategy."
 derived_from:
   - feature.md
-status: active
+status: archived
 audience: humans_and_agents
 must_not_define:
   - ft_hw2_fe2_scope
