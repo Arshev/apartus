@@ -43,12 +43,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useReservationsStore } from '../stores/reservations'
 import * as reservationsApi from '../api/reservations'
 import * as unitsApi from '../api/units'
 import * as guestsApi from '../api/guests'
+import * as seasonalPricesApi from '../api/seasonalPrices'
 
 const route = useRoute()
 const router = useRouter()
@@ -70,7 +71,35 @@ const form = ref({
 })
 
 const units = ref([])
+const unitDataMap = ref({}) // { unitId: { base_price_cents, seasonal_prices: [] } }
 const guests = ref([])
+
+// Auto-calculate price when unit + dates change
+watch(
+  () => [form.value.unit_id, form.value.check_in, form.value.check_out],
+  async ([unitId, checkIn, checkOut]) => {
+    if (!unitId || !checkIn || !checkOut || checkOut <= checkIn) return
+    try {
+      let data = unitDataMap.value[unitId]
+      if (!data) {
+        const sp = await seasonalPricesApi.list(unitId)
+        const unitInfo = units.value.find((u) => u.id === unitId)
+        data = { base_price_cents: unitInfo?.base_price_cents || 0, seasonal_prices: sp }
+        unitDataMap.value[unitId] = data
+      }
+      // Calculate nightly
+      let total = 0
+      const start = new Date(checkIn)
+      const end = new Date(checkOut)
+      for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
+        const ds = d.toISOString().slice(0, 10)
+        const sp = data.seasonal_prices.find((s) => ds >= s.start_date && ds < s.end_date)
+        total += sp ? sp.price_cents : data.base_price_cents
+      }
+      form.value.total_price_cents = total
+    } catch { /* non-critical */ }
+  },
+)
 
 const rules = {
   required: (v) => (v !== '' && v !== null && v !== undefined) || 'Обязательное поле',
@@ -85,7 +114,7 @@ async function loadSelectors() {
     for (const p of props) {
       const uList = await unitsApi.list(p.id)
       for (const u of uList) {
-        allUnits.push({ id: u.id, label: `${p.name} → ${u.name}` })
+        allUnits.push({ id: u.id, label: `${p.name} → ${u.name}`, base_price_cents: u.base_price_cents || 0 })
       }
     }
     units.value = allUnits

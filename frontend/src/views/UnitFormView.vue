@@ -41,6 +41,12 @@
         :rules="[rules.required]"
         class="mb-2"
       />
+      <v-text-field
+        v-model.number="form.base_price_cents"
+        label="Цена за ночь (копейки)"
+        type="number"
+        class="mb-2"
+      />
 
       <div v-if="isEdit" class="mb-4">
         <label class="text-subtitle-2 text-medium-emphasis mb-1 d-block">Удобства</label>
@@ -103,6 +109,7 @@ const form = ref({
   unit_type: '',
   capacity: null,
   status: 'available',
+  base_price_cents: 0,
 })
 
 const unitTypes = [
@@ -132,6 +139,7 @@ async function loadUnit() {
       unit_type: unit.unit_type,
       capacity: unit.capacity,
       status: unit.status,
+      base_price_cents: unit.base_price_cents || 0,
     }
   } catch {
     formError.value = 'Не удалось загрузить помещение'
