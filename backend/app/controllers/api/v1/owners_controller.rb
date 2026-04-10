@@ -75,16 +75,21 @@ module Api
           { property_name: p.name, revenue: p_revenue, expenses: p_expenses, commission: p_commission, payout: p_revenue - p_commission - p_expenses }
         end
 
-        render json: {
-          owner_name: owner.name,
-          from: from, to: to,
+        data = {
+          owner_name: owner.name, from: from, to: to,
           commission_rate: owner.commission_rate,
-          total_revenue: revenue,
-          total_expenses: expenses,
-          commission: commission,
-          net_payout: net_payout,
+          total_revenue: revenue, total_expenses: expenses,
+          commission: commission, net_payout: net_payout,
           properties: per_property
         }
+
+        if params[:format] == "pdf"
+          pdf = Pdf::OwnerStatementPdf.new(Current.organization, data).render_pdf
+          send_data pdf, filename: "statement_#{owner.name.parameterize}_#{from}_#{to}.pdf",
+                         type: "application/pdf", disposition: "attachment"
+        else
+          render json: data
+        end
       end
 
       private

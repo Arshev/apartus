@@ -60,6 +60,7 @@ Rails.application.routes.draw do
         end
       end
       get "reports/financial", to: "reports#financial"
+      get "reports/financial/pdf", to: "reports#financial_pdf"
       get "dashboard", to: "dashboard#show"
       get "health", to: "health#show"
 
