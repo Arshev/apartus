@@ -36,6 +36,7 @@ module Api
 
         if reservation.save
           NotificationSender.send_booking_confirmation(reservation)
+          TelegramNotifier.notify_booking(reservation)
           render json: reservation_json(reservation), status: :created
         else
           render json: { error: reservation.errors.full_messages }, status: :unprocessable_entity
@@ -98,6 +99,7 @@ module Api
         when :checked_in then NotificationSender.send_check_in_reminder(reservation)
         when :checked_out then NotificationSender.send_check_out_thank_you(reservation)
         end
+        TelegramNotifier.notify_status_change(reservation, new_status.to_s)
 
         render json: reservation_json(reservation)
       end

@@ -31,6 +31,15 @@ module Api
         end
       end
 
+      def test_telegram
+        authorize Current.organization, :update?
+        if TelegramNotifier.send_test(Current.organization)
+          render json: { message: "Test message sent" }
+        else
+          render json: { error: "Telegram not configured or send failed" }, status: :unprocessable_entity
+        end
+      end
+
       private
 
       def organization_params
