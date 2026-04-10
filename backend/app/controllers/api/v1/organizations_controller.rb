@@ -17,21 +17,13 @@ module Api
 
       def show
         authorize Current.organization
-        render json: {
-          id: Current.organization.id,
-          name: Current.organization.name,
-          slug: Current.organization.slug,
-          settings: Current.organization.settings
-        }
+        render json: org_json(Current.organization)
       end
 
       def update
         authorize Current.organization
         if Current.organization.update(organization_params)
-          render json: {
-            id: Current.organization.id,
-            name: Current.organization.name,
-            slug: Current.organization.slug,
+          render json: org_json(Current.organization)
             settings: Current.organization.settings
           }
         else
@@ -42,7 +34,18 @@ module Api
       private
 
       def organization_params
-        params.require(:organization).permit(:name, settings: {})
+        params.require(:organization).permit(:name, :currency, settings: {})
+      end
+
+      def org_json(org)
+        {
+          id: org.id,
+          name: org.name,
+          slug: org.slug,
+          currency: org.currency,
+          currency_config: CurrencyConfig.config_for(org.currency),
+          settings: org.settings
+        }
       end
     end
   end
