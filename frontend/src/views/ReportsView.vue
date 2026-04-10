@@ -1,6 +1,10 @@
 <template>
   <v-container>
-    <h1 class="text-h4 mb-4">Финансовый отчёт</h1>
+    <div class="d-flex align-center mb-4">
+      <h1 class="text-h4">Финансовый отчёт</h1>
+      <v-spacer />
+      <v-btn variant="outlined" prepend-icon="mdi-file-pdf-box" @click="downloadPdf" :loading="downloading">Скачать PDF</v-btn>
+    </div>
 
     <v-progress-linear v-if="loading" indeterminate class="mb-4" />
     <v-alert v-if="error" type="error" class="mb-4">{{ error }}</v-alert>
@@ -97,10 +101,19 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import * as reportsApi from '../api/reports'
+import { downloadFinancialReport } from '../api/pdfExport'
 import { useAuthStore } from '../stores/auth'
 const data = ref(null)
 const loading = ref(false)
 const error = ref(null)
+const downloading = ref(false)
+
+async function downloadPdf() {
+  downloading.value = true
+  try { await downloadFinancialReport() }
+  catch (e) { console.error(e) }
+  finally { downloading.value = false }
+}
 const authStore = useAuthStore()
 const categoryLabels = { maintenance: 'Обслуживание', utilities: 'Коммунальные', cleaning: 'Уборка', supplies: 'Расходники', other: 'Прочее' }
 

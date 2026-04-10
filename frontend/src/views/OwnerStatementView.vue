@@ -3,6 +3,8 @@
     <div class="d-flex align-center mb-4">
       <v-btn variant="text" icon="mdi-arrow-left" :to="'/owners'" />
       <h1 class="text-h4 ml-2">Отчёт собственника</h1>
+      <v-spacer />
+      <v-btn variant="outlined" prepend-icon="mdi-file-pdf-box" @click="downloadPdf" :loading="downloading">PDF</v-btn>
     </div>
 
     <v-progress-linear v-if="loading" indeterminate class="mb-4" />
@@ -65,9 +67,19 @@ import { useRoute } from 'vue-router'
 import * as ownersApi from '../api/owners'
 
 const route = useRoute()
+import { downloadOwnerStatement } from '../api/pdfExport'
+
 const data = ref(null)
 const loading = ref(false)
 const error = ref(null)
+const downloading = ref(false)
+
+async function downloadPdf() {
+  downloading.value = true
+  try { await downloadOwnerStatement(route.params.id) }
+  catch (e) { console.error(e) }
+  finally { downloading.value = false }
+}
 
 const propHeaders = [
   { title: 'Объект', key: 'property_name' },
