@@ -31,7 +31,11 @@ Rails.application.routes.draw do
       end
 
       resources :branches, only: [ :index, :show, :create, :update, :destroy ]
-      resources :guests, only: [ :index, :show, :create, :update, :destroy ]
+      resources :guests, only: [ :index, :show, :create, :update, :destroy ] do
+        member do
+          get :timeline
+        end
+      end
       resources :reservations, only: [ :index, :show, :create, :update, :destroy ] do
         member do
           patch :check_in
@@ -48,6 +52,7 @@ Rails.application.routes.draw do
           post :sync
         end
       end
+      resources :pricing_rules, only: [ :index, :create, :update, :destroy ]
       resources :owners, only: [ :index, :show, :create, :update, :destroy ] do
         member do
           get :statement

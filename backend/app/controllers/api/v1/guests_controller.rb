@@ -15,6 +15,29 @@ module Api
         render json: guest_json(guest)
       end
 
+      def timeline
+        guest = find_guest
+        return if performed?
+
+        authorize guest, :show?
+        reservations = guest.reservations
+          .joins(unit: :property)
+          .where(properties: { organization_id: Current.organization.id })
+          .includes(:unit)
+          .order(check_in: :desc)
+
+        render json: reservations.map { |r|
+          {
+            id: r.id,
+            unit_name: r.unit.name,
+            check_in: r.check_in,
+            check_out: r.check_out,
+            status: r.status,
+            total_price_cents: r.total_price_cents
+          }
+        }
+      end
+
       def create
         authorize Guest
         guest = Current.organization.guests.new(guest_params)
@@ -58,7 +81,7 @@ module Api
       end
 
       def guest_params
-        params.require(:guest).permit(:first_name, :last_name, :email, :phone, :notes)
+        params.require(:guest).permit(:first_name, :last_name, :email, :phone, :notes, :source, tags: [])
       end
 
       def guest_json(guest)
@@ -71,6 +94,9 @@ module Api
           email: guest.email,
           phone: guest.phone,
           notes: guest.notes,
+          tags: guest.tags,
+          source: guest.source,
+          reservations_count: guest.reservations.count,
           created_at: guest.created_at,
           updated_at: guest.updated_at
         }

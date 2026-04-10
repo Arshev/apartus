@@ -1,5 +1,6 @@
 class Guest < ApplicationRecord
   belongs_to :organization
+  has_many :reservations, dependent: :nullify
 
   normalizes :first_name, :last_name, with: ->(v) { v.strip }
   normalizes :email, with: ->(v) { v&.strip&.downcase }

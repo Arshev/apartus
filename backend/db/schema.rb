@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_10_162309) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_10_163238) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -101,6 +101,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_162309) do
     t.text "notes"
     t.bigint "organization_id", null: false
     t.string "phone", limit: 50
+    t.string "source", limit: 50
+    t.text "tags", default: [], array: true
     t.datetime "updated_at", null: false
     t.index "organization_id, lower((email)::text)", name: "index_guests_on_org_lower_email", unique: true, where: "((email IS NOT NULL) AND ((email)::text <> ''::text))"
     t.index ["organization_id"], name: "index_guests_on_organization_id"
@@ -158,6 +160,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_162309) do
     t.string "phone", limit: 50
     t.datetime "updated_at", null: false
     t.index ["organization_id"], name: "index_owners_on_organization_id"
+  end
+
+  create_table "pricing_rules", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.integer "days_before"
+    t.integer "discount_percent", default: 0
+    t.integer "markup_percent", default: 0
+    t.integer "min_nights"
+    t.integer "occupancy_threshold"
+    t.integer "rule_type", default: 0, null: false
+    t.bigint "unit_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["unit_id", "rule_type"], name: "index_pricing_rules_on_unit_id_and_rule_type"
+    t.index ["unit_id"], name: "index_pricing_rules_on_unit_id"
   end
 
   create_table "properties", force: :cascade do |t|
@@ -286,6 +303,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_162309) do
   add_foreign_key "memberships", "users"
   add_foreign_key "notification_logs", "reservations", on_delete: :cascade
   add_foreign_key "owners", "organizations", on_delete: :cascade
+  add_foreign_key "pricing_rules", "units", on_delete: :cascade
   add_foreign_key "properties", "branches", on_delete: :restrict
   add_foreign_key "properties", "organizations", on_delete: :cascade
   add_foreign_key "properties", "owners", on_delete: :nullify

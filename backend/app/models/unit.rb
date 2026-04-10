@@ -6,6 +6,7 @@ class Unit < ApplicationRecord
   has_many :seasonal_prices, dependent: :destroy
   has_many_attached :photos
   has_many :channels, dependent: :destroy
+  has_many :pricing_rules, dependent: :destroy
 
   enum :unit_type, { room: 0, apartment: 1, bed: 2, studio: 3 }, validate: true
   enum :status,    { available: 0, maintenance: 1, blocked: 2 }, validate: true
