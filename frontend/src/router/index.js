@@ -11,7 +11,19 @@ const routes = [
   {
     path: '/properties',
     name: 'Properties',
-    component: () => import('../views/PlaceholderView.vue'),
+    component: () => import('../views/PropertyListView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/properties/new',
+    name: 'PropertyNew',
+    component: () => import('../views/PropertyFormView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/properties/:id/edit',
+    name: 'PropertyEdit',
+    component: () => import('../views/PropertyFormView.vue'),
     meta: { requiresAuth: true },
   },
   {
