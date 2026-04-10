@@ -35,9 +35,8 @@ export default mergeConfig(
         ],
         thresholds: {
           // Coverage ratchet — raise after each feature, never lower without ADR.
-          // FE1 actual: 34.21% (shell+store 83-100%, HW-0 legacy 0%). Honest
-          // denominator (src/**) preserved; HW-0 surfaces covered by FE2-FE5.
-          lines: 33,
+          // FE2 actual: 52.82%. HW-0 legacy still 0% in denominator.
+          lines: 51,
         },
       },
     },
