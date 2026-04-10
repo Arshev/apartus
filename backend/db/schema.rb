@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_10_152851) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_10_153603) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -111,6 +111,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_152851) do
     t.index ["role_id"], name: "index_memberships_on_role_id"
     t.index ["user_id", "organization_id"], name: "index_memberships_on_user_id_and_organization_id", unique: true
     t.index ["user_id"], name: "index_memberships_on_user_id"
+  end
+
+  create_table "notification_logs", force: :cascade do |t|
+    t.string "channel", default: "email", null: false
+    t.datetime "created_at", null: false
+    t.string "event_type", null: false
+    t.string "recipient_email"
+    t.bigint "reservation_id", null: false
+    t.datetime "sent_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["reservation_id", "event_type"], name: "index_notification_logs_on_reservation_id_and_event_type"
+    t.index ["reservation_id"], name: "index_notification_logs_on_reservation_id"
   end
 
   create_table "organizations", force: :cascade do |t|
@@ -243,6 +255,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_152851) do
   add_foreign_key "memberships", "organizations"
   add_foreign_key "memberships", "roles"
   add_foreign_key "memberships", "users"
+  add_foreign_key "notification_logs", "reservations", on_delete: :cascade
   add_foreign_key "properties", "branches", on_delete: :restrict
   add_foreign_key "properties", "organizations", on_delete: :cascade
   add_foreign_key "reservations", "guests", on_delete: :nullify

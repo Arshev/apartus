@@ -1,0 +1,10 @@
+<h2>Бронирование подтверждено</h2>
+<p>Здравствуйте, <%= @guest.full_name %>!</p>
+<p>Ваше бронирование подтверждено:</p>
+<ul>
+  <li><strong>Юнит:</strong> <%= @reservation.unit.name %></li>
+  <li><strong>Заезд:</strong> <%= @reservation.check_in %></li>
+  <li><strong>Выезд:</strong> <%= @reservation.check_out %></li>
+  <li><strong>Гостей:</strong> <%= @reservation.guests_count %></li>
+</ul>
+<p>До встречи!</p>

@@ -35,6 +35,7 @@ module Api
         end
 
         if reservation.save
+          NotificationSender.send_booking_confirmation(reservation)
           render json: reservation_json(reservation), status: :created
         else
           render json: { error: reservation.errors.full_messages }, status: :unprocessable_entity
@@ -86,6 +87,12 @@ module Api
         end
 
         reservation.update!(status: new_status)
+
+        case new_status
+        when :checked_in then NotificationSender.send_check_in_reminder(reservation)
+        when :checked_out then NotificationSender.send_check_out_thank_you(reservation)
+        end
+
         render json: reservation_json(reservation)
       end
 

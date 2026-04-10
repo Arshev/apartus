@@ -1,6 +1,7 @@
 class Reservation < ApplicationRecord
   belongs_to :unit
   belongs_to :guest, optional: true
+  has_many :notification_logs, dependent: :destroy
 
   enum :status, { confirmed: 0, checked_in: 1, checked_out: 2, cancelled: 3 }, validate: true
 

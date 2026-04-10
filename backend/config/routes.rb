@@ -37,6 +37,7 @@ Rails.application.routes.draw do
           patch :check_out
           patch :cancel
         end
+        resources :notifications, only: [ :index ], controller: "notification_logs"
       end
 
       resources :expenses, only: [ :index, :create, :update, :destroy ]
