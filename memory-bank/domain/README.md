@@ -16,3 +16,4 @@ audience: humans_and_agents
 - [`schema.md`](schema.md) — текущее состояние моделей и связей (живой справочник, обновляется при изменениях схемы).
 - [`frontend.md`](frontend.md) — UI surfaces, стек, design system Vuetify, i18n.
 - [`integrations-strategy.md`](integrations-strategy.md) — стратегия интеграций: приоритеты, adapter architecture, build vs buy, провайдеры.
+- [`pricing-strategy.md`](pricing-strategy.md) — тарифная сетка, unit economics, go-to-market pricing.
