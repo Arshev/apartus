@@ -9,6 +9,7 @@
     </div>
 
     <v-progress-linear v-if="loading" indeterminate class="mb-4" />
+    <v-alert v-if="error" type="error" class="mb-4" closable @click:close="error = null">{{ error }}</v-alert>
 
     <div v-if="unitRows.length" class="calendar-grid" :style="gridStyle">
       <!-- Header row: unit label + date cells -->
@@ -57,6 +58,7 @@ const router = useRouter()
 
 const startDate = ref(todayStr())
 const loading = ref(false)
+const error = ref(null)
 const reservations = ref([])
 const unitRows = ref([])
 
@@ -132,8 +134,9 @@ async function loadData() {
       }
     }
     unitRows.value = rows
-  } catch {
-    // silent — dashboard still shows greeting
+  } catch (e) {
+    console.error('Calendar loadData failed:', e)
+    error.value = 'Не удалось загрузить данные календаря'
   } finally {
     loading.value = false
   }

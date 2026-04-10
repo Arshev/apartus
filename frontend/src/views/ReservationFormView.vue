@@ -70,6 +70,7 @@ const form = ref({
   notes: '',
 })
 
+const priceWarning = ref(null)
 const units = ref([])
 const unitDataMap = ref({}) // { unitId: { base_price_cents, seasonal_prices: [] } }
 const guests = ref([])
@@ -97,7 +98,11 @@ watch(
         total += sp ? sp.price_cents : data.base_price_cents
       }
       form.value.total_price_cents = total
-    } catch { /* non-critical */ }
+      priceWarning.value = null
+    } catch (e) {
+      console.warn('Price auto-calculation failed:', e)
+      priceWarning.value = 'Не удалось рассчитать цену автоматически'
+    }
   },
 )
 

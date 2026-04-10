@@ -97,13 +97,17 @@ export const useAuthStore = defineStore('auth', () => {
         membership.value = response.membership
       }
       return response
-    } catch {
-      removeAuthTokens()
-      localStorage.removeItem('currentOrganizationId')
-      user.value = null
-      organization.value = null
-      organizations.value = []
-      membership.value = null
+    } catch (e) {
+      if (e.response?.status === 401 || !e.response) {
+        removeAuthTokens()
+        localStorage.removeItem('currentOrganizationId')
+        user.value = null
+        organization.value = null
+        organizations.value = []
+        membership.value = null
+      } else {
+        error.value = 'Ошибка соединения с сервером'
+      }
     } finally {
       loading.value = false
     }
