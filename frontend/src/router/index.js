@@ -27,9 +27,21 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/units',
+    path: '/properties/:propertyId/units',
     name: 'Units',
-    component: () => import('../views/PlaceholderView.vue'),
+    component: () => import('../views/UnitListView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/properties/:propertyId/units/new',
+    name: 'UnitNew',
+    component: () => import('../views/UnitFormView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/properties/:propertyId/units/:id/edit',
+    name: 'UnitEdit',
+    component: () => import('../views/UnitFormView.vue'),
     meta: { requiresAuth: true },
   },
   {

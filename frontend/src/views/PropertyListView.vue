@@ -27,6 +27,7 @@
         {{ typeLabels[item.property_type] || item.property_type }}
       </template>
       <template v-slot:item.actions="{ item }">
+        <v-btn icon="mdi-door" variant="text" size="small" title="Помещения" :to="`/properties/${item.id}/units`" />
         <v-btn icon="mdi-pencil" variant="text" size="small" :to="`/properties/${item.id}/edit`" />
         <v-btn icon="mdi-delete" variant="text" size="small" color="error" @click="confirmDelete(item)" />
       </template>
