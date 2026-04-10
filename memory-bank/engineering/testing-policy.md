@@ -64,7 +64,7 @@ cd frontend && yarn build
 - **Никогда не понижаем** существующий порог без ADR.
 - Текущие значения (обновлять по мере работы):
   - Backend: 87 (HW-1 final, actual ~88%)
-  - Frontend: 33 (FE1 actual 34.21%; shell+store 83–100%, HW-0 legacy 0%; honest denominator `src/**` сохранён)
+  - Frontend: 51 (FE2 actual 52.82%; shell+store+properties 83–100%, HW-0 legacy 0%; honest denominator `src/**` сохранён)
 - Target на конец HW-2 frontend: растёт с каждой FE-фичей по ratchet rule; 60+ ожидается после FE2–FE3.
 
 ## Ownership Split
