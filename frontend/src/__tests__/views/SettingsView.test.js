@@ -61,7 +61,7 @@ describe('SettingsView', () => {
 
     wrapper.vm.orgForm.name = 'New Name'
     await wrapper.vm.handleOrgSave()
-    expect(orgApi.update).toHaveBeenCalledWith(1, { name: 'New Name' })
+    expect(orgApi.update).toHaveBeenCalledWith({ name: 'New Name' })
     expect(wrapper.vm.orgSnackbar).toBe(true)
   })
 

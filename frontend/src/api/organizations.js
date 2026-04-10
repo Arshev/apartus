@@ -5,12 +5,14 @@ export async function list() {
   return response.data
 }
 
-export async function get(id) {
-  const response = await apiClient.get(`/organizations/${id}`)
+// Singular resource — GET /organization (current org, no id)
+export async function get() {
+  const response = await apiClient.get('/organization')
   return response.data
 }
 
-export async function update(id, data) {
-  const response = await apiClient.patch(`/organizations/${id}`, { organization: data })
+// Singular resource — PATCH /organization
+export async function update(data) {
+  const response = await apiClient.patch('/organization', { organization: data })
   return response.data
 }

@@ -188,7 +188,7 @@ const orgSnackbar = ref(false)
 async function loadOrg() {
   if (!authStore.organization?.id) return
   try {
-    const org = await organizationsApi.get(authStore.organization.id)
+    const org = await organizationsApi.get()
     orgForm.value.name = org.name
   } catch {
     orgError.value = 'Не удалось загрузить настройки'
@@ -199,7 +199,7 @@ async function handleOrgSave() {
   orgSaving.value = true
   orgError.value = null
   try {
-    await organizationsApi.update(authStore.organization.id, orgForm.value)
+    await organizationsApi.update(orgForm.value)
     orgSnackbar.value = true
   } catch (e) {
     orgError.value = e.response?.data?.error || 'Ошибка сохранения'

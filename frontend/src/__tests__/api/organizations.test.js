@@ -13,14 +13,14 @@ describe('api/organizations', () => {
     await orgApi.list()
     expect(apiClient.get).toHaveBeenCalledWith('/organizations')
   })
-  it('get calls GET /organizations/:id', async () => {
+  it('get calls GET /organization (singular, current org)', async () => {
     apiClient.get.mockResolvedValue({ data: { id: 1 } })
-    await orgApi.get(1)
-    expect(apiClient.get).toHaveBeenCalledWith('/organizations/1')
+    await orgApi.get()
+    expect(apiClient.get).toHaveBeenCalledWith('/organization')
   })
-  it('update calls PATCH with wrapped body', async () => {
+  it('update calls PATCH /organization (singular)', async () => {
     apiClient.patch.mockResolvedValue({ data: { id: 1 } })
-    await orgApi.update(1, { name: 'New' })
-    expect(apiClient.patch).toHaveBeenCalledWith('/organizations/1', { organization: { name: 'New' } })
+    await orgApi.update({ name: 'New' })
+    expect(apiClient.patch).toHaveBeenCalledWith('/organization', { organization: { name: 'New' } })
   })
 })
