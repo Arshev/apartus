@@ -53,7 +53,7 @@ const routes = [
   {
     path: '/branches',
     name: 'Branches',
-    component: () => import('../views/PlaceholderView.vue'),
+    component: () => import('../views/BranchTreeView.vue'),
     meta: { requiresAuth: true },
   },
   {
