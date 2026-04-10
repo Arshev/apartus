@@ -82,7 +82,7 @@ module Api
       end
 
       def unit_params
-        params.require(:unit).permit(:name, :unit_type, :capacity, :status)
+        params.require(:unit).permit(:name, :unit_type, :capacity, :status, :base_price_cents)
       end
 
       def unit_json(unit)
@@ -93,6 +93,7 @@ module Api
           unit_type: unit.unit_type,
           capacity: unit.capacity,
           status: unit.status,
+          base_price_cents: unit.base_price_cents,
           created_at: unit.created_at,
           updated_at: unit.updated_at
         }

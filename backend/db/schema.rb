@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_10_100249) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_10_105257) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -123,6 +123,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_100249) do
     t.index ["organization_id"], name: "index_roles_on_organization_id"
   end
 
+  create_table "seasonal_prices", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.date "end_date", null: false
+    t.integer "price_cents", default: 0, null: false
+    t.date "start_date", null: false
+    t.bigint "unit_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["unit_id", "start_date", "end_date"], name: "index_seasonal_prices_on_unit_id_and_start_date_and_end_date"
+    t.index ["unit_id"], name: "index_seasonal_prices_on_unit_id"
+  end
+
   create_table "unit_amenities", force: :cascade do |t|
     t.bigint "amenity_id", null: false
     t.datetime "created_at", null: false
@@ -134,6 +145,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_100249) do
   end
 
   create_table "units", force: :cascade do |t|
+    t.integer "base_price_cents", default: 0, null: false
     t.integer "capacity", null: false
     t.datetime "created_at", null: false
     t.string "name", limit: 255, null: false
@@ -168,6 +180,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_100249) do
   add_foreign_key "reservations", "guests", on_delete: :nullify
   add_foreign_key "reservations", "units", on_delete: :cascade
   add_foreign_key "roles", "organizations"
+  add_foreign_key "seasonal_prices", "units", on_delete: :cascade
   add_foreign_key "unit_amenities", "amenities", on_delete: :restrict
   add_foreign_key "unit_amenities", "units", on_delete: :cascade
   add_foreign_key "units", "properties", on_delete: :cascade

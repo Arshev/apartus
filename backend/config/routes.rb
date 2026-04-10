@@ -24,6 +24,7 @@ Rails.application.routes.draw do
       resources :units, only: [] do
         resources :amenities, only: [ :index, :create, :destroy ],
                   controller: "unit_amenities"
+        resources :seasonal_prices, only: [ :index, :create, :update, :destroy ]
       end
 
       resources :branches, only: [ :index, :show, :create, :update, :destroy ]

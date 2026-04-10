@@ -30,6 +30,10 @@ module Api
         resolve_guest(reservation)
         return if performed?
 
+        if reservation.total_price_cents.zero? && reservation.check_in.present? && reservation.check_out.present?
+          reservation.total_price_cents = PriceCalculator.call(unit, reservation.check_in, reservation.check_out)
+        end
+
         if reservation.save
           render json: reservation_json(reservation), status: :created
         else
