@@ -57,6 +57,7 @@ const navItems = [
   { title: 'Properties', icon: 'mdi-domain', to: '/properties' },
   { title: 'Amenities', icon: 'mdi-star-circle', to: '/amenities' },
   { title: 'Branches', icon: 'mdi-source-branch', to: '/branches' },
+  { title: 'Guests', icon: 'mdi-account-group', to: '/guests' },
   { title: 'Settings', icon: 'mdi-cog', to: '/settings' },
 ]
 

@@ -57,6 +57,24 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/guests',
+    name: 'Guests',
+    component: () => import('../views/GuestListView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/guests/new',
+    name: 'GuestNew',
+    component: () => import('../views/GuestFormView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/guests/:id/edit',
+    name: 'GuestEdit',
+    component: () => import('../views/GuestFormView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/settings',
     name: 'Settings',
     component: () => import('../views/SettingsView.vue'),
