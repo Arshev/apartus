@@ -44,17 +44,43 @@ canonical_for:
 | **P3** | Smart locks | integrate | Nuki / Igloohome REST API | planned |
 | **P3** | Direct OTA APIs | build | Booking.com XML (3-6 мес сертификация), Airbnb REST (2-4 мес) | deferred |
 
-## Channel Manager — phased approach
+## Channel Manager — dual-adapter strategy (СНГ + мир)
 
-Channex.io ($69/мес за 5 properties) слишком дорого для стартапа. Альтернативы:
+Целевые рынки: СНГ (Россия, Казахстан, Узбекистан, Грузия) + мир (Турция, Таиланд, Бали, Дубай, EU).
 
-| Фаза | Решение | Стоимость | Что даёт |
+**Bnovo отклонён** — это конкурентная PMS с закрытым API, не открытый channel manager. Строить на конкуренте = vendor lock-in + стратегический риск.
+
+### Архитектура: Channex (глобал) + Ostrovok direct + iCal fallback
+
+| Компонент | Провайдер | Покрывает | Стоимость |
 |---|---|---|---|
-| **Phase 1 (сейчас)** | iCal sync | $0 | Базовая синхронизация календарей. Достаточно для <5 properties + 1-2 OTA. |
-| **Phase 2 (первый revenue)** | **Bnovo** API | ~2000₽/мес | Полная синхронизация: calendar + rates + bookings. **Ostrovok + Sutochno** (ключевые RU OTA). |
-| **Phase 3 (масштаб)** | Direct Booking.com / Airbnb Partner API | Dev cost | Убираем посредника. Требует сертификации + established company. |
+| **Глобальные OTA** | Channex.io REST API | Booking.com, Airbnb, Expedia, VRBO, Agoda (200+) | ~$3-5/property/мес |
+| **Ostrovok** | Прямая интеграция (Extranet API) | Ostrovok (ключевой RU/СНГ OTA) | Dev time |
+| **Sutochno** | iCal sync (уже done FT-011) | Sutochno.ru | $0 |
 
-**Bnovo** (bnovo.ru) — российский channel manager. Дешевле западных, поддерживает российские OTA. TravelLine (~3000₽/мес) — альтернатива.
+**~$30-50/мес на 10 объектов** при подключённых клиентах.
+
+### Phased rollout
+
+| Фаза | Решение | Стоимость | Когда |
+|---|---|---|---|
+| **Phase 1 (сейчас)** | iCal sync для всех OTA | $0 | Done (FT-011) |
+| **Phase 2 (первый revenue)** | Channex API (глобальные OTA) + Ostrovok direct API | ~$30-50/мес + dev | Когда есть платящие клиенты |
+| **Phase 3 (масштаб)** | Direct Booking.com/Airbnb Partner API | Dev cost | Когда volume оправдывает сертификацию |
+
+### Channex.io — детали
+
+- REST API, JSON:API формат, `user-api-key` auth
+- Sandbox для тестирования
+- Push availability/rates, receive bookings via webhooks
+- НЕ поддерживает Ostrovok/Sutochno — потому нужна прямая интеграция
+- Pricing: ~$3-5/property/мес (negotiate as PMS partner), $69/мес retail за 5 properties
+
+### Ostrovok Extranet API — прямая интеграция
+
+- Публичный partner API для PMS
+- Даёт: availability push, rate push, booking receive
+- Приоритетнее чем Sutochno (больше трафика в СНГ)
 
 **iCal ограничения** (приемлемы на MVP): задержка 15-30мин, нет push цен, нет данных гостя из OTA, нет instant availability update.
 
