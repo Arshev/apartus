@@ -54,6 +54,7 @@ const authStore = useAuthStore()
 
 const navItems = [
   { title: 'Dashboard', icon: 'mdi-view-dashboard', to: '/' },
+  { title: 'Calendar', icon: 'mdi-calendar-month', to: '/calendar' },
   { title: 'Properties', icon: 'mdi-domain', to: '/properties' },
   { title: 'Amenities', icon: 'mdi-star-circle', to: '/amenities' },
   { title: 'Branches', icon: 'mdi-source-branch', to: '/branches' },
