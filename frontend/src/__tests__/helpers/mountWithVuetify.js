@@ -83,7 +83,14 @@ export const VUETIFY_STUBS = {
   'router-view': passthrough('router-view'),
 }
 
+// When initialRoute is set, use mountWithVuetifyAsync to await router readiness.
+// Sync mountWithVuetify still works for tests that don't need route params.
 export function mountWithVuetify(component, options = {}) {
+  const { wrapper, router } = _buildMount(component, options)
+  return wrapper
+}
+
+export async function mountWithVuetifyAsync(component, options = {}) {
   const {
     routes = [{ path: '/', component: { template: '<div/>' } }],
     props = {},
@@ -95,10 +102,13 @@ export function mountWithVuetify(component, options = {}) {
   const pinia = createPinia()
   setActivePinia(pinia)
   const router = createRouter({
-    history: createMemoryHistory(initialRoute ? initialRoute : undefined),
+    history: createMemoryHistory(initialRoute || undefined),
     routes,
   })
-  if (initialRoute) router.push(initialRoute)
+  if (initialRoute) {
+    router.push(initialRoute)
+    await router.isReady()
+  }
 
   return mount(component, {
     props,
@@ -109,4 +119,33 @@ export function mountWithVuetify(component, options = {}) {
       ...globalOpts,
     },
   })
+}
+
+function _buildMount(component, options = {}) {
+  const {
+    routes = [{ path: '/', component: { template: '<div/>' } }],
+    props = {},
+    slots = {},
+    global: globalOpts = {},
+    initialRoute = null,
+  } = options
+
+  const pinia = createPinia()
+  setActivePinia(pinia)
+  const router = createRouter({
+    history: createMemoryHistory(initialRoute || undefined),
+    routes,
+  })
+  if (initialRoute) router.push(initialRoute)
+
+  const wrapper = mount(component, {
+    props,
+    slots,
+    global: {
+      plugins: [pinia, router],
+      stubs: { ...VUETIFY_STUBS, ...(globalOpts.stubs || {}) },
+      ...globalOpts,
+    },
+  })
+  return { wrapper, router }
 }
