@@ -1,6 +1,7 @@
 class Property < ApplicationRecord
   belongs_to :organization
   belongs_to :branch, optional: true
+  belongs_to :owner, optional: true
   has_many :units, dependent: :destroy
   has_many_attached :photos
 

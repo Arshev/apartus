@@ -48,6 +48,11 @@ Rails.application.routes.draw do
           post :sync
         end
       end
+      resources :owners, only: [ :index, :show, :create, :update, :destroy ] do
+        member do
+          get :statement
+        end
+      end
       get "reports/financial", to: "reports#financial"
       get "dashboard", to: "dashboard#show"
       get "health", to: "health#show"

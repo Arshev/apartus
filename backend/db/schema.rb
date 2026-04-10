@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_10_160651) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_10_162309) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -148,6 +148,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_160651) do
     t.index ["slug"], name: "index_organizations_on_slug", unique: true
   end
 
+  create_table "owners", force: :cascade do |t|
+    t.integer "commission_rate", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.string "email", limit: 255
+    t.string "name", limit: 255, null: false
+    t.text "notes"
+    t.bigint "organization_id", null: false
+    t.string "phone", limit: 50
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_owners_on_organization_id"
+  end
+
   create_table "properties", force: :cascade do |t|
     t.string "address", limit: 500, null: false
     t.bigint "branch_id"
@@ -155,11 +167,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_160651) do
     t.text "description"
     t.string "name", limit: 255, null: false
     t.bigint "organization_id", null: false
+    t.bigint "owner_id"
     t.integer "property_type", null: false
     t.datetime "updated_at", null: false
     t.index ["branch_id"], name: "index_properties_on_branch_id"
     t.index ["organization_id", "id"], name: "index_properties_on_organization_id_and_id"
     t.index ["organization_id"], name: "index_properties_on_organization_id"
+    t.index ["owner_id"], name: "index_properties_on_owner_id"
   end
 
   create_table "reservations", force: :cascade do |t|
@@ -271,8 +285,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_160651) do
   add_foreign_key "memberships", "roles"
   add_foreign_key "memberships", "users"
   add_foreign_key "notification_logs", "reservations", on_delete: :cascade
+  add_foreign_key "owners", "organizations", on_delete: :cascade
   add_foreign_key "properties", "branches", on_delete: :restrict
   add_foreign_key "properties", "organizations", on_delete: :cascade
+  add_foreign_key "properties", "owners", on_delete: :nullify
   add_foreign_key "reservations", "guests", on_delete: :nullify
   add_foreign_key "reservations", "units", on_delete: :cascade
   add_foreign_key "roles", "organizations"

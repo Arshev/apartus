@@ -19,7 +19,7 @@ module Api
         authorize Property
 
         permitted = params.require(:property).permit(
-          :name, :address, :property_type, :description, :branch_id
+          :name, :address, :property_type, :description, :branch_id, :owner_id
         )
         property_attrs = permitted.slice(:name, :address, :property_type, :description)
 
@@ -51,7 +51,7 @@ module Api
         authorize property
 
         permitted = params.require(:property).permit(
-          :name, :address, :property_type, :description, :branch_id
+          :name, :address, :property_type, :description, :branch_id, :owner_id
         )
         property.assign_attributes(permitted.slice(:name, :address, :property_type, :description))
 
