@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_10_152232) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_10_152851) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -177,6 +177,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_152232) do
     t.index ["unit_id"], name: "index_seasonal_prices_on_unit_id"
   end
 
+  create_table "tasks", force: :cascade do |t|
+    t.bigint "assigned_to_id"
+    t.integer "category", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.date "due_date"
+    t.bigint "organization_id", null: false
+    t.integer "priority", default: 1, null: false
+    t.bigint "property_id"
+    t.integer "status", default: 0, null: false
+    t.string "title", limit: 255, null: false
+    t.bigint "unit_id"
+    t.datetime "updated_at", null: false
+    t.index ["assigned_to_id"], name: "index_tasks_on_assigned_to_id"
+    t.index ["organization_id", "status"], name: "index_tasks_on_organization_id_and_status"
+    t.index ["organization_id"], name: "index_tasks_on_organization_id"
+    t.index ["priority"], name: "index_tasks_on_priority"
+    t.index ["property_id"], name: "index_tasks_on_property_id"
+    t.index ["unit_id"], name: "index_tasks_on_unit_id"
+  end
+
   create_table "unit_amenities", force: :cascade do |t|
     t.bigint "amenity_id", null: false
     t.datetime "created_at", null: false
@@ -228,6 +249,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_152232) do
   add_foreign_key "reservations", "units", on_delete: :cascade
   add_foreign_key "roles", "organizations"
   add_foreign_key "seasonal_prices", "units", on_delete: :cascade
+  add_foreign_key "tasks", "organizations", on_delete: :cascade
+  add_foreign_key "tasks", "properties", on_delete: :nullify
+  add_foreign_key "tasks", "units", on_delete: :nullify
+  add_foreign_key "tasks", "users", column: "assigned_to_id", on_delete: :nullify
   add_foreign_key "unit_amenities", "amenities", on_delete: :restrict
   add_foreign_key "unit_amenities", "units", on_delete: :cascade
   add_foreign_key "units", "properties", on_delete: :cascade
