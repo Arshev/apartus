@@ -113,17 +113,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import * as dashboardApi from '../api/dashboard'
+import { formatMoney } from '../utils/currency'
 
 const authStore = useAuthStore()
 const data = ref(null)
 const loading = ref(false)
 const error = ref(null)
 
+const currency = computed(() => authStore.organization?.currency || 'RUB')
 function formatPrice(cents) {
-  return cents > 0 ? `${(cents / 100).toFixed(0)} ₽` : '0 ₽'
+  return formatMoney(cents, currency.value)
 }
 
 async function loadDashboard() {

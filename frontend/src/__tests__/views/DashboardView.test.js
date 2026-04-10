@@ -45,10 +45,12 @@ describe('DashboardView', () => {
     expect(wrapper.vm.data.occupancy_rate).toBe(0.4)
   })
 
-  it('formatPrice formats cents to rubles', () => {
+  it('formatPrice formats cents to currency', () => {
     const wrapper = mountWithVuetify(DashboardView)
-    expect(wrapper.vm.formatPrice(50000)).toBe('500 ₽')
-    expect(wrapper.vm.formatPrice(0)).toBe('0 ₽')
+    const store = useAuthStore()
+    store.organization = { id: 1, name: 'Test', currency: 'RUB' }
+    expect(wrapper.vm.formatPrice(50000)).toBe('500.00 ₽')
+    expect(wrapper.vm.formatPrice(0)).toBe('0.00 ₽')
   })
 
   it('loadDashboard error sets error', async () => {

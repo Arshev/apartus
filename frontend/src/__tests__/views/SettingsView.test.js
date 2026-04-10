@@ -10,8 +10,8 @@ vi.mock('../../api/client', () => ({
   default: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
 }))
 vi.mock('../../api/organizations', () => ({
-  list: vi.fn(), get: vi.fn().mockResolvedValue({ id: 1, name: 'Org', slug: 'org' }),
-  update: vi.fn().mockResolvedValue({ id: 1, name: 'Updated' }),
+  list: vi.fn(), get: vi.fn().mockResolvedValue({ id: 1, name: 'Org', slug: 'org', currency: 'RUB' }),
+  update: vi.fn().mockResolvedValue({ id: 1, name: 'Updated', currency: 'RUB' }),
 }))
 vi.mock('../../api/members', () => ({
   list: vi.fn().mockResolvedValue([]),
@@ -61,7 +61,7 @@ describe('SettingsView', () => {
 
     wrapper.vm.orgForm.name = 'New Name'
     await wrapper.vm.handleOrgSave()
-    expect(orgApi.update).toHaveBeenCalledWith({ name: 'New Name' })
+    expect(orgApi.update).toHaveBeenCalledWith({ name: 'New Name', currency: 'RUB' })
     expect(wrapper.vm.orgSnackbar).toBe(true)
   })
 

@@ -15,6 +15,7 @@
         </v-alert>
         <v-form @submit.prevent="handleOrgSave" :disabled="orgSaving">
           <v-text-field v-model="orgForm.name" label="Название организации" class="mb-2" />
+          <v-select v-model="orgForm.currency" label="Валюта" :items="currencyList" item-title="label" item-value="code" class="mb-2" />
           <v-btn type="submit" color="primary" :loading="orgSaving">Сохранить</v-btn>
         </v-form>
         <v-snackbar v-model="orgSnackbar" :timeout="3000" color="success">Сохранено</v-snackbar>
@@ -172,6 +173,7 @@ import { useAuthStore } from '../stores/auth'
 import { useMembersStore } from '../stores/members'
 import { useRolesStore } from '../stores/roles'
 import * as organizationsApi from '../api/organizations'
+import { CURRENCY_LIST } from '../utils/currency'
 
 const authStore = useAuthStore()
 const membersStore = useMembersStore()
@@ -180,7 +182,8 @@ const rolesStore = useRolesStore()
 const tab = ref('general')
 
 // -- General tab --
-const orgForm = ref({ name: '' })
+const orgForm = ref({ name: '', currency: 'RUB' })
+const currencyList = CURRENCY_LIST
 const orgSaving = ref(false)
 const orgError = ref(null)
 const orgSnackbar = ref(false)
@@ -190,6 +193,7 @@ async function loadOrg() {
   try {
     const org = await organizationsApi.get()
     orgForm.value.name = org.name
+    orgForm.value.currency = org.currency || 'RUB'
   } catch (e) { console.error(e);
     orgError.value = 'Не удалось загрузить настройки'
   }

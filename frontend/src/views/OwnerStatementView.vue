@@ -77,7 +77,7 @@ const propHeaders = [
   { title: 'К выплате', key: 'payout' },
 ]
 
-function fmt(cents) { return `${(cents / 100).toFixed(0)} ₽` }
+function fmt(cents) { return formatMoney(cents, 'RUB') }
 
 async function loadStatement() {
   loading.value = true

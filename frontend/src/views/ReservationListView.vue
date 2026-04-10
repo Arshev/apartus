@@ -67,9 +67,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useReservationsStore } from '../stores/reservations'
+import { useAuthStore } from '../stores/auth'
+import { formatMoney } from '../utils/currency'
 
 const store = useReservationsStore()
-
+const authStore = useAuthStore()
 const headers = [
   { title: 'Юнит', key: 'unit_name' },
   { title: 'Гость', key: 'guest_name' },
@@ -85,7 +87,7 @@ const statusLabels = { confirmed: 'Подтверждено', checked_in: 'За�
 
 function statusColor(s) { return statusColors[s] || 'grey' }
 function statusLabel(s) { return statusLabels[s] || s }
-function formatPrice(cents) { return cents > 0 ? `${(cents / 100).toFixed(2)} ₽` : '—' }
+function formatPrice(cents) { return cents > 0 ? formatMoney(cents, authStore.organization?.currency || 'RUB') : '—' }
 
 const deleteDialog = ref(false)
 const deletingItem = ref(null)

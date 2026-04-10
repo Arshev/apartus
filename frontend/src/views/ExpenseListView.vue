@@ -21,7 +21,7 @@
         {{ categoryLabels[item.category] || item.category }}
       </template>
       <template v-slot:item.amount_cents="{ item }">
-        {{ (item.amount_cents / 100).toFixed(2) }} ₽
+        {{ formatMoney(item.amount_cents, authStore.organization?.currency || 'RUB') }}
       </template>
       <template v-slot:item.actions="{ item }">
         <v-btn icon="mdi-pencil" variant="text" size="small" @click="openEdit(item)" />
@@ -66,9 +66,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useExpensesStore } from '../stores/expenses'
-
+import { useAuthStore } from '../stores/auth'
 const store = useExpensesStore()
-
+const authStore = useAuthStore()
 const headers = [
   { title: 'Дата', key: 'expense_date' },
   { title: 'Категория', key: 'category' },

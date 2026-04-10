@@ -95,17 +95,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import * as reportsApi from '../api/reports'
-
+import { useAuthStore } from '../stores/auth'
 const data = ref(null)
 const loading = ref(false)
 const error = ref(null)
-
+const authStore = useAuthStore()
 const categoryLabels = { maintenance: 'Обслуживание', utilities: 'Коммунальные', cleaning: 'Уборка', supplies: 'Расходники', other: 'Прочее' }
 
+const currency = computed(() => authStore.organization?.currency || 'RUB')
 function formatPrice(cents) {
-  return `${(cents / 100).toFixed(0)} ₽`
+  return formatMoney(cents, currency.value)
 }
 
 async function loadReport() {
