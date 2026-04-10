@@ -1,0 +1,144 @@
+<template>
+  <v-container>
+    <h1 class="text-h4 mb-4">{{ isEdit ? 'Редактировать бронирование' : 'Новое бронирование' }}</h1>
+
+    <v-alert v-if="formError" type="error" class="mb-4" closable @click:close="formError = null">
+      {{ Array.isArray(formError) ? formError.join(', ') : formError }}
+    </v-alert>
+
+    <v-form ref="formRef" @submit.prevent="handleSubmit" :disabled="submitting">
+      <v-select
+        v-model="form.unit_id"
+        label="Юнит"
+        :items="units"
+        item-title="label"
+        item-value="id"
+        :rules="[rules.required]"
+        :disabled="isEdit"
+        class="mb-2"
+      />
+      <v-select
+        v-model="form.guest_id"
+        label="Гость (необязательно)"
+        :items="guests"
+        item-title="label"
+        item-value="id"
+        clearable
+        class="mb-2"
+      />
+      <v-text-field v-model="form.check_in" label="Дата заезда" type="date" :rules="[rules.required]" class="mb-2" />
+      <v-text-field v-model="form.check_out" label="Дата выезда" type="date" :rules="[rules.required]" class="mb-2" />
+      <v-text-field v-model.number="form.guests_count" label="Количество гостей" type="number" :rules="[rules.required, rules.minOne]" class="mb-2" />
+      <v-text-field v-model.number="form.total_price_cents" label="Цена (копейки)" type="number" class="mb-2" />
+      <v-textarea v-model="form.notes" label="Заметки" rows="2" class="mb-4" />
+
+      <div class="d-flex ga-2">
+        <v-btn type="submit" color="primary" :loading="submitting">
+          {{ isEdit ? 'Сохранить' : 'Создать' }}
+        </v-btn>
+        <v-btn variant="text" :to="'/reservations'">Отмена</v-btn>
+      </div>
+    </v-form>
+  </v-container>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useReservationsStore } from '../stores/reservations'
+import * as reservationsApi from '../api/reservations'
+import * as unitsApi from '../api/units'
+import * as guestsApi from '../api/guests'
+
+const route = useRoute()
+const router = useRouter()
+const store = useReservationsStore()
+
+const isEdit = computed(() => !!route.params.id)
+const formRef = ref(null)
+const submitting = ref(false)
+const formError = ref(null)
+
+const form = ref({
+  unit_id: null,
+  guest_id: null,
+  check_in: '',
+  check_out: '',
+  guests_count: 1,
+  total_price_cents: 0,
+  notes: '',
+})
+
+const units = ref([])
+const guests = ref([])
+
+const rules = {
+  required: (v) => (v !== '' && v !== null && v !== undefined) || 'Обязательное поле',
+  minOne: (v) => (Number(v) >= 1) || 'Минимум 1',
+}
+
+async function loadSelectors() {
+  try {
+    // Load all units across all properties for the org
+    const props = await (await import('../api/properties')).list()
+    const allUnits = []
+    for (const p of props) {
+      const uList = await unitsApi.list(p.id)
+      for (const u of uList) {
+        allUnits.push({ id: u.id, label: `${p.name} → ${u.name}` })
+      }
+    }
+    units.value = allUnits
+
+    const gList = await guestsApi.list()
+    guests.value = gList.map((g) => ({ id: g.id, label: `${g.first_name} ${g.last_name}` }))
+  } catch {
+    formError.value = 'Не удалось загрузить данные для формы'
+  }
+}
+
+async function loadReservation() {
+  if (!isEdit.value) return
+  try {
+    const r = await reservationsApi.get(route.params.id)
+    form.value = {
+      unit_id: r.unit_id,
+      guest_id: r.guest_id,
+      check_in: r.check_in,
+      check_out: r.check_out,
+      guests_count: r.guests_count,
+      total_price_cents: r.total_price_cents,
+      notes: r.notes || '',
+    }
+  } catch {
+    formError.value = 'Не удалось загрузить бронирование'
+  }
+}
+
+async function handleSubmit() {
+  const { valid } = await formRef.value.validate()
+  if (!valid) return
+
+  submitting.value = true
+  formError.value = null
+  try {
+    if (isEdit.value) {
+      await store.update(Number(route.params.id), form.value)
+    } else {
+      await store.create(form.value)
+    }
+    router.push('/reservations')
+  } catch (e) {
+    formError.value = e.response?.data?.error || store.error || 'Ошибка сохранения'
+  } finally {
+    submitting.value = false
+  }
+}
+
+onMounted(() => {
+  loadSelectors()
+  loadReservation()
+})
+
+defineExpose({ form, formError, handleSubmit, isEdit, rules, submitting, units, guests, loadSelectors, loadReservation })
+</script>

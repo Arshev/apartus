@@ -57,6 +57,24 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/reservations',
+    name: 'Reservations',
+    component: () => import('../views/ReservationListView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/reservations/new',
+    name: 'ReservationNew',
+    component: () => import('../views/ReservationFormView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/reservations/:id/edit',
+    name: 'ReservationEdit',
+    component: () => import('../views/ReservationFormView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/guests',
     name: 'Guests',
     component: () => import('../views/GuestListView.vue'),
