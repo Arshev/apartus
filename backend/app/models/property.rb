@@ -2,6 +2,7 @@ class Property < ApplicationRecord
   belongs_to :organization
   belongs_to :branch, optional: true
   has_many :units, dependent: :destroy
+  has_many_attached :photos
 
   enum :property_type, { apartment: 0, hotel: 1, house: 2, hostel: 3 }, validate: true
 

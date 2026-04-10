@@ -17,6 +17,7 @@ Rails.application.routes.draw do
       resources :roles, only: [ :index, :create, :update, :destroy ]
       resources :properties, only: [ :index, :show, :create, :update, :destroy ] do
         resources :units, only: [ :index, :show, :create, :update, :destroy ]
+        resources :photos, only: [ :index, :create, :destroy ], controller: "photos"
       end
 
       resources :amenities, only: [ :index, :show, :create, :update, :destroy ]
@@ -25,6 +26,7 @@ Rails.application.routes.draw do
         resources :amenities, only: [ :index, :create, :destroy ],
                   controller: "unit_amenities"
         resources :seasonal_prices, only: [ :index, :create, :update, :destroy ]
+        resources :photos, only: [ :index, :create, :destroy ], controller: "photos"
       end
 
       resources :branches, only: [ :index, :show, :create, :update, :destroy ]
