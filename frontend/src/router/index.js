@@ -123,6 +123,12 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/widget/:slug',
+    name: 'BookingWidget',
+    component: () => import('../views/BookingWidgetView.vue'),
+    meta: { widget: true },
+  },
+  {
     path: '/auth/login',
     name: 'login',
     component: () => import('../pages/auth/LoginPage.vue'),

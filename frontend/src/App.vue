@@ -11,6 +11,6 @@ import DefaultLayout from './layouts/DefaultLayout.vue'
 const route = useRoute()
 
 const showLayout = computed(() => {
-  return !route.meta.guest && route.name !== 'selectOrganization'
+  return !route.meta.guest && !route.meta.widget && route.name !== 'selectOrganization'
 })
 </script>
