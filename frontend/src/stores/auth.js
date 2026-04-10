@@ -52,7 +52,7 @@ export const useAuthStore = defineStore('auth', () => {
       organizations.value = response.organizations
 
       if (response.organizations.length === 1) {
-        switchOrganization(response.organizations[0])
+        await switchOrganization(response.organizations[0])
       }
 
       return response
@@ -109,10 +109,11 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  function switchOrganization(org) {
+  async function switchOrganization(org) {
     organization.value = org
     localStorage.setItem('currentOrganizationId', org.id)
     membership.value = null
+    await fetchCurrentUser()
   }
 
   return {
