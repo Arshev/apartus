@@ -33,7 +33,7 @@ canonical_for:
 
 | Priority | Интеграция | Тип | Провайдер | Status |
 |---|---|---|---|---|
-| **P0** | Channel Manager | integrate | Channex.io (REST API → 200+ OTA) | iCal done (FT-011), Channex planned |
+| **P0** | Channel Manager | phased | **Phase 1: iCal** (done FT-011). **Phase 2: Bnovo API** (~2000₽/мес, поддерживает Ostrovok + Sutochno). **Phase 3: Direct API** (Booking.com/Airbnb partner) при масштабе. | iCal done |
 | **P0** | Платежи | integrate | YooKassa (marketplace splits), fallback Tinkoff | planned |
 | **P0** | Email + Telegram | build adapters | SMTP/SendGrid + Telegram Bot API | email done (FT-009), Telegram planned |
 | **P1** | Финансовый экспорт | build | CSV/XLSX export из Reports | planned |
@@ -42,11 +42,25 @@ canonical_for:
 | **P2** | 1С / МойСклад | integrate | CommerceML XML / MoySklad API | planned |
 | **P2** | Dynamic pricing API | integrate | PriceLabs / Beyond Pricing webhook | planned |
 | **P3** | Smart locks | integrate | Nuki / Igloohome REST API | planned |
-| **P3** | Direct OTA APIs | build | Booking.com XML, Airbnb REST (сертификация 3-12 мес) | deferred |
+| **P3** | Direct OTA APIs | build | Booking.com XML (3-6 мес сертификация), Airbnb REST (2-4 мес) | deferred |
+
+## Channel Manager — phased approach
+
+Channex.io ($69/мес за 5 properties) слишком дорого для стартапа. Альтернативы:
+
+| Фаза | Решение | Стоимость | Что даёт |
+|---|---|---|---|
+| **Phase 1 (сейчас)** | iCal sync | $0 | Базовая синхронизация календарей. Достаточно для <5 properties + 1-2 OTA. |
+| **Phase 2 (первый revenue)** | **Bnovo** API | ~2000₽/мес | Полная синхронизация: calendar + rates + bookings. **Ostrovok + Sutochno** (ключевые RU OTA). |
+| **Phase 3 (масштаб)** | Direct Booking.com / Airbnb Partner API | Dev cost | Убираем посредника. Требует сертификации + established company. |
+
+**Bnovo** (bnovo.ru) — российский channel manager. Дешевле западных, поддерживает российские OTA. TravelLine (~3000₽/мес) — альтернатива.
+
+**iCal ограничения** (приемлемы на MVP): задержка 15-30мин, нет push цен, нет данных гостя из OTA, нет instant availability update.
 
 ## Что НЕ строить самим
 
-- **Channel manager** — используем Channex.io или аналог. Прямые OTA интеграции только при достаточном объёме.
+- **Channel manager** — iCal сейчас, Bnovo при revenue, direct API при масштабе. Никогда не строить свой channel manager.
 - **Payment processing** — YooKassa/Tinkoff marketplace. Не строим escrow/split самостоятельно.
 - **Accounting engine** — экспорт в 1С/МойСклад, не дублируем бухгалтерию.
 - **SMS/Email delivery** — SendGrid/Mailgun, не свой SMTP.
