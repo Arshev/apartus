@@ -131,7 +131,7 @@ async function loadDashboard() {
   error.value = null
   try {
     data.value = await dashboardApi.get()
-  } catch {
+  } catch (e) { console.error(e);
     error.value = 'Не удалось загрузить данные'
   } finally {
     loading.value = false

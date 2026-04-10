@@ -105,7 +105,7 @@ async function handleDelete() {
   try {
     await store.destroy(deletingItem.value.id)
     showSnack('Бронирование удалено')
-  } catch { showSnack(store.error || 'Ошибка', 'error') }
+  } catch (e) { console.error(e); showSnack(store.error || 'Ошибка', 'error') }
   finally { deleteDialog.value = false; deletingItem.value = null }
 }
 

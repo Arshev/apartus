@@ -47,7 +47,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useReservationsStore } from '../stores/reservations'
 import * as reservationsApi from '../api/reservations'
-import * as unitsApi from '../api/units'
+import * as allUnitsApi from '../api/allUnits'
 import * as guestsApi from '../api/guests'
 import * as seasonalPricesApi from '../api/seasonalPrices'
 
@@ -113,20 +113,17 @@ const rules = {
 
 async function loadSelectors() {
   try {
-    // Load all units across all properties for the org
-    const props = await (await import('../api/properties')).list()
-    const allUnits = []
-    for (const p of props) {
-      const uList = await unitsApi.list(p.id)
-      for (const u of uList) {
-        allUnits.push({ id: u.id, label: `${p.name} → ${u.name}`, base_price_cents: u.base_price_cents || 0 })
-      }
-    }
-    units.value = allUnits
-
-    const gList = await guestsApi.list()
+    const [unitsList, gList] = await Promise.all([
+      allUnitsApi.list(),
+      guestsApi.list(),
+    ])
+    units.value = unitsList.map((u) => ({
+      id: u.id,
+      label: `${u.property_name} → ${u.name}`,
+      base_price_cents: u.base_price_cents || 0,
+    }))
     guests.value = gList.map((g) => ({ id: g.id, label: `${g.first_name} ${g.last_name}` }))
-  } catch {
+  } catch (e) { console.error(e);
     formError.value = 'Не удалось загрузить данные для формы'
   }
 }
@@ -144,7 +141,7 @@ async function loadReservation() {
       total_price_cents: r.total_price_cents,
       notes: r.notes || '',
     }
-  } catch {
+  } catch (e) { console.error(e);
     formError.value = 'Не удалось загрузить бронирование'
   }
 }

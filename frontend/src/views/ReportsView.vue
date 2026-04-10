@@ -113,7 +113,7 @@ async function loadReport() {
   error.value = null
   try {
     data.value = await reportsApi.financial()
-  } catch {
+  } catch (e) { console.error(e);
     error.value = 'Не удалось загрузить отчёт'
   } finally {
     loading.value = false

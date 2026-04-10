@@ -115,7 +115,7 @@ async function handleSubmit() {
     snackbarColor.value = 'success'
     snackbar.value = true
     formDialog.value = false
-  } catch {
+  } catch (e) { console.error(e);
     snackbarText.value = store.error || 'Ошибка'
     snackbarColor.value = 'error'
     snackbar.value = true
@@ -132,7 +132,7 @@ async function handleDelete() {
     snackbarText.value = 'Удалено'
     snackbarColor.value = 'success'
     snackbar.value = true
-  } catch {
+  } catch (e) { console.error(e);
     snackbarText.value = store.error || 'Ошибка'
     snackbarColor.value = 'error'
     snackbar.value = true

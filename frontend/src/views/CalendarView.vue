@@ -51,8 +51,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import * as reservationsApi from '../api/reservations'
-import * as propertiesApi from '../api/properties'
-import * as unitsApi from '../api/units'
+import * as allUnitsApi from '../api/allUnits'
 
 const router = useRouter()
 
@@ -120,20 +119,12 @@ async function loadData() {
   loading.value = true
   try {
     const endDate = dateRange.value[dateRange.value.length - 1]
-    const [resList, propsList] = await Promise.all([
+    const [resList, unitsList] = await Promise.all([
       reservationsApi.list({ from: startDate.value, to: endDate }),
-      propertiesApi.list(),
+      allUnitsApi.list(),
     ])
     reservations.value = resList
-
-    const rows = []
-    for (const p of propsList) {
-      const uList = await unitsApi.list(p.id)
-      for (const u of uList) {
-        rows.push({ unit: u, propertyName: p.name })
-      }
-    }
-    unitRows.value = rows
+    unitRows.value = unitsList.map((u) => ({ unit: u, propertyName: u.property_name }))
   } catch (e) {
     console.error('Calendar loadData failed:', e)
     error.value = 'Не удалось загрузить данные календаря'

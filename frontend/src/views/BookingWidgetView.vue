@@ -90,7 +90,7 @@ async function search() {
     const data = await publicBookingApi.getAvailability(slug, checkIn.value, checkOut.value)
     units.value = data.units
     orgName.value = data.organization
-  } catch {
+  } catch (e) { console.error(e);
     error.value = 'Не удалось загрузить доступность'
   } finally {
     searching.value = false

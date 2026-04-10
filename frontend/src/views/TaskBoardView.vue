@@ -138,7 +138,7 @@ async function handleSubmit() {
     snackbarText.value = editing.value ? 'Обновлено' : 'Создано'
     snackbarColor.value = 'success'
     snackbar.value = true
-  } catch {
+  } catch (e) { console.error(e);
     snackbarText.value = store.error || 'Ошибка'
     snackbarColor.value = 'error'
     snackbar.value = true
@@ -151,7 +151,7 @@ async function moveForward(task) {
   const next = task.status === 'pending' ? 'in_progress' : 'completed'
   try {
     await store.update(task.id, { status: next })
-  } catch {
+  } catch (e) { console.error(e);
     snackbarText.value = store.error || 'Ошибка'
     snackbarColor.value = 'error'
     snackbar.value = true
@@ -166,7 +166,7 @@ async function handleDelete() {
     snackbarText.value = 'Удалено'
     snackbarColor.value = 'success'
     snackbar.value = true
-  } catch {
+  } catch (e) { console.error(e);
     snackbarText.value = store.error || 'Ошибка'
     snackbarColor.value = 'error'
     snackbar.value = true

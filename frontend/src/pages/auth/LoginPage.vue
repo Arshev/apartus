@@ -81,7 +81,7 @@ async function handleLogin() {
     } else {
       router.push(route.query.redirect || '/')
     }
-  } catch {
+  } catch (e) { console.error(e);
     // error handled by store
   }
 }

@@ -117,7 +117,7 @@ async function handleRegister() {
   try {
     await authStore.signUp(form)
     router.push('/')
-  } catch {
+  } catch (e) { console.error(e);
     // error handled by store
   }
 }

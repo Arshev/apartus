@@ -190,7 +190,7 @@ async function loadOrg() {
   try {
     const org = await organizationsApi.get()
     orgForm.value.name = org.name
-  } catch {
+  } catch (e) { console.error(e);
     orgError.value = 'Не удалось загрузить настройки'
   }
 }
@@ -260,7 +260,7 @@ async function handleMemberSubmit() {
     memberSnackbarColor.value = 'success'
     memberSnackbar.value = true
     memberDialog.value = false
-  } catch {
+  } catch (e) { console.error(e);
     memberSnackbarText.value = membersStore.error || 'Ошибка'
     memberSnackbarColor.value = 'error'
     memberSnackbar.value = true
@@ -280,7 +280,7 @@ async function handleDeleteMember() {
     memberSnackbarText.value = 'Участник удалён'
     memberSnackbarColor.value = 'success'
     memberSnackbar.value = true
-  } catch {
+  } catch (e) { console.error(e);
     memberSnackbarText.value = membersStore.error || 'Ошибка'
     memberSnackbarColor.value = 'error'
     memberSnackbar.value = true
@@ -334,7 +334,7 @@ async function handleRoleSubmit() {
     roleSnackbarColor.value = 'success'
     roleSnackbar.value = true
     roleDialog.value = false
-  } catch {
+  } catch (e) { console.error(e);
     roleSnackbarText.value = rolesStore.error || 'Ошибка'
     roleSnackbarColor.value = 'error'
     roleSnackbar.value = true
@@ -354,7 +354,7 @@ async function handleDeleteRole() {
     roleSnackbarText.value = 'Роль удалена'
     roleSnackbarColor.value = 'success'
     roleSnackbar.value = true
-  } catch {
+  } catch (e) { console.error(e);
     roleSnackbarText.value = rolesStore.error || 'Ошибка'
     roleSnackbarColor.value = 'error'
     roleSnackbar.value = true

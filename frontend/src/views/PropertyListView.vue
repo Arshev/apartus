@@ -101,7 +101,7 @@ async function handleDelete() {
     await store.destroy(deletingProperty.value.id)
     snackbarText.value = 'Объект удалён'
     snackbar.value = true
-  } catch {
+  } catch (e) { console.error(e);
     snackbarText.value = store.error || 'Не удалось удалить объект'
     snackbar.value = true
   } finally {

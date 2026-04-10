@@ -89,7 +89,7 @@ async function handleDelete() {
     await store.destroy(deletingGuest.value.id)
     snackbarText.value = 'Гость удалён'
     snackbar.value = true
-  } catch {
+  } catch (e) { console.error(e);
     snackbarText.value = store.error || 'Не удалось удалить'
     snackbar.value = true
   } finally {

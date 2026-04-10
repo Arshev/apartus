@@ -141,7 +141,7 @@ async function loadUnit() {
       status: unit.status,
       base_price_cents: unit.base_price_cents || 0,
     }
-  } catch {
+  } catch (e) { console.error(e);
     formError.value = 'Не удалось загрузить помещение'
   }
 }
@@ -187,7 +187,7 @@ async function toggleAmenity(amenityId) {
       await unitAmenitiesApi.attach(route.params.id, amenityId)
       attachedAmenityIds.value.push(amenityId)
     }
-  } catch {
+  } catch (e) { console.error(e);
     amenitiesError.value = 'Не удалось обновить удобства'
   } finally {
     togglingAmenity.value = null
@@ -203,7 +203,7 @@ async function loadAmenities() {
     ])
     allAmenities.value = all
     attachedAmenityIds.value = attached.map((a) => a.id)
-  } catch {
+  } catch (e) { console.error(e);
     amenitiesError.value = 'Не удалось загрузить удобства'
   }
 }

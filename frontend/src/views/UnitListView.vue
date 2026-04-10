@@ -113,7 +113,7 @@ async function handleDelete() {
     await store.destroy(deletingUnit.value.id)
     snackbarText.value = 'Помещение удалено'
     snackbar.value = true
-  } catch {
+  } catch (e) { console.error(e);
     snackbarText.value = store.error || 'Не удалось удалить'
     snackbar.value = true
   } finally {

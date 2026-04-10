@@ -67,7 +67,7 @@ async function loadGuest() {
       phone: guest.phone || '',
       notes: guest.notes || '',
     }
-  } catch {
+  } catch (e) { console.error(e);
     formError.value = 'Не удалось загрузить гостя'
   }
 }

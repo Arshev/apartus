@@ -110,7 +110,7 @@ async function loadBranches() {
   branchesError.value = null
   try {
     branches.value = await branchesApi.list()
-  } catch {
+  } catch (e) { console.error(e);
     branchesError.value = 'Не удалось загрузить филиалы'
     branches.value = []
   } finally {
@@ -129,7 +129,7 @@ async function loadProperty() {
       description: property.description || '',
       branch_id: property.branch_id,
     }
-  } catch {
+  } catch (e) { console.error(e);
     formError.value = 'Не удалось загрузить объект'
   }
 }
