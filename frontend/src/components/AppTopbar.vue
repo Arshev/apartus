@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar elevation="1">
+  <v-app-bar elevation="1" :extended="authStore.loading" extension-height="2">
     <v-app-bar-nav-icon @click="$emit('toggleDrawer')" />
     <v-app-bar-title>Apartus</v-app-bar-title>
     <v-spacer />
@@ -17,6 +17,9 @@
         </v-list>
       </v-menu>
     </template>
+    <template v-slot:extension>
+      <v-progress-linear v-if="authStore.loading" indeterminate color="primary" height="2" />
+    </template>
   </v-app-bar>
 </template>
 
@@ -33,4 +36,6 @@ async function handleLogout() {
   await authStore.signOut()
   router.push({ name: 'login' })
 }
+
+defineExpose({ handleLogout })
 </script>

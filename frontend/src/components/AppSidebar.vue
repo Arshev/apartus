@@ -54,10 +54,16 @@ const authStore = useAuthStore()
 
 const navItems = [
   { title: 'Dashboard', icon: 'mdi-view-dashboard', to: '/' },
+  { title: 'Properties', icon: 'mdi-domain', to: '/properties' },
+  { title: 'Units', icon: 'mdi-door', to: '/units' },
+  { title: 'Amenities', icon: 'mdi-star-circle', to: '/amenities' },
+  { title: 'Branches', icon: 'mdi-source-branch', to: '/branches' },
 ]
 
-function switchOrg(org) {
-  authStore.switchOrganization(org)
+async function switchOrg(org) {
+  await authStore.switchOrganization(org)
   router.push('/')
 }
+
+defineExpose({ switchOrg, navItems })
 </script>
