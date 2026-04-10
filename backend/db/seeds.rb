@@ -100,6 +100,23 @@ ActiveRecord::Base.transaction do
   end
   puts "  ✓ UnitAmenity attachments (4 links)"
 
+  # ---- Guests ----
+  organization.guests.find_or_create_by!(email: "ivan@example.com") do |g|
+    g.first_name = "Иван"
+    g.last_name = "Петров"
+    g.phone = "+79001112233"
+    g.notes = "Постоянный гость"
+  end
+  organization.guests.find_or_create_by!(email: "maria@example.com") do |g|
+    g.first_name = "Мария"
+    g.last_name = "Сидорова"
+    g.phone = "+79004445566"
+  end
+  organization.guests.find_or_create_by!(first_name: "Алексей", last_name: "Козлов") do |g|
+    g.phone = "+79007778899"
+  end
+  puts "  ✓ Guests: Иван Петров, Мария Сидорова, Алексей Козлов"
+
   puts
   puts "Done. Sign in with:"
   puts "  email:    demo@apartus.local"

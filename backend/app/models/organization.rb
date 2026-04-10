@@ -6,6 +6,7 @@ class Organization < ApplicationRecord
   has_many :units, through: :properties
   has_many :amenities, dependent: :destroy
   has_many :branches, dependent: :destroy
+  has_many :guests, dependent: :destroy
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true

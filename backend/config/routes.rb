@@ -27,6 +27,7 @@ Rails.application.routes.draw do
       end
 
       resources :branches, only: [ :index, :show, :create, :update, :destroy ]
+      resources :guests, only: [ :index, :show, :create, :update, :destroy ]
 
       get "health", to: "health#show"
     end
