@@ -162,6 +162,22 @@ Adjacency list tree, см. [`../adr/ADR-014-adjacency-list-branch-tree.md`](../a
 
 DB-level `ON DELETE RESTRICT` на `amenity_id` — второй рубеж инварианта "amenity in use"; основная защита — `Amenity#before_destroy`. См. [`../adr/ADR-013-has-many-through-m2n.md`](../adr/ADR-013-has-many-through-m2n.md).
 
+## Guest
+
+| Field | Type | Notes |
+|---|---|---|
+| id | bigint | PK |
+| organization_id | bigint | FK, not null, on_delete: cascade |
+| first_name | string(255) | not null |
+| last_name | string(255) | not null |
+| email | string(255) | optional, unique per org (partial index where email IS NOT NULL) |
+| phone | string(50) | optional |
+| notes | text | optional |
+
+**Associations:** `belongs_to :organization`
+**Validations:** first_name/last_name presence + length, email uniqueness per org (case-insensitive, allow_blank), phone length
+**Indexes:** `[organization_id]`, partial unique `[organization_id, LOWER(email)] WHERE email IS NOT NULL`
+
 ## ER diagram
 
 ```mermaid
@@ -173,6 +189,7 @@ erDiagram
     Organization ||--o{ Branch : has
     Organization ||--o{ Property : has
     Organization ||--o{ Amenity : has
+    Organization ||--o{ Guest : has
     Branch ||--o{ Property : has
     Branch ||--o{ Branch : parent
     Property ||--o{ Unit : has

@@ -79,16 +79,17 @@ Apartus — SaaS Property Management System (PMS) для управления к
 
 | Capability | MVP? | Current state | Owner refs |
 |---|---|---|---|
-| Auth, multi-tenancy, basic roles | yes | done (HW-0) | — |
-| Branches hierarchy | yes | done backend (HW-1 F4), frontend pending (HW-2 FE5) | `features/FT-HW1-04-branches/` |
-| Property CRUD | yes | done backend (HW-1 F1), frontend pending (HW-2 FE2) | `features/FT-HW1-01-property-crud/` |
-| Unit CRUD | yes | done backend (HW-1 F2), frontend pending (HW-2 FE3) | `features/FT-HW1-02-unit-crud/` |
-| Amenities M:N | yes | done backend (HW-1 F3), frontend pending (HW-2 FE4) | `features/FT-HW1-03-amenities/` |
-| Property↔Branch link | yes | done backend (HW-1 F5) | `features/FT-HW1-05-property-branch-link/` |
-| Property/Unit photos | yes | not started | — |
+| Auth, multi-tenancy, basic roles | yes | done full-stack (HW-0 + HW-2 Settings) | — |
+| Branches hierarchy | yes | done full-stack (HW-1 backend + HW-2 FE5 tree UI) | `features/FT-HW1-04-branches/`, `features/FT-HW2-FE5-branches-tree-ui/` |
+| Property CRUD | yes | done full-stack (HW-1 backend + HW-2 FE2 UI) | `features/FT-HW1-01-property-crud/`, `features/FT-HW2-FE2-properties-ui/` |
+| Unit CRUD | yes | done full-stack (HW-1 backend + HW-2 FE3 UI) | `features/FT-HW1-02-unit-crud/`, `features/FT-HW2-FE3-units-ui/` |
+| Amenities M:N | yes | done full-stack (HW-1 backend + HW-2 FE4 UI + attach/detach) | `features/FT-HW1-03-amenities/`, `features/FT-HW2-FE4-amenities-catalog-ui/` |
+| Property↔Branch link | yes | done full-stack (HW-1 backend + branch selector in FE2) | `features/FT-HW1-05-property-branch-link/` |
+| Organization settings | yes | done full-stack (HW-2 Settings: org/members/roles) | — |
+| Guests (minimum CRM) | yes | done full-stack (FT-001) | `features/FT-001-guests/` |
 | Reservation calendar | yes | not started | — |
 | Pricing (base + seasonal) | yes | not started | — |
-| Guests (minimum CRM) | yes | not started | — |
+| Property/Unit photos | yes | not started | — |
 | Channel Manager, Widget, Finances, Owners, CRM full, Tasks, Communications, Loyalty, Dynamic pricing | no (post-MVP) | not started | — |
 
 ## Source Documents
