@@ -43,6 +43,11 @@ Rails.application.routes.draw do
 
       resources :expenses, only: [ :index, :create, :update, :destroy ]
       resources :tasks, only: [ :index, :create, :update, :destroy ]
+      resources :channels, only: [ :index, :create, :update, :destroy ] do
+        member do
+          post :sync
+        end
+      end
       get "reports/financial", to: "reports#financial"
       get "dashboard", to: "dashboard#show"
       get "health", to: "health#show"
@@ -50,6 +55,7 @@ Rails.application.routes.draw do
       namespace :public do
         get "properties/:slug/availability", to: "bookings#availability"
         post "properties/:slug/bookings", to: "bookings#create"
+        get "ical/:token", to: "ical#show", as: :ical_export
       end
     end
   end

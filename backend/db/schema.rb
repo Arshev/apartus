@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_10_160214) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_10_160651) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -62,6 +62,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_160214) do
     t.index "organization_id, parent_branch_id, lower((name)::text)", name: "index_branches_on_org_parent_lower_name", unique: true, where: "(parent_branch_id IS NOT NULL)"
     t.index ["organization_id"], name: "index_branches_on_organization_id"
     t.index ["parent_branch_id"], name: "index_branches_on_parent_branch_id"
+  end
+
+  create_table "channels", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "ical_export_token", null: false
+    t.string "ical_import_url"
+    t.datetime "last_synced_at"
+    t.integer "platform", default: 0, null: false
+    t.boolean "sync_enabled", default: true, null: false
+    t.bigint "unit_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ical_export_token"], name: "index_channels_on_ical_export_token", unique: true
+    t.index ["unit_id", "platform"], name: "index_channels_on_unit_id_and_platform"
+    t.index ["unit_id"], name: "index_channels_on_unit_id"
   end
 
   create_table "expenses", force: :cascade do |t|
@@ -249,6 +263,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_160214) do
   add_foreign_key "amenities", "organizations", on_delete: :cascade
   add_foreign_key "branches", "branches", column: "parent_branch_id", on_delete: :restrict
   add_foreign_key "branches", "organizations", on_delete: :cascade
+  add_foreign_key "channels", "units", on_delete: :cascade
   add_foreign_key "expenses", "organizations", on_delete: :cascade
   add_foreign_key "expenses", "properties", on_delete: :nullify
   add_foreign_key "guests", "organizations", on_delete: :cascade
