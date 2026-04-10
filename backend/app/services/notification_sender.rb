@@ -20,7 +20,7 @@ class NotificationSender
       event_type: event_type,
       channel: "email",
       recipient_email: reservation.guest.email,
-      sent_at: Time.current
+      queued_at: Time.current
     )
   rescue Net::SMTPError, Net::OpenTimeout, SocketError, Errno::ECONNREFUSED => e
     Rails.logger.error("NotificationSender delivery error for reservation##{reservation.id}: #{e.class} #{e.message}\n#{e.backtrace&.first(5)&.join("\n")}")
@@ -28,7 +28,7 @@ class NotificationSender
       event_type: event_type,
       channel: "email",
       recipient_email: reservation.guest&.email,
-      sent_at: Time.current
+      queued_at: Time.current
     )
   end
 end

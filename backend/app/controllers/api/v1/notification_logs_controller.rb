@@ -6,13 +6,13 @@ module Api
         reservation = find_reservation
         return if performed?
 
-        render json: reservation.notification_logs.order(sent_at: :desc).map { |n|
+        render json: reservation.notification_logs.order(queued_at: :desc).map { |n|
           {
             id: n.id,
             event_type: n.event_type,
             channel: n.channel,
             recipient_email: n.recipient_email,
-            sent_at: n.sent_at
+            queued_at: n.queued_at
           }
         }
       end

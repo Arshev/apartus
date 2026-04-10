@@ -107,11 +107,16 @@ module Api
         def resolve_guest(organization)
           return nil if params[:guest_email].blank?
 
+          if params[:guest_name].blank?
+            render json: { error: "Guest name is required when email is provided" }, status: :unprocessable_entity
+            return nil
+          end
+
           guest = organization.guests.find_or_initialize_by(email: params[:guest_email].downcase.strip)
           if guest.new_record?
             name_parts = params[:guest_name].to_s.strip.split(" ", 2)
-            guest.first_name = name_parts.first.presence || "Guest"
-            guest.last_name = name_parts.last.presence || "—"
+            guest.first_name = name_parts.first
+            guest.last_name = name_parts.second.presence || name_parts.first
             guest.phone = params[:guest_phone] if params[:guest_phone].present?
           end
           guest.save!

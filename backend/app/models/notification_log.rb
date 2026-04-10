@@ -3,5 +3,5 @@ class NotificationLog < ApplicationRecord
 
   validates :event_type, presence: true
   validates :channel, presence: true
-  validates :sent_at, presence: true
+  validates :queued_at, presence: true
 end

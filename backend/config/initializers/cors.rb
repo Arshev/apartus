@@ -1,3 +1,6 @@
+# CORS origins are space-separated. In production, set CORS_ORIGINS to your
+# frontend domain(s) only: CORS_ORIGINS="https://app.apartus.io"
+# Each value must be a trusted origin — do not include untrusted domains.
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
     origins ENV.fetch("CORS_ORIGINS") { "http://localhost:5173 http://localhost:5174" }.split

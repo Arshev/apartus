@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_10_153603) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_10_160214) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -117,9 +117,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_153603) do
     t.string "channel", default: "email", null: false
     t.datetime "created_at", null: false
     t.string "event_type", null: false
+    t.datetime "queued_at", null: false
     t.string "recipient_email"
     t.bigint "reservation_id", null: false
-    t.datetime "sent_at", null: false
     t.datetime "updated_at", null: false
     t.index ["reservation_id", "event_type"], name: "index_notification_logs_on_reservation_id_and_event_type"
     t.index ["reservation_id"], name: "index_notification_logs_on_reservation_id"

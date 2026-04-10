@@ -20,6 +20,7 @@ Rails.application.routes.draw do
         resources :photos, only: [ :index, :create, :destroy ], controller: "photos"
       end
 
+      get "all_units", to: "all_units#index"
       resources :amenities, only: [ :index, :show, :create, :update, :destroy ]
 
       resources :units, only: [] do

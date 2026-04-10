@@ -35,13 +35,11 @@ module Api
         total_units = org.units.count
         total_room_nights = total_units * days
 
-        # Count occupied room-nights
-        occupied_nights = 0
-        reservations.each do |r|
-          overlap_start = [ r.check_in, from ].max
-          overlap_end = [ r.check_out, to + 1 ].min
-          occupied_nights += (overlap_end - overlap_start).to_i if overlap_end > overlap_start
-        end
+        # Count occupied room-nights via SQL (no N+1)
+        occupied_nights = reservations
+          .pick(Arel.sql(
+            "COALESCE(SUM(LEAST(check_out, '#{to + 1}'::date) - GREATEST(check_in, '#{from}'::date)), 0)"
+          )).to_i
 
         occupancy_rate = total_room_nights.positive? ? (occupied_nights.to_f / total_room_nights).round(4) : 0.0
         adr = occupied_nights.positive? ? (total_revenue.to_f / occupied_nights).round(0).to_i : 0
