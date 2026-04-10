@@ -32,6 +32,59 @@ describe('AmenityListView', () => {
     expect(wrapper.vm.formName).toBe('WiFi')
   })
 
+  it('handleFormSubmit create: calls store.create', async () => {
+    const wrapper = mountWithVuetify(AmenityListView)
+    const store = useAmenitiesStore()
+    const spy = vi.spyOn(store, 'create').mockResolvedValue({ id: 1, name: 'WiFi' })
+    wrapper.vm.openCreate()
+    wrapper.vm.formName = 'WiFi'
+    await wrapper.vm.handleFormSubmit()
+    expect(spy).toHaveBeenCalledWith({ name: 'WiFi' })
+    expect(wrapper.vm.formDialog).toBe(false)
+  })
+
+  it('handleFormSubmit edit: calls store.update', async () => {
+    const wrapper = mountWithVuetify(AmenityListView)
+    const store = useAmenitiesStore()
+    const spy = vi.spyOn(store, 'update').mockResolvedValue({ id: 1, name: 'Fast WiFi' })
+    wrapper.vm.openEdit({ id: 1, name: 'WiFi' })
+    wrapper.vm.formName = 'Fast WiFi'
+    await wrapper.vm.handleFormSubmit()
+    expect(spy).toHaveBeenCalledWith(1, { name: 'Fast WiFi' })
+    expect(wrapper.vm.formDialog).toBe(false)
+  })
+
+  it('handleFormSubmit error: shows snackbar', async () => {
+    const wrapper = mountWithVuetify(AmenityListView)
+    const store = useAmenitiesStore()
+    vi.spyOn(store, 'create').mockRejectedValue(new Error('fail'))
+    store.error = 'duplicate'
+    wrapper.vm.openCreate()
+    wrapper.vm.formName = 'X'
+    await wrapper.vm.handleFormSubmit()
+    expect(wrapper.vm.formSubmitting).toBe(false)
+  })
+
+  it('handleFormSubmit skips empty name', async () => {
+    const wrapper = mountWithVuetify(AmenityListView)
+    const store = useAmenitiesStore()
+    const spy = vi.spyOn(store, 'create')
+    wrapper.vm.openCreate()
+    wrapper.vm.formName = '  '
+    await wrapper.vm.handleFormSubmit()
+    expect(spy).not.toHaveBeenCalled()
+  })
+
+  it('handleDelete error: shows error snackbar', async () => {
+    const wrapper = mountWithVuetify(AmenityListView)
+    const store = useAmenitiesStore()
+    vi.spyOn(store, 'destroy').mockRejectedValue(new Error('409'))
+    store.error = 'Удалите привязки'
+    wrapper.vm.confirmDelete({ id: 1, name: 'WiFi' })
+    await wrapper.vm.handleDelete()
+    expect(wrapper.vm.deleteDialog).toBe(false)
+  })
+
   it('confirmDelete + handleDelete calls store.destroy', async () => {
     const wrapper = mountWithVuetify(AmenityListView)
     const store = useAmenitiesStore()

@@ -63,4 +63,12 @@ describe('RegisterPage', () => {
     await wrapper.vm.handleRegister()
     expect(authApi.signUp).not.toHaveBeenCalled()
   })
+
+  it('handleRegister error: caught silently', async () => {
+    authApi.signUp.mockRejectedValue(new Error('409'))
+    const wrapper = mountWithVuetify(RegisterPage, { routes: ROUTES })
+    wrapper.vm.formValid = true
+    await wrapper.vm.handleRegister()
+    // No throw, stays on page
+  })
 })

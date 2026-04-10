@@ -11,7 +11,7 @@ vi.mock('../../api/branches', () => ({
   list: vi.fn().mockResolvedValue([{ id: 1, name: 'HQ' }]),
 }))
 
-import { mountWithVuetify } from '../helpers/mountWithVuetify'
+import { mountWithVuetify, mountWithVuetifyAsync } from '../helpers/mountWithVuetify'
 import PropertyFormView from '../../views/PropertyFormView.vue'
 import * as propertiesApi from '../../api/properties'
 import * as branchesApi from '../../api/branches'
@@ -62,6 +62,55 @@ describe('PropertyFormView', () => {
     await wrapper.vm.$nextTick()
     await wrapper.vm.$nextTick()
     expect(wrapper.vm.branchesError).toBe('Не удалось загрузить филиалы')
+  })
+
+  it('handleSubmit create mode: calls store.create and redirects', async () => {
+    propertiesApi.create.mockResolvedValue({ id: 99, name: 'New' })
+    const wrapper = await mountWithVuetifyAsync(PropertyFormView, {
+      routes: ROUTES,
+      initialRoute: '/properties/new',
+    })
+    wrapper.vm.form = { name: 'New', address: '1 St', property_type: 'apartment', description: '', branch_id: null }
+    const pushSpy = vi.spyOn(wrapper.vm.$router, 'push')
+    await wrapper.vm.handleSubmit()
+    expect(pushSpy).toHaveBeenCalledWith('/properties')
+  })
+
+  it('handleSubmit edit mode: calls store.update', async () => {
+    propertiesApi.get.mockResolvedValue({ id: 5, name: 'X', address: 'Y', property_type: 'hotel', description: '', branch_id: null })
+    propertiesApi.update.mockResolvedValue({ id: 5, name: 'Updated' })
+    const wrapper = await mountWithVuetifyAsync(PropertyFormView, {
+      routes: ROUTES,
+      initialRoute: '/properties/5/edit',
+    })
+    await wrapper.vm.$nextTick()
+    wrapper.vm.form = { name: 'Updated', address: 'Y', property_type: 'hotel', description: '', branch_id: null }
+    const pushSpy = vi.spyOn(wrapper.vm.$router, 'push')
+    await wrapper.vm.handleSubmit()
+    expect(pushSpy).toHaveBeenCalledWith('/properties')
+  })
+
+  it('handleSubmit error: sets formError', async () => {
+    propertiesApi.create.mockRejectedValue({ response: { data: { error: ['Bad'] } } })
+    const wrapper = await mountWithVuetifyAsync(PropertyFormView, {
+      routes: ROUTES,
+      initialRoute: '/properties/new',
+    })
+    wrapper.vm.form = { name: 'X', address: 'Y', property_type: 'apartment', description: '', branch_id: null }
+    await wrapper.vm.handleSubmit()
+    expect(wrapper.vm.formError).toBeTruthy()
+    expect(wrapper.vm.submitting).toBe(false)
+  })
+
+  it('loadProperty sets formError on failure', async () => {
+    propertiesApi.get.mockRejectedValue(new Error('404'))
+    const wrapper = await mountWithVuetifyAsync(PropertyFormView, {
+      routes: ROUTES,
+      initialRoute: '/properties/5/edit',
+    })
+    await wrapper.vm.$nextTick()
+    await wrapper.vm.loadProperty()
+    expect(wrapper.vm.formError).toBe('Не удалось загрузить объект')
   })
 
   it('validation rules exist for required fields', () => {

@@ -50,4 +50,15 @@ describe('PropertyListView', () => {
     await wrapper.vm.handleDelete()
     expect(spy).toHaveBeenCalledWith(1)
   })
+
+  it('handleDelete error: closes dialog and shows error', async () => {
+    const wrapper = mountWithVuetify(PropertyListView, { routes: ROUTES })
+    const store = usePropertiesStore()
+    vi.spyOn(store, 'destroy').mockRejectedValue(new Error('404'))
+    store.error = 'Not found'
+    wrapper.vm.confirmDelete({ id: 1, name: 'Test' })
+    await wrapper.vm.handleDelete()
+    expect(wrapper.vm.deleteDialog).toBe(false)
+    expect(wrapper.vm.deletingProperty).toBeNull()
+  })
 })

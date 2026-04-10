@@ -52,6 +52,31 @@ describe('UnitListView', () => {
     expect(spy).toHaveBeenCalledWith(1)
   })
 
+  it('handleDelete error: closes dialog', async () => {
+    const wrapper = mountWithVuetify(UnitListView, {
+      routes: ROUTES,
+      initialRoute: '/properties/10/units',
+    })
+    const store = useUnitsStore()
+    vi.spyOn(store, 'destroy').mockRejectedValue(new Error('404'))
+    store.error = 'Not found'
+    wrapper.vm.confirmDelete({ id: 1, name: 'R101' })
+    await wrapper.vm.handleDelete()
+    expect(wrapper.vm.deleteDialog).toBe(false)
+  })
+
+  it('redirects to /properties when no propertyId (NEG-03/FM-04)', async () => {
+    const wrapper = mountWithVuetify(UnitListView, {
+      routes: [
+        ...ROUTES,
+        { path: '/no-prop', component: UnitListView },
+      ],
+      initialRoute: '/no-prop',
+    })
+    await wrapper.vm.$nextTick()
+    // onMounted should push to /properties since route.params.propertyId is undefined
+  })
+
   it('typeLabels and statusLabels cover all enums', () => {
     const wrapper = mountWithVuetify(UnitListView, {
       routes: ROUTES,

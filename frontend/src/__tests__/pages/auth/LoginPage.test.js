@@ -77,6 +77,13 @@ describe('LoginPage', () => {
     await wrapper.vm.handleLogin()
     expect(authApi.signIn).not.toHaveBeenCalled()
   })
-})
 
-// Expose handleLogin for test
+  it('handleLogin error: caught silently (error handled by store)', async () => {
+    authApi.signIn.mockRejectedValue(new Error('network'))
+    const wrapper = mountWithVuetify(LoginPage, { routes: ROUTES })
+    wrapper.vm.formValid = true
+    // Should not throw
+    await wrapper.vm.handleLogin()
+    // Stays on page, no redirect
+  })
+})

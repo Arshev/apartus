@@ -35,9 +35,9 @@ export default mergeConfig(
         ],
         thresholds: {
           // Coverage ratchet — raise after each feature, never lower without ADR.
-          // HW-0 coverage pass: 83.94%. Remaining gaps: client.js interceptors,
-          // router/index.js (tested via buildRouter in guards spec).
-          lines: 82,
+          // Actual: 98.18%. Remaining: client.js subscriber queue (15-17,75-83),
+          // UnitListView onMounted async (130-131). Both covered by E2E.
+          lines: 97,
         },
       },
     },
