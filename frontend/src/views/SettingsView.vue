@@ -4,6 +4,7 @@
 
     <v-tabs v-model="tab" class="mb-4">
       <v-tab value="general">Общие</v-tab>
+      <v-tab value="integrations">Интеграции</v-tab>
       <v-tab value="members">Участники</v-tab>
       <v-tab value="roles">Роли</v-tab>
     </v-tabs>
@@ -19,6 +20,31 @@
           <v-btn type="submit" color="primary" :loading="orgSaving">Сохранить</v-btn>
         </v-form>
         <v-snackbar v-model="orgSnackbar" :timeout="3000" color="success">Сохранено</v-snackbar>
+      </v-window-item>
+
+      <v-window-item value="integrations">
+        <h2 class="text-h5 mb-4">Telegram уведомления</h2>
+        <v-alert v-if="telegramError" type="error" class="mb-4" closable @click:close="telegramError = null">
+          {{ telegramError }}
+        </v-alert>
+        <v-alert v-if="telegramSuccess" type="success" class="mb-4" closable @click:close="telegramSuccess = false">
+          Тестовое сообщение отправлено!
+        </v-alert>
+        <v-text-field v-model="telegramForm.bot_token" label="Bot Token (от @BotFather)" class="mb-2" />
+        <v-text-field v-model="telegramForm.chat_id" label="Chat ID" class="mb-2" />
+        <div class="d-flex ga-2 mb-4">
+          <v-btn color="primary" :loading="telegramSaving" @click="saveTelegram">Сохранить</v-btn>
+          <v-btn variant="outlined" :loading="telegramTesting" @click="testTelegram" :disabled="!telegramForm.bot_token || !telegramForm.chat_id">Тест</v-btn>
+        </div>
+        <v-card variant="outlined" class="pa-3">
+          <p class="text-body-2 text-medium-emphasis">
+            1. Создайте бота через <a href="https://t.me/BotFather" target="_blank">@BotFather</a> в Telegram<br>
+            2. Скопируйте Bot Token сюда<br>
+            3. Добавьте бота в группу или напишите ему /start<br>
+            4. Узнайте Chat ID через <a href="https://t.me/getmyid_bot" target="_blank">@getmyid_bot</a><br>
+            5. Нажмите "Тест" для проверки
+          </p>
+        </v-card>
       </v-window-item>
 
       <v-window-item value="members">
@@ -173,6 +199,7 @@ import { useAuthStore } from '../stores/auth'
 import { useMembersStore } from '../stores/members'
 import { useRolesStore } from '../stores/roles'
 import * as organizationsApi from '../api/organizations'
+import apiClient from '../api/client'
 import { CURRENCY_LIST } from '../utils/currency'
 
 const authStore = useAuthStore()
@@ -180,6 +207,48 @@ const membersStore = useMembersStore()
 const rolesStore = useRolesStore()
 
 const tab = ref('general')
+
+// -- Telegram tab --
+const telegramForm = ref({ bot_token: '', chat_id: '' })
+const telegramSaving = ref(false)
+const telegramTesting = ref(false)
+const telegramError = ref(null)
+const telegramSuccess = ref(false)
+
+async function saveTelegram() {
+  telegramSaving.value = true
+  telegramError.value = null
+  try {
+    await organizationsApi.update({
+      settings: {
+        telegram_bot_token: telegramForm.value.bot_token,
+        telegram_chat_id: telegramForm.value.chat_id,
+      },
+    })
+    telegramSuccess.value = false
+  } catch (e) {
+    console.error(e)
+    telegramError.value = 'Не удалось сохранить'
+  } finally {
+    telegramSaving.value = false
+  }
+}
+
+async function testTelegram() {
+  telegramTesting.value = true
+  telegramError.value = null
+  telegramSuccess.value = false
+  try {
+    await saveTelegram()
+    const response = await apiClient.post('/organization/test_telegram')
+    telegramSuccess.value = true
+  } catch (e) {
+    console.error(e)
+    telegramError.value = 'Не удалось отправить тестовое сообщение'
+  } finally {
+    telegramTesting.value = false
+  }
+}
 
 // -- General tab --
 const orgForm = ref({ name: '', currency: 'RUB' })
@@ -194,6 +263,8 @@ async function loadOrg() {
     const org = await organizationsApi.get()
     orgForm.value.name = org.name
     orgForm.value.currency = org.currency || 'RUB'
+    telegramForm.value.bot_token = org.settings?.telegram_bot_token || ''
+    telegramForm.value.chat_id = org.settings?.telegram_chat_id || ''
   } catch (e) { console.error(e);
     orgError.value = 'Не удалось загрузить настройки'
   }
