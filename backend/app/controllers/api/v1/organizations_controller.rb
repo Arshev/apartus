@@ -53,6 +53,8 @@ module Api
           slug: org.slug,
           currency: org.currency,
           currency_config: CurrencyConfig.config_for(org.currency),
+          plan: org.plan,
+          plan_config: org.plan_config,
           settings: org.settings
         }
       end

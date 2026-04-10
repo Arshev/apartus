@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_10_181655) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_10_185436) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -145,6 +145,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_181655) do
     t.datetime "created_at", null: false
     t.string "currency", limit: 3, default: "RUB", null: false
     t.string "name", null: false
+    t.string "plan", limit: 20, default: "starter", null: false
     t.jsonb "settings", default: {}
     t.string "slug", null: false
     t.datetime "updated_at", null: false

@@ -14,8 +14,25 @@ class Organization < ApplicationRecord
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true
   validates :currency, inclusion: { in: CurrencyConfig.codes }
+  validates :plan, inclusion: { in: PlanConfig.codes }
 
   normalizes :name, with: ->(name) { name.strip }
+
+  def plan_config
+    PlanConfig.config_for(plan)
+  end
+
+  def can_add_units?
+    PlanConfig.within_limit?(units.count, plan_config[:max_units])
+  end
+
+  def can_add_users?
+    PlanConfig.within_limit?(memberships.count, plan_config[:max_users])
+  end
+
+  def has_feature?(feature)
+    !!plan_config[feature]
+  end
 
   before_validation :generate_slug, on: :create
   after_create :create_preset_roles
