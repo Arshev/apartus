@@ -47,7 +47,7 @@ const routes = [
   {
     path: '/amenities',
     name: 'Amenities',
-    component: () => import('../views/PlaceholderView.vue'),
+    component: () => import('../views/AmenityListView.vue'),
     meta: { requiresAuth: true },
   },
   {

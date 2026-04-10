@@ -35,8 +35,8 @@ export default mergeConfig(
         ],
         thresholds: {
           // Coverage ratchet — raise after each feature, never lower without ADR.
-          // FE3 actual: 61.19%. HW-0 legacy still 0% in denominator.
-          lines: 60,
+          // FE4 actual: 64.86%. HW-0 legacy still 0% in denominator.
+          lines: 63,
         },
       },
     },
