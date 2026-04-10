@@ -1,0 +1,20 @@
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v2.1.9 /Users/artshevko/dev/apartus/frontend
+
+ ✓ src/__tests__/smoke.test.js (1 test) 1ms
+ ✓ src/__tests__/router/guards.test.js (3 tests) 11ms
+ ✓ src/__tests__/stores/auth.test.js (11 tests) 12ms
+ ✓ src/__tests__/views/DashboardView.test.js (1 test) 16ms
+ ✓ src/__tests__/views/PlaceholderView.test.js (1 test) 17ms
+ ✓ src/__tests__/components/AppTopbar.test.js (4 tests) 29ms
+ ✓ src/__tests__/App.test.js (3 tests) 17ms
+ ✓ src/__tests__/components/AppSidebar.test.js (3 tests) 30ms
+
+ Test Files  8 passed (8)
+      Tests  27 passed (27)
+   Start at  07:12:24
+   Duration  971ms (transform 572ms, setup 0ms, collect 2.07s, tests 133ms, environment 2.95s, prepare 374ms)
+
+Done in 1.60s.

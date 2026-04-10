@@ -28,9 +28,14 @@ Backend CRUD features, реализованные во время HW-1. Все m
 
 Frontend фичи, закрывающие UI долг HW-1. Будут созданы в Фазе 2 миграции, через полный feature-flow (Draft → Design Ready → Plan Ready → Execution → Done).
 
+| Package | Status | Delivery | Scope |
+|---|---|---|---|
+| [FT-HW2-FE1-organization-shell](FT-HW2-FE1-organization-shell/feature.md) | active | done | Layout, navigation, org switcher, logout — frontend reference implementation |
+
+### Planned
+
 | Planned package | Scope |
 |---|---|
-| FT-HW2-FE1-organization-shell | Layout, navigation, org switcher, logout — frontend reference implementation |
 | FT-HW2-FE2-properties-ui | Property list/form/branch selector |
 | FT-HW2-FE3-units-ui | Unit list/form/amenity chips под Property |
 | FT-HW2-FE4-amenities-catalog-ui | Standalone amenities page |

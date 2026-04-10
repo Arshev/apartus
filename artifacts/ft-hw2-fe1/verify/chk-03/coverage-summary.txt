@@ -1,0 +1,51 @@
+yarn run v1.22.22
+$ vitest run --coverage
+
+ RUN  v2.1.9 /Users/artshevko/dev/apartus/frontend
+      Coverage enabled with v8
+
+ ✓ src/__tests__/smoke.test.js (1 test) 1ms
+ ✓ src/__tests__/router/guards.test.js (3 tests) 10ms
+ ✓ src/__tests__/stores/auth.test.js (11 tests) 8ms
+ ✓ src/__tests__/views/DashboardView.test.js (1 test) 18ms
+stderr | src/__tests__/views/PlaceholderView.test.js > PlaceholderView > renders «Скоро» empty state
+[Vue Router warn]: No match found for location with path ""
+
+ ✓ src/__tests__/views/PlaceholderView.test.js (1 test) 19ms
+ ✓ src/__tests__/components/AppTopbar.test.js (4 tests) 36ms
+ ✓ src/__tests__/App.test.js (3 tests) 22ms
+ ✓ src/__tests__/components/AppSidebar.test.js (3 tests) 37ms
+
+ Test Files  8 passed (8)
+      Tests  27 passed (27)
+   Start at  07:12:25
+   Duration  890ms (transform 547ms, setup 0ms, collect 1.92s, tests 150ms, environment 1.72s, prepare 388ms)
+
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   34.21 |    77.27 |   41.17 |   34.21 |                   
+ src               |     100 |      100 |     100 |     100 |                   
+  App.vue          |     100 |      100 |     100 |     100 |                   
+ src/api           |       0 |        0 |       0 |       0 |                   
+  auth.js          |       0 |        0 |       0 |       0 | 1-21              
+  client.js        |       0 |        0 |       0 |       0 | 1-97              
+ src/components    |     100 |       75 |      40 |     100 |                   
+  AppSidebar.vue   |     100 |       50 |   33.33 |     100 | 8                 
+  AppTopbar.vue    |     100 |      100 |      50 |     100 |                   
+ src/layouts       |     100 |      100 |     100 |     100 |                   
+  ...ultLayout.vue |     100 |      100 |     100 |     100 |                   
+ src/pages/auth    |       0 |        0 |       0 |       0 |                   
+  LoginPage.vue    |       0 |        0 |       0 |       0 | 1-87              
+  RegisterPage.vue |       0 |        0 |       0 |       0 | 1-123             
+  ...ationPage.vue |       0 |        0 |       0 |       0 | 1-37              
+ src/router        |       0 |        0 |       0 |       0 |                   
+  index.js         |       0 |        0 |       0 |       0 | 1-80              
+ src/stores        |   83.48 |    88.46 |   83.33 |   83.48 |                   
+  auth.js          |   83.48 |    88.46 |   83.33 |   83.48 | 25-42             
+ src/views         |     100 |      100 |     100 |     100 |                   
+  ...boardView.vue |     100 |      100 |     100 |     100 |                   
+  ...olderView.vue |     100 |      100 |     100 |     100 |                   
+-------------------|---------|----------|---------|---------|-------------------
+Done in 1.38s.

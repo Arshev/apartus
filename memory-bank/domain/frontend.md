@@ -22,7 +22,7 @@ Apartus frontend — это одно приложение, SPA.
 
 | Surface | Location | Status |
 |---|---|---|
-| Organization SPA (`/frontend`) | Vue 3 SPA, основной UI для УК и арендодателей | active (HW-0 auth skeleton, HW-2 добавляет layouts + HW-1 feature UIs) |
+| Organization SPA (`/frontend`) | Vue 3 SPA, основной UI для УК и арендодателей | active (HW-0 auth skeleton → [FT-HW2-FE1](../features/FT-HW2-FE1-organization-shell/feature.md) canonical shell reference; HW-2 добавляет domain UIs FE2–FE5) |
 | Booking Widget | встраиваемый модуль для сайтов собственников | post-MVP, не начат |
 | Owner Cabinet | отдельный view для собственников | post-MVP |
 
