@@ -10,6 +10,14 @@ export default mergeConfig(
       environment: 'jsdom',
       globals: false,
       include: ['src/**/*.{test,spec}.{js,mjs}', 'src/__tests__/**/*.{test,spec}.{js,mjs}'],
+      // Vuetify component CSS is imported on demand by vite-plugin-vuetify
+      // (autoImport). Without inlining, Node tries to import .css natively and
+      // fails with "Unknown file extension".
+      server: {
+        deps: {
+          inline: [/vuetify/],
+        },
+      },
       coverage: {
         provider: 'v8',
         // json-summary is required by scripts/coverage-badge.mjs (reads total.lines.pct).
@@ -26,9 +34,10 @@ export default mergeConfig(
           'src/plugins/**',
         ],
         thresholds: {
-          // HW-1 ratchet: start at 0, raise after each feature. Mirrors backend
-          // SimpleCov ratchet in spec_helper.rb. Final HW-1 target: 80 (may slip to HW-2).
-          lines: 0,
+          // Coverage ratchet — raise after each feature, never lower without ADR.
+          // FE1 actual: 34.21% (shell+store 83-100%, HW-0 legacy 0%). Honest
+          // denominator (src/**) preserved; HW-0 surfaces covered by FE2-FE5.
+          lines: 33,
         },
       },
     },
