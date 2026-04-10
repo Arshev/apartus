@@ -59,7 +59,7 @@ export const VUETIFY_STUBS = {
   'v-data-table': {
     name: 'v-data-table',
     props: ['headers', 'items', 'loading', 'density'],
-    template: '<div data-stub="v-data-table"><slot /><slot v-for="h in headers" :name="`item.${h.key}`" :item="{}" /></div>',
+    template: '<div data-stub="v-data-table"><slot /></div>',
   },
   'v-form': {
     name: 'v-form',
@@ -84,6 +84,10 @@ export const VUETIFY_STUBS = {
     emits: ['update:modelValue'],
     template: '<div data-stub="v-textarea">{{ label }}</div>',
   },
+  'v-tabs': passthrough('v-tabs'),
+  'v-tab': passthrough('v-tab'),
+  'v-window': passthrough('v-window'),
+  'v-window-item': passthrough('v-window-item'),
   'v-empty-state': {
     name: 'v-empty-state',
     props: ['title', 'text'],

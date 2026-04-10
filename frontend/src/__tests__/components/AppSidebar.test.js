@@ -31,12 +31,12 @@ const ROUTES = [
 describe('AppSidebar', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
-  it('exposes 4 navigation items (Dashboard + 3 top-level; Units nested under Properties)', () => {
+  it('exposes 5 navigation items (Dashboard + domain + settings)', () => {
     const wrapper = mountWithVuetify(AppSidebar, { routes: ROUTES, props: { modelValue: true } })
     const navItems = wrapper.vm.navItems
-    expect(navItems).toHaveLength(4)
+    expect(navItems).toHaveLength(5)
     expect(navItems.map((n) => n.title)).toEqual([
-      'Dashboard', 'Properties', 'Amenities', 'Branches',
+      'Dashboard', 'Properties', 'Amenities', 'Branches', 'Settings',
     ])
   })
 
