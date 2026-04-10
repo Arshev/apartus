@@ -14,7 +14,7 @@ class NotificationSender
   def self.send_email(reservation, mailer_method, event_type)
     return unless reservation.guest&.email.present?
 
-    GuestMailer.send(mailer_method, reservation).deliver_later
+    GuestMailer.public_send(mailer_method, reservation).deliver_later
 
     reservation.notification_logs.create!(
       event_type: event_type,
@@ -22,7 +22,13 @@ class NotificationSender
       recipient_email: reservation.guest.email,
       sent_at: Time.current
     )
-  rescue StandardError => e
-    Rails.logger.error("NotificationSender failed: #{e.message}")
+  rescue Net::SMTPError, Net::OpenTimeout, SocketError, Errno::ECONNREFUSED => e
+    Rails.logger.error("NotificationSender delivery error for reservation##{reservation.id}: #{e.class} #{e.message}\n#{e.backtrace&.first(5)&.join("\n")}")
+    reservation.notification_logs.create(
+      event_type: event_type,
+      channel: "email",
+      recipient_email: reservation.guest&.email,
+      sent_at: Time.current
+    )
   end
 end

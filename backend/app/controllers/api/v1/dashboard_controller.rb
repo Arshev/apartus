@@ -2,6 +2,7 @@ module Api
   module V1
     class DashboardController < BaseController
       def show
+        authorize :dashboard, :show?
         today = Date.current
         month_start = today.beginning_of_month
         month_end = today.end_of_month

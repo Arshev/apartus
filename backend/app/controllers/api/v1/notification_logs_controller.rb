@@ -2,6 +2,7 @@ module Api
   module V1
     class NotificationLogsController < BaseController
       def index
+        authorize :notification_log, :index?
         reservation = find_reservation
         return if performed?
 

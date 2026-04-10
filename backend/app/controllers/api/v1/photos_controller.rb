@@ -1,10 +1,14 @@
 module Api
   module V1
     class PhotosController < BaseController
+      ALLOWED_TYPES = %w[image/jpeg image/png image/webp image/gif].freeze
+      MAX_SIZE = 10.megabytes
+
       def index
         record = find_record
         return if performed?
 
+        authorize :photo, :index?
         render json: record.photos.map { |p| photo_json(p) }
       end
 
@@ -12,19 +16,38 @@ module Api
         record = find_record
         return if performed?
 
+        authorize :photo, :create?
+
         files = params[:photos] || [ params[:photo] ].compact
         if files.empty?
           render json: { error: "No files provided" }, status: :unprocessable_entity
           return
         end
 
+        files.each do |file|
+          unless ALLOWED_TYPES.include?(file.content_type)
+            render json: { error: "Invalid file type: #{file.content_type}. Allowed: #{ALLOWED_TYPES.join(', ')}" },
+                   status: :unprocessable_entity
+            return
+          end
+          if file.size > MAX_SIZE
+            render json: { error: "File too large (max #{MAX_SIZE / 1.megabyte}MB)" },
+                   status: :unprocessable_entity
+            return
+          end
+        end
+
         record.photos.attach(files)
         render json: record.photos.map { |p| photo_json(p) }, status: :created
+      rescue ActiveStorage::IntegrityError, ActiveStorage::Error => e
+        render json: { error: "Upload failed: #{e.message}" }, status: :unprocessable_entity
       end
 
       def destroy
         record = find_record
         return if performed?
+
+        authorize :photo, :destroy?
 
         photo = record.photos.find_by(id: params[:id])
         unless photo

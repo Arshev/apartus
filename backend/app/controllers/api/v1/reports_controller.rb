@@ -2,8 +2,9 @@ module Api
   module V1
     class ReportsController < BaseController
       def financial
-        from = Date.parse(params[:from] || Date.current.beginning_of_month.to_s)
-        to = Date.parse(params[:to] || Date.current.end_of_month.to_s)
+        authorize :report, :financial?
+        from = parse_date(params[:from], Date.current.beginning_of_month)
+        to = parse_date(params[:to], Date.current.end_of_month)
         days = (to - from).to_i + 1
 
         org = Current.organization
@@ -59,6 +60,15 @@ module Api
           total_room_nights: total_room_nights,
           occupied_nights: occupied_nights
         }
+      end
+
+      private
+
+      def parse_date(param, default)
+        return default if param.blank?
+        Date.parse(param)
+      rescue Date::Error, ArgumentError
+        default
       end
     end
   end

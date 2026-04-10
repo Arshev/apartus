@@ -40,6 +40,12 @@ module Api
         else
           render json: { error: reservation.errors.full_messages }, status: :unprocessable_entity
         end
+      rescue ActiveRecord::StatementInvalid => e
+        if e.message.include?("no_overlapping_reservations")
+          render json: { error: [ "Даты пересекаются с другим бронированием" ] }, status: :conflict
+        else
+          raise
+        end
       end
 
       def update
@@ -124,7 +130,7 @@ module Api
       def reservation_params
         params.require(:reservation).permit(
           :unit_id, :guest_id, :check_in, :check_out,
-          :guests_count, :total_price_cents, :notes
+          :guests_count, :notes
         )
       end
 
