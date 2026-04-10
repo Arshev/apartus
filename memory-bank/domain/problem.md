@@ -70,7 +70,7 @@ Apartus — SaaS Property Management System (PMS) для управления к
 
 - `PCON-01` Mult-tenant isolation: данные одной организации не должны пересекаться с другой ни через какой API-путь.
 - `PCON-02` Русский язык — основной, английский — второй. Все UI-копии локализуемы.
-- `PCON-03` Money fields — integer cents (см. [`../adr/ADR-004-integer-cents-for-money.md`](../adr/ADR-004-integer-cents-for-money.md)).
+- `PCON-03` Money fields — integer cents (см. [`../adr/ADR-004-integer-cents-for-money.md`](../adr/ADR-004-integer-cents-for-money.md)). Валюта сейчас hardcoded ₽ — запланирована настраиваемая валюта per organization (см. backlog ниже).
 - `PCON-04` Monorepo `/backend` + `/frontend`, split ответственности (см. [`../adr/ADR-001-monorepo-structure.md`](../adr/ADR-001-monorepo-structure.md)).
 
 ## Capability Roadmap
@@ -91,6 +91,20 @@ Apartus — SaaS Property Management System (PMS) для управления к
 | Pricing (base + seasonal) | yes | done full-stack (FT-003) | `features/FT-003-pricing/` |
 | Property/Unit photos | yes | done full-stack (FT-004) | `features/FT-004-photos/` |
 | Channel Manager, Widget, Finances, Owners, CRM full, Tasks, Communications, Loyalty, Dynamic pricing | no (post-MVP) | not started | — |
+
+## Backlog (запланировано, не начато)
+
+| Item | Description | Priority |
+|---|---|---|
+| Configurable currency | Валюта per organization (currency code + symbol + decimal places в org settings). Сейчас hardcoded ₽. Требует: поле `currency` в Organization, frontend formatter с symbol/locale, API возвращает currency рядом с money fields. | high |
+| Multi-currency | Поддержка нескольких валют в одной org (конвертация, курсы) | low |
+| i18n (vue-i18n) | Вынос UI строк в i18n файлы, переключение языка | medium |
+| Visual calendar (month view) | Помесячный grid-календарь помимо timeline | medium |
+| PDF export (reports, statements) | Генерация PDF для отчётов и актов собственникам | medium |
+| Drag-and-drop calendar | Перетаскивание бронирований на timeline | low |
+| AI yield management | ML-based dynamic pricing на основе исторических данных | low |
+| Telegram bot | Уведомления + управление через Telegram | low |
+| Unified Inbox | Агрегация сообщений из каналов + email | low |
 
 ## Source Documents
 
