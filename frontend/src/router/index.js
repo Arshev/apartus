@@ -99,6 +99,18 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/owners',
+    name: 'Owners',
+    component: () => import('../views/OwnerListView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/owners/:id/statement',
+    name: 'OwnerStatement',
+    component: () => import('../views/OwnerStatementView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/channels',
     name: 'Channels',
     component: () => import('../views/ChannelListView.vue'),

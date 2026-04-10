@@ -62,6 +62,7 @@ const navItems = [
   { title: 'Channels', icon: 'mdi-swap-horizontal', to: '/channels' },
   { title: 'Guests', icon: 'mdi-account-group', to: '/guests' },
   { title: 'Tasks', icon: 'mdi-clipboard-check', to: '/tasks' },
+  { title: 'Owners', icon: 'mdi-account-key', to: '/owners' },
   { title: 'Expenses', icon: 'mdi-cash-minus', to: '/expenses' },
   { title: 'Reports', icon: 'mdi-chart-bar', to: '/reports' },
   { title: 'Settings', icon: 'mdi-cog', to: '/settings' },
