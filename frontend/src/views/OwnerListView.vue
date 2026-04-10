@@ -36,7 +36,7 @@
           <v-text-field v-model="form.name" label="Имя" class="mb-2" />
           <v-text-field v-model="form.email" label="Email" class="mb-2" />
           <v-text-field v-model="form.phone" label="Телефон" class="mb-2" />
-          <v-text-field v-model.number="form.commission_rate" label="Комиссия (базисные пункты, 1500 = 15%)" type="number" class="mb-2" />
+          <v-text-field v-model.number="form.commission_pct" label="Комиссия (%)" type="number" step="0.1" class="mb-2" />
           <v-textarea v-model="form.notes" label="Заметки" rows="2" />
         </v-card-text>
         <v-card-actions>
@@ -78,7 +78,7 @@ const headers = [
 
 const formDialog = ref(false)
 const editing = ref(null)
-const form = ref({ name: '', email: '', phone: '', commission_rate: 0, notes: '' })
+const form = ref({ name: '', email: '', phone: '', commission_pct: 0, notes: '' })
 const formSubmitting = ref(false)
 const deleteDialog = ref(false)
 const deleting = ref(null)
@@ -88,21 +88,23 @@ const snackbarColor = ref('success')
 
 function openCreate() {
   editing.value = null
-  form.value = { name: '', email: '', phone: '', commission_rate: 0, notes: '' }
+  form.value = { name: '', email: '', phone: '', commission_pct: 0, notes: '' }
   formDialog.value = true
 }
 
 function openEdit(item) {
   editing.value = item
-  form.value = { name: item.name, email: item.email || '', phone: item.phone || '', commission_rate: item.commission_rate, notes: item.notes || '' }
+  form.value = { name: item.name, email: item.email || '', phone: item.phone || '', commission_pct: (item.commission_rate || 0) / 100, notes: item.notes || '' }
   formDialog.value = true
 }
 
 async function handleSubmit() {
   formSubmitting.value = true
+  const payload = { ...form.value, commission_rate: Math.round((form.value.commission_pct || 0) * 100) }
+  delete payload.commission_pct
   try {
-    if (editing.value) { await store.update(editing.value.id, form.value) }
-    else { await store.create(form.value) }
+    if (editing.value) { await store.update(editing.value.id, payload) }
+    else { await store.create(payload) }
     formDialog.value = false
     snackbarText.value = editing.value ? 'Обновлено' : 'Создано'
     snackbarColor.value = 'success'

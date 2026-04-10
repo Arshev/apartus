@@ -42,9 +42,10 @@
         class="mb-2"
       />
       <v-text-field
-        v-model.number="form.base_price_cents"
-        label="Цена за ночь (копейки)"
+        v-model.number="form.base_price_rub"
+        label="Цена за ночь (₽)"
         type="number"
+        step="0.01"
         class="mb-2"
       />
 
@@ -109,7 +110,7 @@ const form = ref({
   unit_type: '',
   capacity: null,
   status: 'available',
-  base_price_cents: 0,
+  base_price_rub: 0,
 })
 
 const unitTypes = [
@@ -139,7 +140,7 @@ async function loadUnit() {
       unit_type: unit.unit_type,
       capacity: unit.capacity,
       status: unit.status,
-      base_price_cents: unit.base_price_cents || 0,
+      base_price_rub: (unit.base_price_cents || 0) / 100,
     }
   } catch (e) { console.error(e);
     formError.value = 'Не удалось загрузить помещение'
@@ -152,15 +153,17 @@ async function handleSubmit() {
 
   submitting.value = true
   formError.value = null
+  const payload = { ...form.value, base_price_cents: Math.round((form.value.base_price_rub || 0) * 100) }
+  delete payload.base_price_rub
   try {
     if (isEdit.value) {
-      await store.update(Number(route.params.id), form.value)
+      await store.update(Number(route.params.id), payload)
       snackbarText.value = 'Помещение обновлено'
     } else {
       if (!store.propertyId || store.propertyId !== propertyId.value) {
         store.propertyId = propertyId.value
       }
-      await store.create(form.value)
+      await store.create(payload)
       snackbarText.value = 'Помещение создано'
     }
     snackbar.value = true

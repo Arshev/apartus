@@ -36,7 +36,7 @@
         <v-card-title>{{ editing ? 'Редактировать' : 'Новый расход' }}</v-card-title>
         <v-card-text>
           <v-select v-model="form.category" label="Категория" :items="categories" item-title="label" item-value="value" class="mb-2" />
-          <v-text-field v-model.number="form.amount_cents" label="Сумма (копейки)" type="number" class="mb-2" />
+          <v-text-field v-model.number="form.amount_rub" label="Сумма (₽)" type="number" step="0.01" class="mb-2" />
           <v-text-field v-model="form.expense_date" label="Дата" type="date" class="mb-2" />
           <v-textarea v-model="form.description" label="Описание" rows="2" />
         </v-card-text>
@@ -82,7 +82,7 @@ const categories = Object.entries(categoryLabels).map(([value, label]) => ({ val
 
 const formDialog = ref(false)
 const editing = ref(null)
-const form = ref({ category: 'other', amount_cents: 0, expense_date: '', description: '' })
+const form = ref({ category: 'other', amount_rub: 0, expense_date: '', description: '' })
 const formSubmitting = ref(false)
 const deleteDialog = ref(false)
 const deleting = ref(null)
@@ -92,24 +92,26 @@ const snackbarColor = ref('success')
 
 function openCreate() {
   editing.value = null
-  form.value = { category: 'other', amount_cents: 0, expense_date: new Date().toISOString().slice(0, 10), description: '' }
+  form.value = { category: 'other', amount_rub: 0, expense_date: new Date().toISOString().slice(0, 10), description: '' }
   formDialog.value = true
 }
 
 function openEdit(item) {
   editing.value = item
-  form.value = { category: item.category, amount_cents: item.amount_cents, expense_date: item.expense_date, description: item.description || '' }
+  form.value = { category: item.category, amount_rub: (item.amount_cents || 0) / 100, expense_date: item.expense_date, description: item.description || '' }
   formDialog.value = true
 }
 
 async function handleSubmit() {
   formSubmitting.value = true
+  const payload = { ...form.value, amount_cents: Math.round((form.value.amount_rub || 0) * 100) }
+  delete payload.amount_rub
   try {
     if (editing.value) {
-      await store.update(editing.value.id, form.value)
+      await store.update(editing.value.id, payload)
       snackbarText.value = 'Обновлено'
     } else {
-      await store.create(form.value)
+      await store.create(payload)
       snackbarText.value = 'Создано'
     }
     snackbarColor.value = 'success'

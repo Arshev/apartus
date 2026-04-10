@@ -29,7 +29,8 @@
       <v-text-field v-model="form.check_in" label="Дата заезда" type="date" :rules="[rules.required]" class="mb-2" />
       <v-text-field v-model="form.check_out" label="Дата выезда" type="date" :rules="[rules.required]" class="mb-2" />
       <v-text-field v-model.number="form.guests_count" label="Количество гостей" type="number" :rules="[rules.required, rules.minOne]" class="mb-2" />
-      <v-text-field v-model.number="form.total_price_cents" label="Цена (копейки)" type="number" class="mb-2" />
+      <v-text-field v-model.number="form.total_price_rub" label="Цена (₽)" type="number" step="0.01" class="mb-2" />
+      <p v-if="priceWarning" class="text-warning text-caption mb-2">{{ priceWarning }}</p>
       <v-textarea v-model="form.notes" label="Заметки" rows="2" class="mb-4" />
 
       <div class="d-flex ga-2">
@@ -66,7 +67,7 @@ const form = ref({
   check_in: '',
   check_out: '',
   guests_count: 1,
-  total_price_cents: 0,
+  total_price_rub: 0,
   notes: '',
 })
 
@@ -97,7 +98,7 @@ watch(
         const sp = data.seasonal_prices.find((s) => ds >= s.start_date && ds < s.end_date)
         total += sp ? sp.price_cents : data.base_price_cents
       }
-      form.value.total_price_cents = total
+      form.value.total_price_rub = (total / 100)
       priceWarning.value = null
     } catch (e) {
       console.warn('Price auto-calculation failed:', e)
@@ -138,7 +139,7 @@ async function loadReservation() {
       check_in: r.check_in,
       check_out: r.check_out,
       guests_count: r.guests_count,
-      total_price_cents: r.total_price_cents,
+      total_price_rub: (r.total_price_cents || 0) / 100,
       notes: r.notes || '',
     }
   } catch (e) { console.error(e);
