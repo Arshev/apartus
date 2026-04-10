@@ -29,6 +29,7 @@ audience: humans_and_agents
 
 1. Все документы одной фичи живут в `memory-bank/features/FT-XXX/`.
 2. **Feature = vertical slice.** Одна фича — одна единица пользовательской ценности, пронизывающая все затронутые слои системы (UI, API, storage, infra). Горизонтальная нарезка ("все endpoints", "весь UI") допустима только для чисто инфраструктурных или рефакторинговых задач и должна быть явно обоснована через `NS-*`.
+2a. **Full-stack delivery rule.** Каждый новый API endpoint должен быть закрыт frontend surface'ом (API client + store + UI) в рамках того же feature package. Вынос frontend в отдельную фичу допустим только если backend и frontend разрабатываются разными людьми с явным handoff через `feature.md`. Агент, реализующий backend CRUD, обязан в `Change Surface` указать frontend touchpoints и либо реализовать их, либо зафиксировать gap как `NS-*` с обоснованием и deadline в `DEC-*`. Цель — не допускать накопления "backend без UI" долга.
 3. `feature.md` — canonical owner intent, delivery-scoped target outcome/KPI, design и verify для delivery-единицы.
 4. `README.md` создается вместе с `feature.md` и остается routing-слоем на всем lifecycle.
 5. `implementation-plan.md` — derived execution-документ. Он не должен существовать, пока sibling `feature.md` не стал design-ready.

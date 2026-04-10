@@ -83,9 +83,28 @@ Canonical feature package: [`../features/FT-HW1-01-property-crud/feature.md`](..
 - **Store** — `defineStore('name', () => { ... })` setup style.
 - **Routes** — meta `{ requiresAuth: true }` защищается guards.
 
-### Reference Implementations (Frontend)
+### Full-Stack Delivery Rule
 
-Появится после FE1 (organization shell). До этого эталон — `frontend/src/stores/auth.js` для Pinia setup-style паттерна.
+Каждый новый backend endpoint сопровождается frontend surface'ом в том же feature:
+1. **API client** (`src/api/<resource>.js`) — thin axios wrapper
+2. **Pinia store** (`src/stores/<resource>.js`) — items/loading/error + CRUD actions
+3. **View** (`src/views/<Resource>*.vue`) — list + form + delete
+4. **Router** — route с `meta.requiresAuth`
+5. **Tests** — store spec + API spec + view spec
+
+Backend-only delivery допустим только как промежуточный шаг внутри одной feature с явным `STEP-*` для frontend в `implementation-plan.md`. Закрытие feature без UI — gap, требующий `DEC-*` или `NS-*` с deadline.
+
+### Reference Implementations (Frontend, HW-2)
+
+- **Shell / layout:** [`frontend/src/views/DashboardView.vue`](../../frontend/src/views/DashboardView.vue), [`frontend/src/layouts/DefaultLayout.vue`](../../frontend/src/layouts/DefaultLayout.vue)
+- **CRUD store:** [`frontend/src/stores/properties.js`](../../frontend/src/stores/properties.js)
+- **API client:** [`frontend/src/api/properties.js`](../../frontend/src/api/properties.js)
+- **List + delete:** [`frontend/src/views/PropertyListView.vue`](../../frontend/src/views/PropertyListView.vue)
+- **Route-based form:** [`frontend/src/views/PropertyFormView.vue`](../../frontend/src/views/PropertyFormView.vue)
+- **Dialog CRUD:** [`frontend/src/views/AmenityListView.vue`](../../frontend/src/views/AmenityListView.vue)
+- **Nested CRUD:** [`frontend/src/views/UnitListView.vue`](../../frontend/src/views/UnitListView.vue) (scoped to property)
+- **Client-side tree:** [`frontend/src/stores/branches.js`](../../frontend/src/stores/branches.js) (`buildTree`)
+- **Test helper:** [`frontend/src/__tests__/helpers/mountWithVuetify.js`](../../frontend/src/__tests__/helpers/mountWithVuetify.js)
 
 ## SQL / Migrations
 
