@@ -59,6 +59,7 @@ const navItems = [
   { title: 'Amenities', icon: 'mdi-star-circle', to: '/amenities' },
   { title: 'Branches', icon: 'mdi-source-branch', to: '/branches' },
   { title: 'Reservations', icon: 'mdi-calendar-check', to: '/reservations' },
+  { title: 'Channels', icon: 'mdi-swap-horizontal', to: '/channels' },
   { title: 'Guests', icon: 'mdi-account-group', to: '/guests' },
   { title: 'Tasks', icon: 'mdi-clipboard-check', to: '/tasks' },
   { title: 'Expenses', icon: 'mdi-cash-minus', to: '/expenses' },
