@@ -11,4 +11,4 @@ audience: humans_and_agents
 
 # FT-014: Guest CRM Extended
 
-- [`feature.md`](feature.md) — scope
+- [`feature.md`](feature.md) — Guest CRM extended: tags, source tracking, booking timeline

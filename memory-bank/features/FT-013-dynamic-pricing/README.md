@@ -11,4 +11,4 @@ audience: humans_and_agents
 
 # FT-013: Dynamic Pricing
 
-- [`feature.md`](feature.md) — scope
+- [`feature.md`](feature.md) — Pricing rules: length discount, last-minute, occupancy markup

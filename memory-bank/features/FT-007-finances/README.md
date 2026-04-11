@@ -11,4 +11,4 @@ audience: humans_and_agents
 
 # FT-007: Finances
 
-- [`feature.md`](feature.md) — scope
+- [`feature.md`](feature.md) — Expenses CRUD + financial reports: P&L, ADR, RevPAR, occupancy

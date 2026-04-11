@@ -11,4 +11,4 @@ audience: humans_and_agents
 
 # FT-004: Photos
 
-- [`feature.md`](feature.md) — scope
+- [`feature.md`](feature.md) — Photo upload via Active Storage, content-type + size validation

@@ -11,4 +11,4 @@ audience: humans_and_agents
 
 # FT-002: Reservations
 
-- [`feature.md`](feature.md) — scope, design, verify
+- [`feature.md`](feature.md) — Reservation CRUD + status machine + overlap validation + notifications

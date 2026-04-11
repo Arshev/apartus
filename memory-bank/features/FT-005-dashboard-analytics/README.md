@@ -11,4 +11,4 @@ audience: humans_and_agents
 
 # FT-005: Dashboard Analytics
 
-- [`feature.md`](feature.md) — scope
+- [`feature.md`](feature.md) — Dashboard: occupancy, revenue, upcoming check-ins/outs, status counts

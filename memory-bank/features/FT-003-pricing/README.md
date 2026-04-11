@@ -11,4 +11,4 @@ audience: humans_and_agents
 
 # FT-003: Pricing
 
-- [`feature.md`](feature.md) — scope, design, verify
+- [`feature.md`](feature.md) — Base price + seasonal overrides + PriceCalculator auto-calc

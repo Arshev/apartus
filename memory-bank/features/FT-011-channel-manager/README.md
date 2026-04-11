@@ -11,4 +11,4 @@ audience: humans_and_agents
 
 # FT-011: Channel Manager
 
-- [`feature.md`](feature.md) — scope
+- [`feature.md`](feature.md) — iCal export/import: calendar sync with Booking.com, Airbnb, Ostrovok

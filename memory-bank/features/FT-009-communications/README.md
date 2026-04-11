@@ -11,4 +11,4 @@ audience: humans_and_agents
 
 # FT-009: Communications
 
-- [`feature.md`](feature.md) — scope
+- [`feature.md`](feature.md) — Guest emails + NotificationLog: confirmation, check-in, check-out

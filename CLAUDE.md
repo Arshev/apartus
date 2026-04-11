@@ -48,6 +48,7 @@
 
 ## Current Date & Project Phase
 
-- Дата на момент миграции: 2026-04-09
-- HW-1 completed (PR #6). HW-2 — migration to memory-bank + frontend catch-up for HW-1 features.
+- HW-1 completed (PR #6). HW-2 completed — memory-bank + frontend + 18 full-stack features (FT-001..FT-018).
+- All 11 core workflows (WF-01..WF-11) implemented.
+- Backend: 1105 specs, 99.23% coverage. Frontend: 409 specs, 100% JS coverage. E2E: 220 Playwright specs.
 - Активная ветка: `hw-2` (от `main`).

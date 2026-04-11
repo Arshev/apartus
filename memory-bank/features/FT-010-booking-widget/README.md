@@ -11,4 +11,4 @@ audience: humans_and_agents
 
 # FT-010: Booking Widget
 
-- [`feature.md`](feature.md) — scope
+- [`feature.md`](feature.md) — Public booking widget: availability search, unit selection, booking

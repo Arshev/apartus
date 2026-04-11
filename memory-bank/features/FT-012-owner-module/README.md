@@ -11,4 +11,4 @@ audience: humans_and_agents
 
 # FT-012: Owner Module
 
-- [`feature.md`](feature.md) — scope
+- [`feature.md`](feature.md) — Owner management: commission (basis points), payouts, statements

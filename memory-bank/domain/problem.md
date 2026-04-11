@@ -32,17 +32,17 @@ Apartus — SaaS Property Management System (PMS) для управления к
 
 ## Core Workflows
 
-- `WF-01` Ведение каталога объектов и юнитов (Property → Unit), иерархия Organization → Branch → Property → Unit.
-- `WF-02` Управление календарём бронирований и check-in/check-out (MVP target).
-- `WF-03` Ценообразование: базовые тарифы + сезонные цены (MVP target).
-- `WF-04` CRM гостей: контакт, история бронирований (MVP minimal).
-- `WF-05` Мультитенантность и доступ: organization, memberships, roles (Owner/Manager/Member).
-- `WF-06` Channel Manager: двусторонняя синхронизация с площадками (post-MVP).
-- `WF-07` Финансы и аналитика: occupancy, RevPAR, ADR, P&L (post-MVP).
-- `WF-08` Управление собственниками: комиссии, выплаты, отчёты (post-MVP).
-- `WF-09` Задачи и обслуживание: канбан, уборки, инспекции (post-MVP).
-- `WF-10` Коммуникации: авто-сообщения, Unified Inbox, Telegram-бот (post-MVP).
-- `WF-11` Виджет бронирования: встраиваемый iframe с онлайн-оплатой (post-MVP).
+- `WF-01` Ведение каталога объектов и юнитов (Property → Unit), иерархия Organization → Branch → Property → Unit. ✅
+- `WF-02` Управление календарём бронирований и check-in/check-out. ✅
+- `WF-03` Ценообразование: базовые тарифы + сезонные цены + dynamic pricing. ✅
+- `WF-04` CRM гостей: контакт, история бронирований, tags, source. ✅
+- `WF-05` Мультитенантность и доступ: organization, memberships, roles, plans. ✅
+- `WF-06` Channel Manager: iCal export/import с площадками (Booking.com, Airbnb, Островок). ✅
+- `WF-07` Финансы и аналитика: expenses, occupancy, RevPAR, ADR, P&L, PDF. ✅
+- `WF-08` Управление собственниками: комиссии, выплаты, отчёты, PDF statements. ✅
+- `WF-09` Задачи и обслуживание: канбан, уборки, инспекции. ✅
+- `WF-10` Коммуникации: email-уведомления гостям + Telegram-бот. ✅
+- `WF-11` Виджет бронирования: встраиваемый booking widget. ✅
 
 ## MVP Scope (активный фокус)
 

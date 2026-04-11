@@ -11,4 +11,4 @@ audience: humans_and_agents
 
 # FT-006: Calendar View
 
-- [`feature.md`](feature.md) — scope
+- [`feature.md`](feature.md) — 14-day timeline grid, reservation bars, cell/bar click navigation

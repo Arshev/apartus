@@ -11,4 +11,4 @@ audience: humans_and_agents
 
 # FT-001: Guests
 
-- [`feature.md`](feature.md) — scope, design, verify
+- [`feature.md`](feature.md) — Guest CRM: CRUD, email uniqueness, phone, notes, timeline

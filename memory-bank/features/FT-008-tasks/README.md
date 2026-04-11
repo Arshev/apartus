@@ -11,4 +11,4 @@ audience: humans_and_agents
 
 # FT-008: Tasks
 
-- [`feature.md`](feature.md) — scope
+- [`feature.md`](feature.md) — Task kanban: pending/in_progress/completed, priority, category, assignee
