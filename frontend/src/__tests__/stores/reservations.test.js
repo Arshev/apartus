@@ -87,4 +87,88 @@ describe('useReservationsStore', () => {
     await expect(store.checkIn(1)).rejects.toBeDefined()
     expect(store.error).toBe('bad transition')
   })
+
+  it('checkOut error sets error and rethrows', async () => {
+    api.checkOut.mockRejectedValue({ response: { data: { error: 'invalid status' } } })
+    const store = useReservationsStore()
+    await expect(store.checkOut(2)).rejects.toBeDefined()
+    expect(store.error).toBe('invalid status')
+  })
+
+  it('cancelReservation error sets error and rethrows', async () => {
+    api.cancel.mockRejectedValue({ response: { data: { error: 'cannot cancel' } } })
+    const store = useReservationsStore()
+    await expect(store.cancelReservation(1)).rejects.toBeDefined()
+    expect(store.error).toBe('cannot cancel')
+  })
+
+  it('create error sets error and rethrows', async () => {
+    api.create.mockRejectedValue({ response: { data: { error: ['overlap'] } } })
+    const store = useReservationsStore()
+    await expect(store.create({})).rejects.toBeDefined()
+    expect(store.error).toEqual(['overlap'])
+  })
+
+  it('destroy error sets error and rethrows', async () => {
+    api.destroy.mockRejectedValue({ response: { data: { error: 'forbidden' } } })
+    const store = useReservationsStore()
+    await expect(store.destroy(1)).rejects.toBeDefined()
+    expect(store.error).toBe('forbidden')
+  })
+
+  it('loading is true during fetchAll and false after', async () => {
+    let resolvePromise
+    api.list.mockReturnValue(new Promise((r) => { resolvePromise = r }))
+    const store = useReservationsStore()
+    const promise = store.fetchAll()
+    expect(store.loading).toBe(true)
+    resolvePromise([R1])
+    await promise
+    expect(store.loading).toBe(false)
+  })
+
+  it('loading resets to false after fetchAll error', async () => {
+    api.list.mockRejectedValue(new Error('fail'))
+    const store = useReservationsStore()
+    await store.fetchAll()
+    expect(store.loading).toBe(false)
+  })
+
+  it('loading resets to false after create error', async () => {
+    api.create.mockRejectedValue(new Error('fail'))
+    const store = useReservationsStore()
+    await store.create({}).catch(() => {})
+    expect(store.loading).toBe(false)
+  })
+
+  it('replaceItem does nothing when item not found', () => {
+    const store = useReservationsStore()
+    store.items = [R1]
+    store.replaceItem(999, { id: 999, status: 'x' })
+    expect(store.items).toEqual([R1])
+  })
+
+  it('checkOut uses fallback error when response has no data', async () => {
+    api.checkOut.mockRejectedValue(new Error('network'))
+    const store = useReservationsStore()
+    await expect(store.checkOut(1)).rejects.toBeDefined()
+    expect(store.error).toBe('Ошибка check-out')
+  })
+
+  it('cancelReservation uses fallback error', async () => {
+    api.cancel.mockRejectedValue(new Error('timeout'))
+    const store = useReservationsStore()
+    await expect(store.cancelReservation(1)).rejects.toBeDefined()
+    expect(store.error).toBe('Ошибка отмены')
+  })
+
+  it('fetchAll clears items on error', async () => {
+    api.list.mockResolvedValueOnce([R1, R2])
+    const store = useReservationsStore()
+    await store.fetchAll()
+    expect(store.items.length).toBe(2)
+    api.list.mockRejectedValueOnce(new Error('fail'))
+    await store.fetchAll()
+    expect(store.items).toEqual([])
+  })
 })

@@ -14,21 +14,30 @@ RSpec.describe "Api::V1::Owners" do
   end
 
   describe "GET /api/v1/owners" do
-    it "returns owners for the organization" do
+    it "returns owners ordered by name" do
+      create(:owner, organization: organization, name: "Zara")
       create(:owner, organization: organization, name: "Alice")
       get "/api/v1/owners", headers: headers
-      expect(response).to have_http_status(:ok)
-      expect(response.parsed_body.length).to eq(1)
-      expect(response.parsed_body.first["name"]).to eq("Alice")
+      names = response.parsed_body.map { |o| o["name"] }
+      expect(names).to eq(%w[Alice Zara])
+    end
+
+    it "includes properties_count" do
+      owner = create(:owner, organization: organization)
+      create(:property, organization: organization, owner: owner)
+      get "/api/v1/owners", headers: headers
+      expect(response.parsed_body.first["properties_count"]).to eq(1)
     end
   end
 
   describe "GET /api/v1/owners/:id" do
-    it "returns the owner" do
-      owner = create(:owner, organization: organization)
+    it "returns the owner with all fields" do
+      owner = create(:owner, organization: organization, name: "Bob", commission_rate: 1500)
       get "/api/v1/owners/#{owner.id}", headers: headers
       expect(response).to have_http_status(:ok)
-      expect(response.parsed_body["id"]).to eq(owner.id)
+      body = response.parsed_body
+      expect(body["name"]).to eq("Bob")
+      expect(body["commission_rate"]).to eq(1500)
     end
 
     it "returns 404 for non-existing" do
@@ -70,15 +79,108 @@ RSpec.describe "Api::V1::Owners" do
     end
   end
 
+  # ---------------------------------------------------------------------------
+  # Statement — financial formulas
+  # ---------------------------------------------------------------------------
   describe "GET /api/v1/owners/:id/statement" do
-    it "returns statement data" do
-      owner = create(:owner, organization: organization, commission_rate: 1000)
+    let(:owner) { create(:owner, organization: organization, commission_rate: 2000) } # 20%
+    let(:property) { create(:property, organization: organization, owner: owner) }
+    let(:unit) { create(:unit, property: property) }
+
+    it "returns all expected keys" do
       get "/api/v1/owners/#{owner.id}/statement", headers: headers
-      expect(response).to have_http_status(:ok)
       body = response.parsed_body
-      expect(body).to have_key("owner_name")
-      expect(body).to have_key("total_revenue")
-      expect(body).to have_key("net_payout")
+      %w[owner_name from to commission_rate total_revenue total_expenses
+         commission net_payout properties].each do |key|
+        expect(body).to have_key(key), "Expected key '#{key}'"
+      end
+    end
+
+    context "with known financial data" do
+      before do
+        create(:reservation, unit: unit, check_in: Date.current, check_out: Date.current + 5,
+               status: :confirmed, total_price_cents: 100_000)
+        create(:expense, organization: organization, property: property,
+               amount_cents: 10_000, expense_date: Date.current)
+      end
+
+      it "commission = revenue * commission_rate / 10000" do
+        get "/api/v1/owners/#{owner.id}/statement", headers: headers
+        body = response.parsed_body
+        expected_commission = (100_000 * 2000 / 10_000.0).round
+        expect(body["commission"]).to eq(expected_commission) # 20_000
+      end
+
+      it "net_payout = revenue - commission - expenses" do
+        get "/api/v1/owners/#{owner.id}/statement", headers: headers
+        body = response.parsed_body
+        expected = body["total_revenue"] - body["commission"] - body["total_expenses"]
+        expect(body["net_payout"]).to eq(expected)
+      end
+
+      it "total_revenue sums reservation prices for owner's properties" do
+        get "/api/v1/owners/#{owner.id}/statement", headers: headers
+        expect(response.parsed_body["total_revenue"]).to eq(100_000)
+      end
+
+      it "total_expenses sums expenses for owner's properties" do
+        get "/api/v1/owners/#{owner.id}/statement", headers: headers
+        expect(response.parsed_body["total_expenses"]).to eq(10_000)
+      end
+    end
+
+    context "per-property breakdown" do
+      let(:property_b) { create(:property, organization: organization, owner: owner, name: "Prop B") }
+      let(:unit_b) { create(:unit, property: property_b) }
+
+      before do
+        create(:reservation, unit: unit, check_in: Date.current, check_out: Date.current + 3,
+               status: :confirmed, total_price_cents: 60_000)
+        create(:reservation, unit: unit_b, check_in: Date.current, check_out: Date.current + 2,
+               status: :confirmed, total_price_cents: 40_000)
+        create(:expense, organization: organization, property: property,
+               amount_cents: 5_000, expense_date: Date.current)
+      end
+
+      it "properties array has entry per property with revenue/commission/expenses/payout" do
+        get "/api/v1/owners/#{owner.id}/statement", headers: headers
+        properties = response.parsed_body["properties"]
+        expect(properties.length).to eq(2)
+
+        prop_a = properties.find { |p| p["property_name"] == property.name }
+        expect(prop_a["revenue"]).to eq(60_000)
+        expect(prop_a["commission"]).to eq((60_000 * 2000 / 10_000.0).round)
+        expect(prop_a["expenses"]).to eq(5_000)
+        expect(prop_a["payout"]).to eq(60_000 - prop_a["commission"] - 5_000)
+
+        prop_b_data = properties.find { |p| p["property_name"] == "Prop B" }
+        expect(prop_b_data["revenue"]).to eq(40_000)
+        expect(prop_b_data["expenses"]).to eq(0) # no expenses for prop B
+      end
+    end
+
+    it "excludes cancelled reservations from revenue" do
+      create(:reservation, unit: unit, check_in: Date.current, check_out: Date.current + 3,
+             status: :cancelled, total_price_cents: 999_999)
+      get "/api/v1/owners/#{owner.id}/statement", headers: headers
+      expect(response.parsed_body["total_revenue"]).to eq(0)
+    end
+
+    it "returns zeros for owner with no properties" do
+      ownerless = create(:owner, organization: organization, commission_rate: 1000)
+      get "/api/v1/owners/#{ownerless.id}/statement", headers: headers
+      body = response.parsed_body
+      expect(body["total_revenue"]).to eq(0)
+      expect(body["net_payout"]).to eq(0)
+    end
+
+    it "respects from/to date params" do
+      create(:reservation, unit: unit, check_in: "2027-01-05", check_out: "2027-01-10",
+             status: :confirmed, total_price_cents: 50_000)
+      get "/api/v1/owners/#{owner.id}/statement",
+          params: { from: "2027-01-01", to: "2027-01-31" }, headers: headers
+      expect(response.parsed_body["from"]).to eq("2027-01-01")
+      expect(response.parsed_body["total_revenue"]).to eq(50_000)
     end
   end
 
@@ -88,6 +190,11 @@ RSpec.describe "Api::V1::Owners" do
 
     it "returns 404 for other org's owner" do
       get "/api/v1/owners/#{other_owner.id}", headers: headers
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "returns 404 for other org's owner statement" do
+      get "/api/v1/owners/#{other_owner.id}/statement", headers: headers
       expect(response).to have_http_status(:not_found)
     end
   end

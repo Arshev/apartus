@@ -64,12 +64,38 @@ RSpec.describe "Api::V1::Channels" do
       channel = create(:channel, unit: unit, ical_import_url: nil)
       post "/api/v1/channels/#{channel.id}/sync", headers: headers
       expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.parsed_body["error"]).to include("No import URL")
     end
 
-    it "enqueues sync job with import URL" do
+    it "returns 422 with empty string import URL" do
+      channel = create(:channel, unit: unit, ical_import_url: "")
+      post "/api/v1/channels/#{channel.id}/sync", headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+
+    it "enqueues ChannelSyncJob and updates last_synced_at" do
+      channel = create(:channel, unit: unit, ical_import_url: "https://example.com/cal.ics")
+      expect {
+        post "/api/v1/channels/#{channel.id}/sync", headers: headers
+      }.to have_enqueued_job(ChannelSyncJob).with(channel.id)
+      expect(response).to have_http_status(:ok)
+      expect(channel.reload.last_synced_at).to be_present
+    end
+
+    it "returns channel JSON after sync" do
       channel = create(:channel, unit: unit, ical_import_url: "https://example.com/cal.ics")
       post "/api/v1/channels/#{channel.id}/sync", headers: headers
-      expect(response).to have_http_status(:ok)
+      body = response.parsed_body
+      expect(body["id"]).to eq(channel.id)
+      expect(body["last_synced_at"]).to be_present
+    end
+
+    it "returns 404 for cross-org channel sync" do
+      other_org = create(:organization)
+      other_unit = create(:unit, property: create(:property, organization: other_org))
+      other_channel = create(:channel, unit: other_unit, ical_import_url: "https://example.com/cal.ics")
+      post "/api/v1/channels/#{other_channel.id}/sync", headers: headers
+      expect(response).to have_http_status(:not_found)
     end
   end
 
@@ -79,8 +105,13 @@ RSpec.describe "Api::V1::Channels" do
     let(:other_unit) { create(:unit, property: other_prop) }
     let(:other_channel) { create(:channel, unit: other_unit) }
 
-    it "returns 404 for other org's channel" do
+    it "update returns 404 for other org's channel" do
       patch "/api/v1/channels/#{other_channel.id}", params: { channel: { platform: "airbnb" } }, headers: headers
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "delete returns 404 for other org's channel" do
+      delete "/api/v1/channels/#{other_channel.id}", headers: headers
       expect(response).to have_http_status(:not_found)
     end
   end
