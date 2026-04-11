@@ -4,6 +4,18 @@
 
 Точка входа: [`memory-bank/README.md`](memory-bank/README.md).
 
+## Session Start Protocol
+
+При каждой новой сессии — прочитай в этом порядке перед началом работы:
+
+1. **Этот файл** — routing table и критичные правила
+2. [`memory-bank/domain/problem.md`](memory-bank/domain/problem.md) — что за продукт, users, workflows
+3. [`memory-bank/domain/architecture.md`](memory-bank/domain/architecture.md) — стек, bounded contexts, API конвенции
+4. [`memory-bank/engineering/testing-policy.md`](memory-bank/engineering/testing-policy.md) — coverage ratchet, test conventions
+5. [`memory-bank/engineering/autonomy-boundaries.md`](memory-bank/engineering/autonomy-boundaries.md) — что делать автономно, где эскалировать
+
+Если задача касается конкретной области — читай relevant doc из таблицы ниже.
+
 ## Куда смотреть
 
 | Нужно | Читай |
