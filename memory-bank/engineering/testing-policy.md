@@ -95,6 +95,17 @@ cd frontend && yarn build
 - Тестируем: stores (Pinia), pure composables, API клиенты (с mocked axios), критичные компоненты.
 - Не мокаем глобально — test helpers per suite.
 - Snapshot-тесты использовать экономно, только для стабильных UI.
+- `src/__tests__/setup.js` — localStorage polyfill для Node 25+ (setupFiles в vitest.config.js).
+- `src/__tests__/helpers/mountWithVuetify.js` — mount helper с Vuetify stubs для jsdom.
+
+### E2E (Playwright)
+
+- Файлы в `frontend/e2e/*.spec.js`. Конфиг: `playwright.config.js`.
+- 220 тестов, 22 файла. 100% покрытие интерактивных элементов (все кнопки, формы, диалоги, переходы).
+- Запуск: `cd frontend && npx playwright test`. Требует работающий backend на порту 3000 с seed данными.
+- `e2e/helpers.js` — shared `login(page)` и `DEMO_USER` credentials.
+- Каждый view покрыт: load, CRUD (create/edit/delete), validation, error handling, snackbar feedback.
+- Stateful: тесты зависят от seed data (`db/seeds.rb`) — 5 guests, 10 reservations, 6 units, 3 properties.
 
 ## Simplify Review
 

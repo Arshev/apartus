@@ -12,4 +12,3 @@ audience: humans_and_agents
 # FT-001: Guests
 
 - [`feature.md`](feature.md) — scope, design, verify
-- [`implementation-plan.md`](implementation-plan.md) — execution plan
