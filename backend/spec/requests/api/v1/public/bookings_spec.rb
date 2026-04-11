@@ -72,5 +72,50 @@ RSpec.describe "Api::V1::Public::Bookings" do
            params: valid_params.merge(check_in: "invalid")
       expect(response).to have_http_status(:unprocessable_entity)
     end
+
+    it "creates reservation without guest (no email provided)" do
+      post "/api/v1/public/properties/#{organization.slug}/bookings", params: valid_params
+      expect(response).to have_http_status(:created)
+      expect(response.parsed_body["id"]).to be_present
+    end
+
+    it "returns 422 when guest_email present but guest_name missing" do
+      params = valid_params.merge(guest_email: "test@test.com")
+      post "/api/v1/public/properties/#{organization.slug}/bookings", params: params
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.parsed_body["error"]).to include("name is required")
+    end
+
+    it "handles single-word guest name (uses first as both first_name and last_name)" do
+      allow(NotificationSender).to receive(:send_booking_confirmation)
+      params = valid_params.merge(guest_email: "mono@test.com", guest_name: "Madonna")
+      post "/api/v1/public/properties/#{organization.slug}/bookings", params: params
+      expect(response).to have_http_status(:created)
+      guest = Guest.find_by(email: "mono@test.com")
+      expect(guest.first_name).to eq("Madonna")
+      expect(guest.last_name).to eq("Madonna")
+    end
+
+    it "reuses existing guest by email" do
+      allow(NotificationSender).to receive(:send_booking_confirmation)
+      existing = create(:guest, organization: organization, email: "existing@test.com")
+      params = valid_params.merge(
+        guest_email: "existing@test.com",
+        guest_name: "Different Name",
+        check_in: (Date.current + 50).to_s,
+        check_out: (Date.current + 53).to_s
+      )
+      expect {
+        post "/api/v1/public/properties/#{organization.slug}/bookings", params: params
+      }.not_to change(Guest, :count)
+      expect(response).to have_http_status(:created)
+    end
+
+    it "auto-calculates price via PriceCalculator" do
+      post "/api/v1/public/properties/#{organization.slug}/bookings", params: valid_params
+      expect(response).to have_http_status(:created)
+      # Unit has base_price_cents: 10_000, 2 nights = 20_000
+      expect(response.parsed_body["total_price_cents"]).to eq(20_000)
+    end
   end
 end

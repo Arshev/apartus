@@ -62,5 +62,49 @@ RSpec.describe "Api::V1::Organizations" do
             params: { organization: { name: "Hacked" } }, headers: member_headers
       expect(response).to have_http_status(:forbidden)
     end
+
+    it "updates settings (Telegram config)" do
+      patch "/api/v1/organization",
+            params: { organization: { settings: { telegram_bot_token: "123:ABC", telegram_chat_id: "456" } } },
+            headers: headers
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["settings"]).to include("telegram_bot_token" => "123:ABC")
+    end
+
+    it "response includes currency_config and plan_config" do
+      patch "/api/v1/organization",
+            params: { organization: { name: "Updated" } }, headers: headers
+      body = response.parsed_body
+      expect(body).to have_key("currency_config")
+      expect(body).to have_key("plan_config")
+      expect(body).to have_key("settings")
+    end
+  end
+
+  describe "POST /api/v1/organization/test_telegram" do
+    it "returns success when Telegram is configured" do
+      organization.update!(settings: { "telegram_bot_token" => "123:ABC", "telegram_chat_id" => "456" })
+      allow(Net::HTTP).to receive(:post_form).and_return(
+        instance_double(Net::HTTPSuccess, is_a?: true, code: "200", body: '{"ok":true}')
+      )
+      post "/api/v1/organization/test_telegram", headers: headers
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["message"]).to include("Test message sent")
+    end
+
+    it "returns 422 when Telegram is not configured" do
+      organization.update!(settings: {})
+      post "/api/v1/organization/test_telegram", headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.parsed_body["error"]).to include("not configured")
+    end
+
+    it "returns 403 for member without update permission" do
+      member_user = create(:user)
+      create(:membership, user: member_user, organization: organization, role_enum: :member)
+      member_headers = auth_headers(member_user, organization)
+      post "/api/v1/organization/test_telegram", headers: member_headers
+      expect(response).to have_http_status(:forbidden)
+    end
   end
 end

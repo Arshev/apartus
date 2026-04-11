@@ -76,6 +76,33 @@ RSpec.describe "Api::V1::Reservations" do
       }, headers: headers
       expect(response).to have_http_status(:not_found)
     end
+
+    it "returns 404 for cross-org guest_id" do
+      other_org = create(:organization)
+      other_guest = create(:guest, organization: other_org)
+      post "/api/v1/reservations", params: {
+        reservation: { unit_id: unit.id, guest_id: other_guest.id, check_in: "2027-09-01", check_out: "2027-09-03", guests_count: 1 }
+      }, headers: headers
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "creates reservation without guest_id (blank guest)" do
+      post "/api/v1/reservations", params: {
+        reservation: { unit_id: unit.id, check_in: "2027-10-01", check_out: "2027-10-03", guests_count: 1 }
+      }, headers: headers
+      expect(response).to have_http_status(:created)
+      expect(response.parsed_body["guest_id"]).to be_nil
+    end
+
+    it "triggers notification and telegram on create with guest" do
+      allow(Net::HTTP).to receive(:post_form).and_return(
+        instance_double(Net::HTTPSuccess, is_a?: true, code: "200", body: '{"ok":true}')
+      )
+      post "/api/v1/reservations", params: {
+        reservation: { unit_id: unit.id, guest_id: guest.id, check_in: "2027-11-01", check_out: "2027-11-03", guests_count: 1, total_price_cents: 5000 }
+      }, headers: headers
+      expect(response).to have_http_status(:created)
+    end
   end
 
   describe "status transitions" do

@@ -57,4 +57,30 @@ RSpec.describe NotificationSender do
       expect(reservation.notification_logs.last.event_type).to eq("check_out_thank_you")
     end
   end
+
+  describe "mail delivery error rescue" do
+    it "logs error and still creates notification_log on SMTP error" do
+      allow(GuestMailer).to receive(:booking_confirmation).and_raise(Net::SMTPFatalError.new("550 SMTP fail"))
+      expect {
+        described_class.send_booking_confirmation(reservation)
+      }.to change(NotificationLog, :count).by(1)
+      # Log should still be created (rescue branch)
+      log = reservation.notification_logs.last
+      expect(log.event_type).to eq("booking_confirmation")
+    end
+
+    it "logs error and creates notification_log on SocketError" do
+      allow(GuestMailer).to receive(:check_in_reminder).and_raise(SocketError.new("connection refused"))
+      expect {
+        described_class.send_check_in_reminder(reservation)
+      }.to change(NotificationLog, :count).by(1)
+    end
+
+    it "logs error on Errno::ECONNREFUSED" do
+      allow(GuestMailer).to receive(:check_out_thank_you).and_raise(Errno::ECONNREFUSED)
+      expect {
+        described_class.send_check_out_thank_you(reservation)
+      }.to change(NotificationLog, :count).by(1)
+    end
+  end
 end
