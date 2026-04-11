@@ -57,9 +57,11 @@
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import * as publicBookingApi from '../api/publicBooking'
+import { formatMoney } from '../utils/currency'
 
 const route = useRoute()
 const slug = route.params.slug
+const orgCurrency = ref('RUB')
 
 const checkIn = ref('')
 const checkOut = ref('')
@@ -78,7 +80,7 @@ const booking = ref(false)
 const successDialog = ref(false)
 
 function formatPrice(cents) {
-  return cents > 0 ? `${(cents / 100).toFixed(0)} ₽` : 'Бесплатно'
+  return cents > 0 ? formatMoney(cents, orgCurrency.value) : 'Бесплатно'
 }
 
 async function search() {
@@ -90,6 +92,7 @@ async function search() {
     const data = await publicBookingApi.getAvailability(slug, checkIn.value, checkOut.value)
     units.value = data.units
     orgName.value = data.organization
+    orgCurrency.value = data.currency || 'RUB'
   } catch (e) { console.error(e);
     error.value = 'Не удалось загрузить доступность'
   } finally {

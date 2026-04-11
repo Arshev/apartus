@@ -64,11 +64,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 import * as ownersApi from '../api/owners'
+import { downloadOwnerStatement } from '../api/pdfExport'
+import { formatMoney } from '../utils/currency'
 
 const route = useRoute()
-import { downloadOwnerStatement } from '../api/pdfExport'
-
+const authStore = useAuthStore()
 const data = ref(null)
 const loading = ref(false)
 const error = ref(null)
@@ -89,7 +91,7 @@ const propHeaders = [
   { title: 'К выплате', key: 'payout' },
 ]
 
-function fmt(cents) { return formatMoney(cents, 'RUB') }
+function fmt(cents) { return formatMoney(cents, authStore.organization?.currency || 'RUB') }
 
 async function loadStatement() {
   loading.value = true

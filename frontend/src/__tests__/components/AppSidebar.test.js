@@ -36,8 +36,9 @@ describe('AppSidebar', () => {
     const navItems = wrapper.vm.navItems
     expect(navItems).toHaveLength(13)
     expect(navItems.map((n) => n.title)).toEqual([
-      'Dashboard', 'Calendar', 'Properties', 'Amenities', 'Branches',
-      'Reservations', 'Channels', 'Guests', 'Tasks', 'Owners', 'Expenses', 'Reports', 'Settings',
+      'Главная', 'Бронирования', 'Календарь', 'Гости', 'Объекты',
+      'Собственники', 'Каналы', 'Задачи', 'Расходы', 'Отчёты',
+      'Удобства', 'Филиалы', 'Настройки',
     ])
   })
 

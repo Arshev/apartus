@@ -53,19 +53,19 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 const navItems = [
-  { title: 'Dashboard', icon: 'mdi-view-dashboard', to: '/' },
-  { title: 'Calendar', icon: 'mdi-calendar-month', to: '/calendar' },
-  { title: 'Properties', icon: 'mdi-domain', to: '/properties' },
-  { title: 'Amenities', icon: 'mdi-star-circle', to: '/amenities' },
-  { title: 'Branches', icon: 'mdi-source-branch', to: '/branches' },
-  { title: 'Reservations', icon: 'mdi-calendar-check', to: '/reservations' },
-  { title: 'Channels', icon: 'mdi-swap-horizontal', to: '/channels' },
-  { title: 'Guests', icon: 'mdi-account-group', to: '/guests' },
-  { title: 'Tasks', icon: 'mdi-clipboard-check', to: '/tasks' },
-  { title: 'Owners', icon: 'mdi-account-key', to: '/owners' },
-  { title: 'Expenses', icon: 'mdi-cash-minus', to: '/expenses' },
-  { title: 'Reports', icon: 'mdi-chart-bar', to: '/reports' },
-  { title: 'Settings', icon: 'mdi-cog', to: '/settings' },
+  { title: 'Главная', icon: 'mdi-view-dashboard', to: '/' },
+  { title: 'Бронирования', icon: 'mdi-calendar-check', to: '/reservations' },
+  { title: 'Календарь', icon: 'mdi-calendar-month', to: '/calendar' },
+  { title: 'Гости', icon: 'mdi-account-group', to: '/guests' },
+  { title: 'Объекты', icon: 'mdi-domain', to: '/properties' },
+  { title: 'Собственники', icon: 'mdi-account-key', to: '/owners' },
+  { title: 'Каналы', icon: 'mdi-swap-horizontal', to: '/channels' },
+  { title: 'Задачи', icon: 'mdi-clipboard-check', to: '/tasks' },
+  { title: 'Расходы', icon: 'mdi-cash-minus', to: '/expenses' },
+  { title: 'Отчёты', icon: 'mdi-chart-bar', to: '/reports' },
+  { title: 'Удобства', icon: 'mdi-star-circle', to: '/amenities' },
+  { title: 'Филиалы', icon: 'mdi-source-branch', to: '/branches' },
+  { title: 'Настройки', icon: 'mdi-cog', to: '/settings' },
 ]
 
 async function switchOrg(org) {

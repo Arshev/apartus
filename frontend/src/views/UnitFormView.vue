@@ -43,7 +43,7 @@
       />
       <v-text-field
         v-model.number="form.base_price_rub"
-        label="Цена за ночь (₽)"
+        label="Цена за ночь"
         type="number"
         step="0.01"
         class="mb-2"

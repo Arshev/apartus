@@ -36,7 +36,7 @@
         <v-card-title>{{ editing ? 'Редактировать' : 'Новый расход' }}</v-card-title>
         <v-card-text>
           <v-select v-model="form.category" label="Категория" :items="categories" item-title="label" item-value="value" class="mb-2" />
-          <v-text-field v-model.number="form.amount_rub" label="Сумма (₽)" type="number" step="0.01" class="mb-2" />
+          <v-text-field v-model.number="form.amount_rub" label="Сумма" type="number" step="0.01" class="mb-2" />
           <v-text-field v-model="form.expense_date" label="Дата" type="date" class="mb-2" />
           <v-textarea v-model="form.description" label="Описание" rows="2" />
         </v-card-text>
@@ -65,8 +65,10 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { formatMoney } from '../utils/currency'
 import { useExpensesStore } from '../stores/expenses'
 import { useAuthStore } from '../stores/auth'
+
 const store = useExpensesStore()
 const authStore = useAuthStore()
 const headers = [

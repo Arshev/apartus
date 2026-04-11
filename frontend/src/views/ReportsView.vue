@@ -103,6 +103,8 @@ import { ref, computed, onMounted } from 'vue'
 import * as reportsApi from '../api/reports'
 import { downloadFinancialReport } from '../api/pdfExport'
 import { useAuthStore } from '../stores/auth'
+import { formatMoney } from '../utils/currency'
+
 const data = ref(null)
 const loading = ref(false)
 const error = ref(null)

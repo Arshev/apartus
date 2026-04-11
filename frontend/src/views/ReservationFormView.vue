@@ -29,7 +29,7 @@
       <v-text-field v-model="form.check_in" label="Дата заезда" type="date" :rules="[rules.required]" class="mb-2" />
       <v-text-field v-model="form.check_out" label="Дата выезда" type="date" :rules="[rules.required]" class="mb-2" />
       <v-text-field v-model.number="form.guests_count" label="Количество гостей" type="number" :rules="[rules.required, rules.minOne]" class="mb-2" />
-      <v-text-field v-model.number="form.total_price_rub" label="Цена (₽)" type="number" step="0.01" class="mb-2" />
+      <v-text-field v-model.number="form.total_price_rub" label="Цена" type="number" step="0.01" class="mb-2" />
       <p v-if="priceWarning" class="text-warning text-caption mb-2">{{ priceWarning }}</p>
       <v-textarea v-model="form.notes" label="Заметки" rows="2" class="mb-4" />
 
@@ -153,11 +153,13 @@ async function handleSubmit() {
 
   submitting.value = true
   formError.value = null
+  const payload = { ...form.value, total_price_cents: Math.round((form.value.total_price_rub || 0) * 100) }
+  delete payload.total_price_rub
   try {
     if (isEdit.value) {
-      await store.update(Number(route.params.id), form.value)
+      await store.update(Number(route.params.id), payload)
     } else {
-      await store.create(form.value)
+      await store.create(payload)
     }
     router.push('/reservations')
   } catch (e) {
