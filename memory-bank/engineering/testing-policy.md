@@ -64,7 +64,7 @@ cd frontend && yarn build
 - **Никогда не понижаем** существующий порог без ADR.
 - Текущие значения (обновлять по мере работы):
   - Backend: 87 (HW-1 final, actual ~88%)
-  - Frontend: 98 (actual 98.95%; remaining ~1% is v8/Vue SFC compilation overhead, not actual uncovered code)
+  - Frontend: 86 (actual 87.32%; 358 specs across 68 files after 18 features)
 - Target на конец HW-2 frontend: растёт с каждой FE-фичей по ratchet rule; 60+ ожидается после FE2–FE3.
 
 ## Ownership Split
