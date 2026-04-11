@@ -44,9 +44,11 @@ canonical_for:
 | id | bigint | PK |
 | name | string | not null |
 | slug | string | unique, not null, auto-generated |
+| currency | string(3) | not null, default: "RUB" |
+| plan | string(20) | not null, default: "starter" |
 | settings | jsonb | default: {} |
 
-**Associations:** `has_many :memberships`, `:users through :memberships`, `:roles`, `:properties`, `:units through :properties`, `:amenities`, `:branches`
+**Associations:** `has_many :memberships`, `:users through :memberships`, `:roles`, `:properties`, `:units through :properties`, `:amenities`, `:branches`, `:guests`, `:expenses`, `:tasks`, `:owners`
 **Callbacks:** `before_validation :generate_slug`, `after_create :create_preset_roles`
 
 ## Membership
@@ -108,6 +110,7 @@ Adjacency list tree, см. [`../adr/ADR-014-adjacency-list-branch-tree.md`](../a
 | id | bigint | PK |
 | organization_id | bigint | FK, not null, on_delete: cascade |
 | branch_id | bigint | FK, nullable, on_delete: restrict |
+| owner_id | bigint | FK, nullable, on_delete: nullify |
 | name | string(255) | not null, normalized strip |
 | address | string(500) | not null, normalized strip |
 | property_type | integer (enum) | not null |
@@ -128,8 +131,9 @@ Adjacency list tree, см. [`../adr/ADR-014-adjacency-list-branch-tree.md`](../a
 | unit_type | integer (enum) | not null |
 | capacity | integer | not null, 1..100 |
 | status | integer (enum) | not null |
+| base_price_cents | integer | not null, default: 0 |
 
-**Associations:** `belongs_to :property`, `has_many :unit_amenities (dependent: :destroy)`, `has_many :amenities through: :unit_amenities`
+**Associations:** `belongs_to :property`, `has_many :unit_amenities (dependent: :destroy)`, `has_many :amenities through: :unit_amenities`, `has_many :reservations`, `has_many :seasonal_prices`, `has_many :channels`, `has_many :pricing_rules`
 **Enums:** `unit_type: { room: 0, apartment: 1, bed: 2, studio: 3 }` (validated); `status: { available: 0, maintenance: 1, blocked: 2 }` (validated)
 **Validations:** name presence + length, capacity presence + numericality 1..100
 **Indexes:** `[property_id]`, `[property_id, id]`
@@ -173,6 +177,8 @@ DB-level `ON DELETE RESTRICT` на `amenity_id` — второй рубеж ин
 | email | string(255) | optional, unique per org (partial index where email IS NOT NULL) |
 | phone | string(50) | optional |
 | notes | text | optional |
+| tags | text[] | default: [] |
+| source | string(50) | optional (direct/booking.com/airbnb/widget) |
 
 **Associations:** `belongs_to :organization`
 **Validations:** first_name/last_name presence + length, email uniqueness per org (case-insensitive, allow_blank), phone length
@@ -209,6 +215,93 @@ DB-level `ON DELETE RESTRICT` на `amenity_id` — второй рубеж ин
 
 **Associations:** `belongs_to :unit`
 **Note:** Unit also has `base_price_cents` (integer, default 0) — fallback when no seasonal price matches a night.
+
+## Expense
+
+| Field | Type | Notes |
+|---|---|---|
+| id | bigint | PK |
+| organization_id | bigint | FK, not null, on_delete: cascade |
+| property_id | bigint | FK, nullable, on_delete: nullify |
+| category | integer (enum) | not null, default: 0 |
+| amount_cents | integer | not null, >0 |
+| description | text | optional |
+| expense_date | date | not null |
+
+**Enums:** `category: { maintenance: 0, utilities: 1, cleaning: 2, supplies: 3, other: 4 }`
+
+## Task
+
+| Field | Type | Notes |
+|---|---|---|
+| id | bigint | PK |
+| organization_id | bigint | FK, not null, on_delete: cascade |
+| property_id | bigint | FK, nullable |
+| unit_id | bigint | FK, nullable |
+| assigned_to_id | bigint | FK User, nullable |
+| title | string(255) | not null |
+| description | text | optional |
+| status | integer (enum) | not null, default: 0 |
+| priority | integer (enum) | not null, default: 1 |
+| due_date | date | optional |
+| category | integer (enum) | not null, default: 0 |
+
+**Enums:** `status: { pending: 0, in_progress: 1, completed: 2 }`, `priority: { low: 0, medium: 1, high: 2, urgent: 3 }`, `category: { cleaning: 0, maintenance: 1, inspection: 2, other: 3 }`
+
+## Owner
+
+| Field | Type | Notes |
+|---|---|---|
+| id | bigint | PK |
+| organization_id | bigint | FK, not null, on_delete: cascade |
+| name | string(255) | not null |
+| email | string(255) | optional |
+| phone | string(50) | optional |
+| commission_rate | integer | not null, default: 0 (basis points, 1500 = 15%) |
+| notes | text | optional |
+
+**Associations:** `belongs_to :organization`, `has_many :properties`
+
+## Channel
+
+| Field | Type | Notes |
+|---|---|---|
+| id | bigint | PK |
+| unit_id | bigint | FK, not null, on_delete: cascade |
+| platform | integer (enum) | not null, default: 0 |
+| ical_export_token | string | not null, unique |
+| ical_import_url | string | optional |
+| sync_enabled | boolean | not null, default: true |
+| last_synced_at | datetime | optional |
+
+**Enums:** `platform: { booking_com: 0, airbnb: 1, ostrovok: 2, other: 3 }`
+
+## PricingRule
+
+| Field | Type | Notes |
+|---|---|---|
+| id | bigint | PK |
+| unit_id | bigint | FK, not null, on_delete: cascade |
+| rule_type | integer (enum) | not null, default: 0 |
+| min_nights | integer | for length_discount |
+| discount_percent | integer | 0..100 |
+| days_before | integer | for last_minute |
+| occupancy_threshold | integer | for occupancy_markup |
+| markup_percent | integer | 0..200 |
+| active | boolean | not null, default: true |
+
+**Enums:** `rule_type: { length_discount: 0, last_minute: 1, occupancy_markup: 2 }`
+
+## NotificationLog
+
+| Field | Type | Notes |
+|---|---|---|
+| id | bigint | PK |
+| reservation_id | bigint | FK, not null, on_delete: cascade |
+| event_type | string | not null |
+| channel | string | not null, default: "email" |
+| recipient_email | string | optional |
+| queued_at | datetime | not null |
 
 ## ER diagram
 
