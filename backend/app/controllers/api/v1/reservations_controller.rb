@@ -132,7 +132,7 @@ module Api
       def reservation_params
         params.require(:reservation).permit(
           :unit_id, :guest_id, :check_in, :check_out,
-          :guests_count, :notes
+          :guests_count, :total_price_cents, :notes
         )
       end
 

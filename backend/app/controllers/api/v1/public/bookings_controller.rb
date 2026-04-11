@@ -37,7 +37,7 @@ module Api
             }
           end.compact
 
-          render json: { organization: organization.name, from: from, to: to, units: available }
+          render json: { organization: organization.name, currency: organization.currency, from: from, to: to, units: available }
         end
 
         def create
