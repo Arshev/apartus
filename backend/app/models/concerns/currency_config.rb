@@ -10,7 +10,7 @@ module CurrencyConfig
     "GEL" => { symbol: "₾", decimal_places: 2, symbol_position: :after, name: "Georgian Lari" },
     "UZS" => { symbol: "сўм", decimal_places: 0, symbol_position: :after, name: "Узбекский сум" },
     "GBP" => { symbol: "£", decimal_places: 2, symbol_position: :before, name: "British Pound" },
-    "IDR" => { symbol: "Rp", decimal_places: 0, symbol_position: :before, name: "Indonesian Rupiah" },
+    "IDR" => { symbol: "Rp", decimal_places: 0, symbol_position: :before, name: "Indonesian Rupiah" }
   }.freeze
 
   def self.codes

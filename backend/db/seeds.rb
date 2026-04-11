@@ -136,11 +136,11 @@ ActiveRecord::Base.transaction do
 
   # ─── Unit ↔ Amenity attachments ────────────────────────────────
   [
-    [apt_studio, wifi], [apt_studio, parking], [apt_studio, ac],
-    [apt_sofa, wifi],
-    [hostel_dorm_a, wifi], [hostel_dorm_a, breakfast],
-    [hotel_standard, wifi], [hotel_standard, ac], [hotel_standard, breakfast],
-    [hotel_deluxe, wifi], [hotel_deluxe, ac], [hotel_deluxe, pool], [hotel_deluxe, breakfast], [hotel_deluxe, parking],
+    [ apt_studio, wifi ], [ apt_studio, parking ], [ apt_studio, ac ],
+    [ apt_sofa, wifi ],
+    [ hostel_dorm_a, wifi ], [ hostel_dorm_a, breakfast ],
+    [ hotel_standard, wifi ], [ hotel_standard, ac ], [ hotel_standard, breakfast ],
+    [ hotel_deluxe, wifi ], [ hotel_deluxe, ac ], [ hotel_deluxe, pool ], [ hotel_deluxe, breakfast ], [ hotel_deluxe, parking ]
   ].each do |unit, amenity|
     UnitAmenity.find_or_create_by!(unit: unit, amenity: amenity)
   end
@@ -149,22 +149,22 @@ ActiveRecord::Base.transaction do
   # ─── Guests (CRM) ─────────────────────────────────────────────
   ivan = organization.guests.find_or_create_by!(email: "ivan@example.com") do |g|
     g.first_name = "Иван"; g.last_name = "Петров"; g.phone = "+79001112233"
-    g.notes = "Постоянный гость, предпочитает верхние этажи"; g.source = "direct"; g.tags = ["vip", "repeat"]
+    g.notes = "Постоянный гость, предпочитает верхние этажи"; g.source = "direct"; g.tags = [ "vip", "repeat" ]
   end
   maria = organization.guests.find_or_create_by!(email: "maria@example.com") do |g|
     g.first_name = "Мария"; g.last_name = "Сидорова"; g.phone = "+79004445566"
-    g.source = "booking.com"; g.tags = ["business"]
+    g.source = "booking.com"; g.tags = [ "business" ]
   end
   alexey = organization.guests.find_or_create_by!(first_name: "Алексей", last_name: "Козлов") do |g|
-    g.phone = "+79007778899"; g.source = "airbnb"; g.tags = ["family"]
+    g.phone = "+79007778899"; g.source = "airbnb"; g.tags = [ "family" ]
   end
   olga = organization.guests.find_or_create_by!(email: "olga@example.com") do |g|
     g.first_name = "Ольга"; g.last_name = "Новикова"; g.phone = "+79003334455"
-    g.source = "widget"; g.tags = ["new"]
+    g.source = "widget"; g.tags = [ "new" ]
   end
   dmitry = organization.guests.find_or_create_by!(email: "dmitry@example.com") do |g|
     g.first_name = "Дмитрий"; g.last_name = "Волков"; g.phone = "+79006667788"
-    g.source = "direct"; g.tags = ["corporate", "repeat"]
+    g.source = "direct"; g.tags = [ "corporate", "repeat" ]
   end
   puts "  ✓ Guests: 5 (Иван, Мария, Алексей, Ольга, Дмитрий) with tags + sources"
 
@@ -219,7 +219,7 @@ ActiveRecord::Base.transaction do
       { property: hostel, category: :cleaning, amount_cents: 5_000, description: "Генеральная уборка", expense_date: today - 3 },
       { property: hotel, category: :supplies, amount_cents: 12_000, description: "Постельное бельё", expense_date: today - 7 },
       { property: hotel, category: :maintenance, amount_cents: 25_000, description: "Ремонт лифта", expense_date: today - 2 },
-      { property: nil, category: :other, amount_cents: 50_000, description: "Реклама в Яндекс", expense_date: today - 1 },
+      { property: nil, category: :other, amount_cents: 50_000, description: "Реклама в Яндекс", expense_date: today - 1 }
     ].each do |attrs|
       organization.expenses.create!(attrs)
     end
@@ -240,7 +240,7 @@ ActiveRecord::Base.transaction do
       { title: "Починить сантехнику Dorm 8B", category: :maintenance, priority: :high, status: :in_progress,
         property: hostel, unit: hostel_dorm_b, due_date: Date.current + 2 },
       { title: "Генеральная уборка отеля", category: :cleaning, priority: :medium, status: :pending,
-        property: hotel, due_date: Date.current + 7 },
+        property: hotel, due_date: Date.current + 7 }
     ].each do |attrs|
       organization.tasks.create!(attrs)
     end

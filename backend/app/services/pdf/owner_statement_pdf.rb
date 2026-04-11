@@ -14,10 +14,10 @@ module Pdf
 
       # Summary
       table([
-        ["Выручка", fmt(@data[:total_revenue])],
-        ["Комиссия УК", fmt(@data[:commission])],
-        ["Расходы", fmt(@data[:total_expenses])],
-        ["К выплате", fmt(@data[:net_payout])],
+        [ "Выручка", fmt(@data[:total_revenue]) ],
+        [ "Комиссия УК", fmt(@data[:commission]) ],
+        [ "Расходы", fmt(@data[:total_expenses]) ],
+        [ "К выплате", fmt(@data[:net_payout]) ]
       ], width: bounds.width, cell_style: { size: 12, padding: 10 })
 
       move_down 20
@@ -27,10 +27,10 @@ module Pdf
         text "Детализация по объектам", size: 14, style: :bold
         move_down 10
         rows = @data[:properties].map do |p|
-          [p[:property_name], fmt(p[:revenue]), fmt(p[:commission]), fmt(p[:expenses]), fmt(p[:payout])]
+          [ p[:property_name], fmt(p[:revenue]), fmt(p[:commission]), fmt(p[:expenses]), fmt(p[:payout]) ]
         end
         table(
-          [["Объект", "Выручка", "Комиссия", "Расходы", "К выплате"]] + rows,
+          [ [ "Объект", "Выручка", "Комиссия", "Расходы", "К выплате" ] ] + rows,
           width: bounds.width, header: true,
           cell_style: { size: 9, padding: 5 }
         )

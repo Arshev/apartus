@@ -12,8 +12,8 @@ RSpec.describe Pdf::FinancialReportPdf do
       occupancy_rate: 0.75,
       adr: 5_000,
       revpar: 3_750,
-      revenue_by_property: [{ property_name: "Hotel A", revenue: 100_000 }],
-      expenses_by_category: [{ category: "maintenance", total: 30_000 }]
+      revenue_by_property: [ { property_name: "Hotel A", revenue: 100_000 } ],
+      expenses_by_category: [ { category: "maintenance", total: 30_000 } ]
     }
   end
 

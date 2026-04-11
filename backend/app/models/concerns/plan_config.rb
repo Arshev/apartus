@@ -8,7 +8,7 @@ module PlanConfig
       max_channels: 0,
       booking_widget: false,
       automation: false,
-      pdf_export: false,
+      pdf_export: false
     },
     "professional" => {
       name: "Professional",
@@ -18,7 +18,7 @@ module PlanConfig
       max_channels: 3,
       booking_widget: true,
       automation: false,
-      pdf_export: true,
+      pdf_export: true
     },
     "business" => {
       name: "Business",
@@ -28,7 +28,7 @@ module PlanConfig
       max_channels: -1, # unlimited
       booking_widget: true,
       automation: true,
-      pdf_export: true,
+      pdf_export: true
     },
     "enterprise" => {
       name: "Enterprise",
@@ -38,8 +38,8 @@ module PlanConfig
       max_channels: -1,
       booking_widget: true,
       automation: true,
-      pdf_export: true,
-    },
+      pdf_export: true
+    }
   }.freeze
 
   def self.codes

@@ -10,7 +10,7 @@ RSpec.describe GuestMailer do
   describe "#booking_confirmation" do
     it "sends to guest email with correct subject" do
       mail = described_class.booking_confirmation(reservation)
-      expect(mail.to).to eq(["guest@example.com"])
+      expect(mail.to).to eq([ "guest@example.com" ])
       expect(mail.subject).to include("Бронирование подтверждено")
       expect(mail.subject).to include("Room 101")
     end
@@ -25,7 +25,7 @@ RSpec.describe GuestMailer do
   describe "#check_in_reminder" do
     it "sends to guest email" do
       mail = described_class.check_in_reminder(reservation)
-      expect(mail.to).to eq(["guest@example.com"])
+      expect(mail.to).to eq([ "guest@example.com" ])
       expect(mail.subject).to include("Напоминание о заезде")
     end
   end
@@ -33,7 +33,7 @@ RSpec.describe GuestMailer do
   describe "#check_out_thank_you" do
     it "sends to guest email" do
       mail = described_class.check_out_thank_you(reservation)
-      expect(mail.to).to eq(["guest@example.com"])
+      expect(mail.to).to eq([ "guest@example.com" ])
       expect(mail.subject).to include("Спасибо за визит")
     end
   end

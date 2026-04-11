@@ -12,7 +12,7 @@ RSpec.shared_examples "standard CRUD policy" do |view_perm:, manage_perm:, actio
   end
 
   context "as member with view permission" do
-    let(:role) { create(:role, organization: organization, permissions: [view_perm]) }
+    let(:role) { create(:role, organization: organization, permissions: [ view_perm ]) }
     let(:membership) { create(:membership, user: user, organization: organization, role: role, role_enum: :member) }
     before { stub_membership(membership) }
 
@@ -29,7 +29,7 @@ RSpec.shared_examples "standard CRUD policy" do |view_perm:, manage_perm:, actio
   end
 
   context "as member with manage permission" do
-    let(:role) { create(:role, organization: organization, permissions: [manage_perm]) }
+    let(:role) { create(:role, organization: organization, permissions: [ manage_perm ]) }
     let(:membership) { create(:membership, user: user, organization: organization, role: role, role_enum: :member) }
     before { stub_membership(membership) }
 
