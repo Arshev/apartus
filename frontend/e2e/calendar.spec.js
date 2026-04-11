@@ -102,4 +102,21 @@ test.describe('Calendar — grid rendering and interactions', () => {
     // Should navigate to /reservations/new with query params
     expect(page.url()).toContain('/reservations/new')
   })
+
+  test('reservation bar click navigates to reservation edit', async ({ page }) => {
+    // Seed has current reservations — look for a reservation bar/label in grid
+    const reservationBar = page.locator('.reservation-bar, .calendar-day-cell .reservation-label').first()
+    if (await reservationBar.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await reservationBar.click()
+      await page.waitForTimeout(1000)
+      expect(page.url()).toContain('/reservations/')
+    }
+  })
+
+  test('calendar has header "Юнит" in first column', async ({ page }) => {
+    const header = page.locator('.calendar-header-cell.sticky-col')
+    await expect(header).toBeVisible()
+    const text = await header.textContent()
+    expect(text).toContain('Юнит')
+  })
 })

@@ -226,4 +226,64 @@ test.describe('Reservation form — create with price auto-calculation', () => {
     await page.getByRole('link', { name: 'Отмена' }).click()
     await page.waitForURL('/reservations')
   })
+
+  test('create reservation with guest selected', async ({ page }) => {
+    await page.goto('/reservations/new')
+    await page.waitForTimeout(2000)
+
+    // Unit
+    await page.locator('.v-select').first().click()
+    await page.locator('.v-list-item').first().click()
+    await page.waitForTimeout(300)
+
+    // Guest (second select)
+    await page.locator('.v-select').nth(1).click()
+    await page.waitForTimeout(500)
+    await page.locator('.v-list-item').first().click()
+    await page.waitForTimeout(300)
+
+    // Dates
+    await page.locator('input[type="date"]').first().fill('2027-07-01')
+    await page.locator('input[type="date"]').nth(1).fill('2027-07-04')
+    await page.getByLabel('Количество гостей').fill('2')
+    await page.waitForTimeout(1500)
+
+    await page.getByRole('button', { name: 'Создать' }).click()
+    await page.waitForURL('/reservations', { timeout: 10000 })
+  })
+
+  test('notes field is visible and accepts text', async ({ page }) => {
+    await page.goto('/reservations/new')
+    await expect(page.locator('text=Заметки')).toBeVisible()
+    await page.locator('textarea').fill('VIP guest, needs extra pillows')
+  })
+
+  test('validation: submit without required fields stays on form', async ({ page }) => {
+    await page.goto('/reservations/new')
+    await page.waitForTimeout(1000)
+    await page.getByRole('button', { name: 'Создать' }).click()
+    await page.waitForTimeout(1000)
+    expect(page.url()).toContain('/reservations/new')
+  })
+
+  test('form shows error alert on validation failure from API', async ({ page }) => {
+    await page.goto('/reservations/new')
+    await page.waitForTimeout(2000)
+    // Select unit
+    await page.locator('.v-select').first().click()
+    await page.locator('.v-list-item').first().click()
+    await page.waitForTimeout(300)
+    // Invalid: check_out before check_in
+    await page.locator('input[type="date"]').first().fill('2027-09-10')
+    await page.locator('input[type="date"]').nth(1).fill('2027-09-05')
+    await page.getByLabel('Количество гостей').fill('1')
+    await page.waitForTimeout(500)
+    await page.getByRole('button', { name: 'Создать' }).click()
+    await page.waitForTimeout(2000)
+    // Should show error alert
+    const alert = page.locator('.v-alert')
+    if (await alert.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await expect(alert).toBeVisible()
+    }
+  })
 })

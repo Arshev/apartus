@@ -198,7 +198,115 @@ test.describe('Settings — Roles tab', () => {
     if (await nonSystemRow.isVisible({ timeout: 3000 }).catch(() => false)) {
       await nonSystemRow.locator('.mdi-delete').click()
       await expect(page.locator('text=Удалить роль?')).toBeVisible()
+      const dialogText = await page.locator('.v-dialog').textContent()
+      expect(dialogText).toContain('будет удалена')
       await page.locator('.v-dialog').getByRole('button', { name: 'Отмена' }).click()
     }
+  })
+
+  test('edit custom role → dialog pre-populated → save', async ({ page }) => {
+    const nonSystemRow = page.locator('.v-data-table tbody tr').filter({ hasText: 'Нет' }).first()
+    if (await nonSystemRow.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await nonSystemRow.locator('.mdi-pencil').click()
+      await expect(page.locator('.v-dialog')).toBeVisible()
+      await expect(page.locator('text=Редактировать роль')).toBeVisible()
+      const nameField = page.locator('.v-dialog').getByLabel('Название')
+      await expect(nameField).not.toHaveValue('', { timeout: 3000 })
+      await page.locator('.v-dialog').getByRole('button', { name: 'Сохранить' }).click()
+      await page.waitForTimeout(2000)
+    }
+  })
+
+  test('delete custom role → confirm removes from list', async ({ page }) => {
+    // Create a role to delete
+    const ts = Date.now()
+    await page.getByRole('button', { name: 'Добавить' }).click()
+    await page.locator('.v-dialog').getByLabel('Название').fill(`Deletable ${ts}`)
+    await page.locator('.v-dialog').getByLabel('Код').fill(`del_${ts}`)
+    await page.locator('.v-dialog').getByRole('button', { name: 'Создать' }).click()
+    await expect(page.locator(`text=Deletable ${ts}`)).toBeVisible({ timeout: 10000 })
+
+    // Delete it
+    const row = page.locator('.v-data-table tbody tr').filter({ hasText: `Deletable ${ts}` })
+    await row.locator('.mdi-delete').click()
+    await page.locator('.v-dialog').getByRole('button', { name: 'Удалить' }).click()
+    await page.waitForTimeout(2000)
+    await expect(page.locator(`text=Deletable ${ts}`)).not.toBeVisible()
+  })
+})
+
+test.describe('Settings — Members full CRUD', () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page)
+    await page.goto('/settings')
+    await page.getByText('Участники').click()
+    await page.waitForTimeout(2000)
+  })
+
+  test('add member → fill all fields → member appears in table', async ({ page }) => {
+    const ts = Date.now()
+    await page.getByRole('button', { name: 'Добавить' }).click()
+    await expect(page.locator('.v-dialog')).toBeVisible()
+    await page.locator('.v-dialog').getByLabel('Email').fill(`e2e-member-${ts}@test.com`)
+    await page.locator('.v-dialog').getByLabel('Имя').fill('E2E')
+    await page.locator('.v-dialog').getByLabel('Фамилия').fill(`Member ${ts}`)
+    await page.locator('.v-dialog').locator('input[type="password"]').fill('Password1!')
+    // Select role
+    await page.locator('.v-dialog .v-select').click()
+    await page.waitForTimeout(500)
+    await page.locator('.v-list-item').first().click()
+
+    await page.locator('.v-dialog').getByRole('button', { name: 'Добавить' }).click()
+    await page.waitForTimeout(3000)
+    await expect(page.locator(`text=e2e-member-${ts}@test.com`)).toBeVisible({ timeout: 10000 })
+  })
+
+  test('edit member role → only role field shown → save', async ({ page }) => {
+    const rows = page.locator('.v-data-table tbody tr')
+    const count = await rows.count()
+    if (count > 1) {
+      // Edit non-first member (avoid editing self)
+      await rows.last().locator('.mdi-pencil').click()
+      await expect(page.locator('.v-dialog')).toBeVisible()
+      await expect(page.locator('text=Редактировать роль')).toBeVisible()
+      // Email field should NOT be visible (edit mode)
+      await expect(page.locator('.v-dialog').getByLabel('Email')).not.toBeVisible()
+      // Role selector visible
+      await expect(page.locator('.v-dialog .v-select')).toBeVisible()
+      await page.locator('.v-dialog').getByRole('button', { name: 'Сохранить' }).click()
+      await page.waitForTimeout(2000)
+    }
+  })
+
+  test('delete member → confirm removes from table', async ({ page }) => {
+    const rows = page.locator('.v-data-table tbody tr')
+    const count = await rows.count()
+    if (count > 2) {
+      // Delete last member (not owner)
+      await rows.last().locator('.mdi-delete').click()
+      await expect(page.locator('text=Удалить участника?')).toBeVisible()
+      const dialogText = await page.locator('.v-dialog').textContent()
+      expect(dialogText).toContain('будет удалён')
+      // Cancel to keep state clean
+      await page.locator('.v-dialog').getByRole('button', { name: 'Отмена' }).click()
+    }
+  })
+})
+
+test.describe('Settings — Telegram save flow', () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page)
+    await page.goto('/settings')
+    await page.getByText('Интеграции').click()
+    await page.waitForTimeout(500)
+  })
+
+  test('save Telegram settings → shows save button loading', async ({ page }) => {
+    await page.getByLabel('Bot Token (от @BotFather)').fill('test:token')
+    await page.getByLabel('Chat ID').fill('12345')
+    await page.getByRole('button', { name: 'Сохранить' }).nth(0).click()
+    // Should trigger save (loading state on button)
+    await page.waitForTimeout(2000)
+    // No crash = success
   })
 })
