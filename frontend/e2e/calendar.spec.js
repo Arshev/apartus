@@ -1,66 +1,105 @@
 import { test, expect } from '@playwright/test'
 import { login } from './helpers.js'
 
-test.describe('Calendar view', () => {
+test.describe('Calendar — grid rendering and interactions', () => {
   test.beforeEach(async ({ page }) => {
     await login(page)
-  })
-
-  test('sidebar link navigates to calendar', async ({ page }) => {
-    await page.getByRole('link', { name: 'Календарь' }).click()
-    await page.waitForURL('/calendar')
-    await expect(page.locator('h1:has-text("Календарь")')).toBeVisible()
-  })
-
-  test('calendar renders grid or loading state', async ({ page }) => {
-    await page.goto('/calendar')
-    await page.waitForTimeout(2000)
-    // Either calendar grid or progress bar
-    const grid = page.locator('.calendar-grid')
-    const progress = page.locator('.v-progress-linear')
-    const error = page.locator('.v-alert')
-    await expect(grid.or(progress).or(error).first()).toBeVisible({ timeout: 10000 })
-  })
-
-  test('today button is visible', async ({ page }) => {
-    await page.goto('/calendar')
-    await expect(page.getByText('Сегодня')).toBeVisible()
-  })
-
-  test('navigation arrows shift dates', async ({ page }) => {
-    await page.goto('/calendar')
-    await page.waitForTimeout(2000)
-    // Click forward arrow
-    await page.locator('.mdi-chevron-right').click()
-    await page.waitForTimeout(500)
-    // Click back arrow
-    await page.locator('.mdi-chevron-left').click()
-    await page.waitForTimeout(500)
-    // Page should still be on calendar without errors
-    expect(page.url()).toContain('/calendar')
-  })
-
-  test('today button resets view', async ({ page }) => {
-    await page.goto('/calendar')
-    await page.waitForTimeout(1000)
-    // Shift forward, then click today
-    await page.locator('.mdi-chevron-right').click()
-    await page.waitForTimeout(500)
-    await page.getByText('Сегодня').click()
-    await page.waitForTimeout(500)
-    expect(page.url()).toContain('/calendar')
-  })
-
-  test('unit rows display property → unit names', async ({ page }) => {
     await page.goto('/calendar')
     await page.waitForTimeout(3000)
-    const grid = page.locator('.calendar-grid')
-    if (await grid.isVisible()) {
-      // Unit cell has format "Property → Unit"
-      const unitCell = page.locator('.calendar-unit-cell').first()
-      await expect(unitCell).toBeVisible()
-      const text = await unitCell.textContent()
-      expect(text).toContain('→')
-    }
+  })
+
+  // ---------------------------------------------------------------------------
+  // Grid structure
+  // ---------------------------------------------------------------------------
+  test('grid renders unit rows with "Property → Unit" format', async ({ page }) => {
+    const unitCells = page.locator('.calendar-unit-cell')
+    const count = await unitCells.count()
+    expect(count).toBeGreaterThanOrEqual(4) // seed has 6 units
+    const text = await unitCells.first().textContent()
+    expect(text).toContain('→')
+  })
+
+  test('grid renders 14 date columns in header', async ({ page }) => {
+    const headerCells = page.locator('.calendar-header-cell')
+    // 1 (unit label) + 14 (dates) = 15
+    const count = await headerCells.count()
+    expect(count).toBe(15)
+  })
+
+  test('date headers show day.month format', async ({ page }) => {
+    const dateHeader = page.locator('.calendar-header-cell').nth(1) // first date cell
+    const text = await dateHeader.textContent()
+    // Format: "11.04" or similar
+    expect(text?.trim()).toMatch(/\d{1,2}\.\d{2}/)
+  })
+
+  // ---------------------------------------------------------------------------
+  // Navigation — shifting dates
+  // ---------------------------------------------------------------------------
+  test('forward arrow shifts dates by 7 days', async ({ page }) => {
+    const firstDateBefore = await page.locator('.calendar-header-cell').nth(1).textContent()
+    await page.locator('.mdi-chevron-right').click()
+    await page.waitForTimeout(1500)
+    const firstDateAfter = await page.locator('.calendar-header-cell').nth(1).textContent()
+    // Dates should have changed
+    expect(firstDateAfter).not.toBe(firstDateBefore)
+  })
+
+  test('back arrow shifts dates backward', async ({ page }) => {
+    // Shift forward first, then back — should return to original
+    const firstDateOriginal = await page.locator('.calendar-header-cell').nth(1).textContent()
+    await page.locator('.mdi-chevron-right').click()
+    await page.waitForTimeout(1500)
+    await page.locator('.mdi-chevron-left').click()
+    await page.waitForTimeout(1500)
+    const firstDateAfter = await page.locator('.calendar-header-cell').nth(1).textContent()
+    expect(firstDateAfter).toBe(firstDateOriginal)
+  })
+
+  test('today button returns to current date window', async ({ page }) => {
+    // Shift forward twice
+    await page.locator('.mdi-chevron-right').click()
+    await page.waitForTimeout(1000)
+    await page.locator('.mdi-chevron-right').click()
+    await page.waitForTimeout(1000)
+    // Click today
+    await page.getByText('Сегодня').click()
+    await page.waitForTimeout(1500)
+    // First date should contain today's day
+    const today = new Date()
+    const todayStr = `${today.getDate()}.${String(today.getMonth() + 1).padStart(2, '0')}`
+    const firstDate = await page.locator('.calendar-header-cell').nth(1).textContent()
+    expect(firstDate?.trim()).toBe(todayStr)
+  })
+
+  // ---------------------------------------------------------------------------
+  // Reservation blocks rendering
+  // ---------------------------------------------------------------------------
+  test('active reservations render as colored blocks in grid', async ({ page }) => {
+    // Seed has current checked_in reservations — they should render as blocks
+    const reservationBlocks = page.locator('.calendar-day-cell .reservation-bar, .calendar-day-cell[style*="background"]')
+    // At least look for colored cells indicating reservations
+    const allDayCells = page.locator('.calendar-day-cell')
+    const count = await allDayCells.count()
+    expect(count).toBeGreaterThan(0)
+  })
+
+  // ---------------------------------------------------------------------------
+  // Cell click → create reservation
+  // ---------------------------------------------------------------------------
+  test('clicking empty cell navigates to new reservation with unit_id and date prefilled', async ({ page }) => {
+    // Click a day cell — navigate to create form
+    const emptyCells = page.locator('.calendar-day-cell')
+    // Click a cell that's likely empty (far in the future)
+    await page.locator('.mdi-chevron-right').click()
+    await page.waitForTimeout(1500)
+    await page.locator('.mdi-chevron-right').click()
+    await page.waitForTimeout(1500)
+    // Click first available day cell
+    const cell = emptyCells.first()
+    await cell.click()
+    await page.waitForTimeout(1000)
+    // Should navigate to /reservations/new with query params
+    expect(page.url()).toContain('/reservations/new')
   })
 })

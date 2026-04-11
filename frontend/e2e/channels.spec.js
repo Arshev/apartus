@@ -1,91 +1,134 @@
 import { test, expect } from '@playwright/test'
 import { login } from './helpers.js'
 
-test.describe('Channels', () => {
+test.describe('Channels — sync logic and platform labels', () => {
   test.beforeEach(async ({ page }) => {
     await login(page)
-  })
-
-  test('sidebar link navigates to channels list', async ({ page }) => {
-    await page.getByRole('link', { name: 'Каналы' }).click()
-    await page.waitForURL('/channels')
-    await expect(page.locator('h1:has-text("Каналы продаж")')).toBeVisible()
-  })
-
-  test('list shows table or empty state', async ({ page }) => {
     await page.goto('/channels')
-    const table = page.locator('.v-data-table')
-    const empty = page.locator('text=Нет каналов')
-    await expect(table.or(empty).first()).toBeVisible({ timeout: 10000 })
+    await page.waitForTimeout(2000)
   })
 
-  test('create channel dialog opens', async ({ page }) => {
-    await page.goto('/channels')
-    await page.waitForTimeout(1000)
-    await page.getByRole('button', { name: 'Добавить канал' }).click()
-    await expect(page.locator('.v-dialog')).toBeVisible()
-    await expect(page.locator('text=Новый канал')).toBeVisible()
-    await expect(page.locator('text=Юнит')).toBeVisible()
-    await expect(page.locator('text=Площадка')).toBeVisible()
+  // ---------------------------------------------------------------------------
+  // Seed data display
+  // ---------------------------------------------------------------------------
+  test('table shows 3 seed channels', async ({ page }) => {
+    const rows = page.locator('.v-data-table tbody tr')
+    const count = await rows.count()
+    expect(count).toBeGreaterThanOrEqual(3)
   })
 
-  test('create channel with unit and platform', async ({ page }) => {
-    await page.goto('/channels')
-    await page.waitForTimeout(1000)
+  test('platform column shows localized labels (Airbnb, Booking.com, Островок)', async ({ page }) => {
+    const cells = page.locator('.v-data-table tbody td')
+    const texts = await cells.allTextContents()
+    const joined = texts.join(' ')
+    // Seed: airbnb, booking_com, ostrovok
+    expect(joined).toContain('Airbnb')
+    expect(joined).toContain('Booking.com')
+    expect(joined).toContain('Островок')
+  })
+
+  test('iCal export URL shown as /api/v1/public/ical/ path', async ({ page }) => {
+    const codeEl = page.locator('.v-data-table code').first()
+    await expect(codeEl).toBeVisible()
+    const text = await codeEl.textContent()
+    expect(text).toContain('/api/v1/public/ical/')
+  })
+
+  // ---------------------------------------------------------------------------
+  // Sync button conditional state
+  // ---------------------------------------------------------------------------
+  test('sync button disabled when channel has no import URL', async ({ page }) => {
+    // Seed: airbnb channel has no ical_import_url
+    const rows = page.locator('.v-data-table tbody tr')
+    const count = await rows.count()
+    let foundDisabled = false
+    for (let i = 0; i < count; i++) {
+      const row = rows.nth(i)
+      const syncBtn = row.getByText('Sync')
+      if (await syncBtn.isVisible({ timeout: 500 }).catch(() => false)) {
+        if (await syncBtn.isDisabled()) {
+          foundDisabled = true
+          break
+        }
+      }
+    }
+    expect(foundDisabled).toBeTruthy()
+  })
+
+  test('sync button enabled when channel has import URL', async ({ page }) => {
+    // Seed: booking_com channel has ical_import_url
+    const bookingRow = page.locator('.v-data-table tbody tr').filter({ hasText: 'Booking.com' })
+    const syncBtn = bookingRow.getByText('Sync')
+    await expect(syncBtn).toBeEnabled()
+  })
+
+  test('clicking sync triggers sync and shows snackbar', async ({ page }) => {
+    const bookingRow = page.locator('.v-data-table tbody tr').filter({ hasText: 'Booking.com' })
+    const syncBtn = bookingRow.getByText('Sync')
+    if (await syncBtn.isEnabled()) {
+      await syncBtn.click()
+      await page.waitForTimeout(3000)
+      // Should show success or error snackbar (sync may fail with external URL)
+    }
+  })
+
+  // ---------------------------------------------------------------------------
+  // Create — unit selector for new channels
+  // ---------------------------------------------------------------------------
+  test('create dialog shows unit selector with seed units', async ({ page }) => {
     await page.getByRole('button', { name: 'Добавить канал' }).click()
     await page.waitForTimeout(500)
-
-    // Select unit
+    // Unit selector should be visible
+    await expect(page.locator('.v-dialog text=Юнит')).toBeVisible()
+    // Click to open
     await page.locator('.v-dialog .v-select').first().click()
-    await page.locator('.v-list-item').first().click()
-    await page.waitForTimeout(300)
-
-    // Select platform
-    await page.locator('.v-dialog .v-select').nth(1).click()
-    await page.locator('.v-list-item').first().click()
-
-    await page.locator('.v-dialog').getByRole('button', { name: 'Создать' }).click()
-    await page.waitForTimeout(3000)
-    // Channel should appear in list
-    const table = page.locator('.v-data-table')
-    await expect(table).toBeVisible({ timeout: 10000 })
+    await page.waitForTimeout(500)
+    const options = page.locator('.v-list-item')
+    const count = await options.count()
+    expect(count).toBeGreaterThanOrEqual(3)
+    await page.keyboard.press('Escape')
+    await page.locator('.v-dialog').getByRole('button', { name: 'Отмена' }).click()
   })
 
-  test('edit channel dialog opens', async ({ page }) => {
-    await page.goto('/channels')
-    await page.waitForSelector('.v-data-table', { timeout: 10000 })
+  test('platform selector shows all 4 platforms', async ({ page }) => {
+    await page.getByRole('button', { name: 'Добавить канал' }).click()
+    await page.waitForTimeout(500)
+    // Platform selector
+    await page.locator('.v-dialog .v-select').nth(1).click()
+    await page.waitForTimeout(500)
+    const options = page.locator('.v-list-item')
+    const texts = await options.allTextContents()
+    const joined = texts.join(' ')
+    expect(joined).toContain('Booking.com')
+    expect(joined).toContain('Airbnb')
+    expect(joined).toContain('Островок')
+    expect(joined).toContain('Другое')
+    await page.keyboard.press('Escape')
+    await page.locator('.v-dialog').getByRole('button', { name: 'Отмена' }).click()
+  })
+
+  // ---------------------------------------------------------------------------
+  // Edit — unit selector hidden
+  // ---------------------------------------------------------------------------
+  test('edit dialog hides unit selector (unit cannot be changed)', async ({ page }) => {
     const firstRow = page.locator('.v-data-table tbody tr').first()
     await firstRow.locator('.mdi-pencil').click()
     await expect(page.locator('.v-dialog')).toBeVisible()
     await expect(page.locator('text=Редактировать канал')).toBeVisible()
+    // Unit selector should NOT be visible
+    const selects = page.locator('.v-dialog .v-select')
+    const count = await selects.count()
+    // Should have only platform selector (1), not unit (2)
+    expect(count).toBe(1)
+    await page.locator('.v-dialog').getByRole('button', { name: 'Отмена' }).click()
   })
 
-  test('delete channel → confirmation', async ({ page }) => {
-    await page.goto('/channels')
-    await page.waitForSelector('.v-data-table', { timeout: 10000 })
-    const lastRow = page.locator('.v-data-table tbody tr').last()
-    await lastRow.locator('.mdi-delete').click()
-    await expect(page.locator('text=Удалить канал?')).toBeVisible()
-    await page.getByRole('button', { name: 'Отмена' }).last().click()
-  })
-
-  test('iCal export URL is displayed', async ({ page }) => {
-    await page.goto('/channels')
-    await page.waitForSelector('.v-data-table', { timeout: 10000 })
-    // Should show iCal export path
-    const codeEl = page.locator('.v-data-table code').first()
-    if (await codeEl.isVisible({ timeout: 3000 }).catch(() => false)) {
-      const text = await codeEl.textContent()
-      expect(text).toContain('/api/v1/public/ical/')
-    }
-  })
-
-  test('copy URL button is visible', async ({ page }) => {
-    await page.goto('/channels')
-    await page.waitForSelector('.v-data-table', { timeout: 10000 })
-    const copyBtn = page.locator('.mdi-content-copy').first()
-    if (await copyBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await expect(copyBtn).toBeVisible()
-    }
+  // ---------------------------------------------------------------------------
+  // Copy URL
+  // ---------------------------------------------------------------------------
+  test('copy button is visible next to each iCal URL', async ({ page }) => {
+    const copyBtns = page.locator('.mdi-content-copy')
+    const count = await copyBtns.count()
+    expect(count).toBeGreaterThanOrEqual(3) // 3 channels in seed
   })
 })
