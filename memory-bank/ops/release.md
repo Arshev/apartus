@@ -25,3 +25,21 @@ Apartus пока не имеет production environment. Release flow огран
 ## Future Deployment
 
 Планируется Kamal (см. [`../adr/ADR-008-no-docker-compose-local.md`](../adr/ADR-008-no-docker-compose-local.md) — Docker Compose не используется локально, но Kamal запускает docker в production). Когда появится production — задокументировать rollback unit, approval gates, release test plan.
+
+## CI Jobs
+
+| Job | Tool | Trigger | Purpose |
+|-----|------|---------|---------|
+| `backend-test` | RSpec | push/PR to main | Full backend suite + SimpleCov ratchet (98%) |
+| `backend-lint` | RuboCop | push/PR to main | Code style (0 offenses) |
+| `frontend-test` | Vitest | push/PR to main | Unit/integration tests + coverage (93%) |
+| `frontend-build` | Vite | push/PR to main | Production build verification |
+
+## Pre-Merge Checklist
+
+- [ ] `bundle exec rspec` — 1105 specs, 0 failures
+- [ ] `bundle exec rubocop` — 0 offenses
+- [ ] `cd frontend && yarn test` — 409 specs, 0 failures
+- [ ] `cd frontend && yarn build` — clean production build
+- [ ] Coverage ratchets met (BE ≥98%, FE ≥93%)
+- [ ] E2E: `npx playwright test` — 220 specs (requires running backend + seed)

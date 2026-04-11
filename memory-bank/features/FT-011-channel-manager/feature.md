@@ -32,3 +32,22 @@ audience: humans_and_agents
 - `NS-01` OAuth-based API integrations (Booking.com Partner API, Airbnb API).
 - `NS-02` Two-way rate/price sync.
 - `NS-03` Automatic periodic sync (cron setup — infrastructure concern).
+
+## Design
+
+- `DEC-01` iCal export: GET /api/v1/public/ical/:token — generates ICS from unit reservations. Token-based, no auth.
+- `DEC-02` Channel#ical_export_token auto-generated via before_validation (SecureRandom.urlsafe_base64).
+- `DEC-03` ChannelSyncJob: fetches URL, parses VEVENT blocks, creates reservations with notes: "ical:UID". Dedup by check_in+check_out+notes.
+- `DEC-04` Sync button disabled in UI when ical_import_url blank.
+- `DEC-05` Platform labels localized: booking_com→Booking.com, airbnb→Airbnb, ostrovok→Островок.
+
+## Verify
+
+- `SC-01` iCal export returns text/calendar with VCALENDAR/VEVENT.
+- `SC-02` Import creates reservations from multi-event feed.
+- `SC-03` Dedup: second import doesn't duplicate.
+- `SC-04` Missing DTSTART/DTEND events skipped.
+- `SC-05` Sync button disabled/enabled based on import URL.
+- `EVID-01` `spec/requests/api/v1/public/ical_spec.rb`
+- `EVID-02` `spec/jobs/channel_sync_job_spec.rb`
+- `EVID-03` `spec/requests/api/v1/channels_spec.rb`

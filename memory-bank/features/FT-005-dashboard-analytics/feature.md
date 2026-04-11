@@ -37,3 +37,21 @@ audience: humans_and_agents
 - `NS-01` Date range picker (hardcoded current month + 7-day upcoming).
 - `NS-02` Charts library — используем Vuetify cards/progress, не Chart.js.
 - `NS-03` Export reports.
+
+## Design
+
+- `DEC-01` Single endpoint with all metrics — no separate endpoints for each KPI.
+- `DEC-02` Occupancy = units with active reservation overlapping today / total units.
+- `DEC-03` Revenue sums confirmed + checked_in + checked_out (excludes cancelled).
+- `DEC-04` Upcoming lists limited to 10, ordered by check_in/check_out.
+- `DEC-05` Frontend: Vuetify cards + v-progress-linear for occupancy bar, v-list for upcoming.
+
+## Verify
+
+- `SC-01` total_units matches org unit count.
+- `SC-02` occupancy_rate = occupied/total as decimal 0..1.
+- `SC-03` revenue excludes cancelled reservations.
+- `SC-04` upcoming_check_ins ordered by check_in, max 7 days.
+- `SC-05` Status counts match actual by-status counts.
+- `SC-06` Cross-org data excluded.
+- `EVID-01` `spec/requests/api/v1/dashboard_spec.rb`

@@ -48,3 +48,21 @@ MVP WF-03: базовое ценообразование. Сейчас total_pri
 - `CON-01` Money = integer cents (ADR-004).
 - `CON-02` Frozen stack.
 - `DEC-01` **Frontend price calculation** — calculate on client from loaded seasonal prices + base_price, no dedicated API endpoint. Simpler, faster UX.
+
+## Design
+
+- `DEC-02` `PriceCalculator` is a service object, not a model method — keeps Unit lean.
+- `DEC-03` Each night gets first matching seasonal price; fallback to base_price_cents.
+- `DEC-04` SeasonalPrice validates `end_date > start_date`. No overlap validation between periods.
+- `DEC-05` Frontend watcher on `[unit_id, check_in, check_out]` auto-calculates by fetching seasonal prices.
+
+## Verify
+
+- `SC-01` Base price × N nights = correct total.
+- `SC-02` Seasonal price overrides base for matching range.
+- `SC-03` Mixed base + seasonal correct.
+- `SC-04` Returns 0 for blank/invalid dates.
+- `SC-05` Auto-calc when total_price_cents=0; manual price preserved when non-zero.
+- `EVID-01` `spec/services/price_calculator_spec.rb`
+- `EVID-02` `spec/models/seasonal_price_spec.rb`
+- `EVID-03` `spec/requests/api/v1/seasonal_prices_spec.rb`

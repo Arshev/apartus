@@ -28,3 +28,22 @@ audience: humans_and_agents
 - `NS-01` Payment integration.
 - `NS-02` Custom widget styling/themes.
 - `NS-03` Multi-property widget.
+
+## Design
+
+- `DEC-01` Public controller inherits ActionController::API (not BaseController) — no auth.
+- `DEC-02` Rate limiting: 20 requests/minute per IP on booking create.
+- `DEC-03` resolve_guest: find_or_initialize_by email. Single-word name duplicated as first+last.
+- `DEC-04` Price auto-calculated via PriceCalculator.call. NotificationSender fires on success.
+- `DEC-05` Widget route has meta: { widget: true } — bypasses auth guard.
+
+## Verify
+
+- `SC-01` Availability returns available units with prices.
+- `SC-02` Booking creates reservation + guest, returns 201.
+- `SC-03` Unknown slug returns 404.
+- `SC-04` Missing guest_name with email returns 422.
+- `SC-05` Existing guest reused by email (no duplicate).
+- `SC-06` Price auto-calculated correctly.
+- `EVID-01` `spec/requests/api/v1/public/bookings_spec.rb`
+- `EVID-02` `e2e/booking-widget.spec.js`

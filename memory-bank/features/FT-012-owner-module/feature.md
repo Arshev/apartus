@@ -35,3 +35,21 @@ audience: humans_and_agents
 - `NS-01` Payment processing / bank transfers.
 - `NS-02` PDF statement export.
 - `NS-03` Owner self-service portal.
+
+## Design
+
+- `DEC-01` commission_rate stored as basis points (integer): 1500 = 15.0%. Display converts /100.
+- `DEC-02` Statement calculates: commission = revenue × rate / 10000, net_payout = revenue - commission - expenses.
+- `DEC-03` Per-property breakdown in statement: each property's revenue/commission/expenses/payout.
+- `DEC-04` Statement supports date range params (from/to), defaults to current month.
+- `DEC-05` PDF export via Pdf::OwnerStatementPdf (FT-017 dependency).
+
+## Verify
+
+- `SC-01` Commission formula: revenue × rate / 10000.
+- `SC-02` net_payout = revenue - commission - expenses.
+- `SC-03` Per-property breakdown accurate.
+- `SC-04` Cancelled reservations excluded from revenue.
+- `SC-05` Owner with no properties returns zeros.
+- `SC-06` PDF format=pdf returns application/pdf attachment.
+- `EVID-01` `spec/requests/api/v1/owners_spec.rb`

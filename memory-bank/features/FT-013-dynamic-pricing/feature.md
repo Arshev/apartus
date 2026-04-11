@@ -28,3 +28,22 @@ audience: humans_and_agents
 ### Non-Scope
 - `NS-01` AI-based yield management.
 - `NS-02` Competitor price tracking.
+
+## Design
+
+- `DEC-01` Rules applied sequentially after base/seasonal: length_discount first, then last_minute, then occupancy_markup.
+- `DEC-02` Length discount: if nights >= min_nights, total *= (100 - discount_percent) / 100.
+- `DEC-03` Last-minute: if (check_in - today) <= days_before, apply discount.
+- `DEC-04` Occupancy markup: if current occupancy >= threshold, total *= (100 + markup_percent) / 100.
+- `DEC-05` Only active rules applied. Multiple rules of same type: first match wins.
+
+## Verify
+
+- `SC-01` Length discount applied when stay >= min_nights.
+- `SC-02` Last-minute discount for near check-in.
+- `SC-03` Occupancy markup with real DB data.
+- `SC-04` Combined rules stack sequentially.
+- `SC-05` Inactive rules ignored.
+- `SC-06` Result never negative.
+- `EVID-01` `spec/services/price_calculator_spec.rb`
+- `EVID-02` `spec/models/pricing_rule_spec.rb`

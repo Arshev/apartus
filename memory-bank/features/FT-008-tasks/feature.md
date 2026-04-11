@@ -31,3 +31,21 @@ audience: humans_and_agents
 - `NS-01` Drag-and-drop (click-based column move for now).
 - `NS-02` Recurring tasks.
 - `NS-03` Checklists inside tasks.
+
+## Design
+
+- `DEC-01` Kanban board: 3 computed columns from store items filtered by status.
+- `DEC-02` "Move forward" = pending→in_progress, in_progress→completed. No backward.
+- `DEC-03` Priority colors: low=grey, medium=blue, high=orange, urgent=red.
+- `DEC-04` Category labels localized: cleaning→Уборка, maintenance→Обслуживание, etc.
+- `DEC-05` Column header shows count: "Ожидает (N)".
+
+## Verify
+
+- `SC-01` Three columns rendered with correct titles and counts.
+- `SC-02` Task cards show title, priority chip, due date, assignee.
+- `SC-03` Move forward changes status correctly.
+- `SC-04` Completed tasks have no forward button.
+- `SC-05` CRUD via dialog works.
+- `EVID-01` `spec/requests/api/v1/tasks_spec.rb`
+- `EVID-02` `e2e/tasks.spec.js`

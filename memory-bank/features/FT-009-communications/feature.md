@@ -31,3 +31,20 @@ audience: humans_and_agents
 - `NS-01` Telegram/SMS channels.
 - `NS-02` Custom email templates editor.
 - `NS-03` Scheduled reminders (cron-based).
+
+## Design
+
+- `DEC-01` ActionMailer enabled (action_mailer/railtie). Mailer views in app/views/guest_mailer/.
+- `DEC-02` NotificationSender facade: delegates to GuestMailer.deliver_later + creates NotificationLog.
+- `DEC-03` Rescue block catches Net::SMTPFatalError, SocketError, Errno::ECONNREFUSED — still creates log entry.
+- `DEC-04` Skips send when guest has no email (early return, no log).
+- `DEC-05` Layout: app/views/layouts/mailer.html.erb — minimal HTML wrapper.
+
+## Verify
+
+- `SC-01` send_booking_confirmation enqueues mail + creates notification_log.
+- `SC-02` Skips when guest has no email.
+- `SC-03` SMTP error creates log (rescue path).
+- `SC-04` NotificationLog records event_type, channel, recipient_email, queued_at.
+- `EVID-01` `spec/services/notification_sender_spec.rb`
+- `EVID-02` `spec/mailers/guest_mailer_spec.rb`
