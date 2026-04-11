@@ -24,8 +24,6 @@ module Api
         authorize Current.organization
         if Current.organization.update(organization_params)
           render json: org_json(Current.organization)
-            settings: Current.organization.settings
-          }
         else
           render json: { error: Current.organization.errors.full_messages }, status: :unprocessable_entity
         end

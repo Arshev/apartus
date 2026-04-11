@@ -100,7 +100,7 @@ RSpec.describe "Api::V1::Units" do
       expect(body["unit_type"]).to eq("room")
       expect(body["capacity"]).to eq(3)
       expect(body["status"]).to eq("available")
-      expected_keys = %w[id property_id name unit_type capacity status created_at updated_at]
+      expected_keys = %w[id property_id name unit_type capacity status base_price_cents created_at updated_at]
       expect(body.keys).to match_array(expected_keys)
     end
 

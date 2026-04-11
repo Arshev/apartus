@@ -9,6 +9,7 @@ export default mergeConfig(
     test: {
       environment: 'jsdom',
       globals: false,
+      setupFiles: ['src/__tests__/setup.js'],
       include: ['src/**/*.{test,spec}.{js,mjs}', 'src/__tests__/**/*.{test,spec}.{js,mjs}'],
       // Vuetify component CSS is imported on demand by vite-plugin-vuetify
       // (autoImport). Without inlining, Node tries to import .css natively and
@@ -35,9 +36,8 @@ export default mergeConfig(
         ],
         thresholds: {
           // Coverage ratchet — raise after each feature, never lower without ADR.
-          // FT-015..018 added many new views; ratchet adjusted to floor(actual)-1.
-          // Was 98 when only HW-2 FE1-5 surfaces existed. Now 87% with 18 features.
-          lines: 86,
+          // Raised from 86 → 93 after full coverage pass (actual 94.21%).
+          lines: 93,
         },
       },
     },

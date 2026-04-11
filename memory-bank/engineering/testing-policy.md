@@ -63,9 +63,8 @@ cd frontend && yarn build
 - После merge каждой feature смотрим фактический процент покрытия и поднимаем floor до `floor(actual) - 1` (буфер против флейков).
 - **Никогда не понижаем** существующий порог без ADR.
 - Текущие значения (обновлять по мере работы):
-  - Backend: 87 (HW-1 final, actual ~88%)
-  - Frontend: 86 (actual 87.32%; 358 specs across 68 files after 18 features)
-- Target на конец HW-2 frontend: растёт с каждой FE-фичей по ratchet rule; 60+ ожидается после FE2–FE3.
+  - Backend: 89 (actual 90.35%; 895 specs after full coverage pass)
+  - Frontend: 93 (actual 94.21%; 382 specs across 72 files after full coverage pass)
 
 ## Ownership Split
 

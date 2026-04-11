@@ -297,7 +297,7 @@ RSpec.describe "Api::V1::UnitAmenities" do
       get "/api/v1/properties/#{property.id}/units/#{unit.id}", headers: headers
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body).not_to have_key("amenities")
-      expected_keys = %w[id property_id name unit_type capacity status created_at updated_at]
+      expected_keys = %w[id property_id name unit_type capacity status base_price_cents created_at updated_at]
       expect(response.parsed_body.keys).to match_array(expected_keys)
     end
   end

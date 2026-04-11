@@ -51,6 +51,7 @@ export const VUETIFY_STUBS = {
   'v-col': passthrough('v-col'),
   'v-card': passthrough('v-card'),
   'v-card-title': passthrough('v-card-title'),
+  'v-card-subtitle': passthrough('v-card-subtitle'),
   'v-card-text': passthrough('v-card-text'),
   'v-card-actions': passthrough('v-card-actions'),
   'v-dialog': passthrough('v-dialog'),
