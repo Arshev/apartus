@@ -38,6 +38,11 @@ RSpec.describe "Api::V1::Channels" do
       post "/api/v1/channels", params: { channel: { unit_id: other_unit.id, platform: "airbnb" } }, headers: headers
       expect(response).to have_http_status(:not_found)
     end
+
+    it "returns 422 for invalid platform" do
+      post "/api/v1/channels", params: { channel: { unit_id: unit.id, platform: "invalid_platform" } }, headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
   end
 
   describe "PATCH /api/v1/channels/:id" do
@@ -47,6 +52,11 @@ RSpec.describe "Api::V1::Channels" do
       patch "/api/v1/channels/#{channel.id}", params: { channel: { ical_import_url: "https://example.com/cal.ics" } }, headers: headers
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body["ical_import_url"]).to eq("https://example.com/cal.ics")
+    end
+
+    it "returns 422 on invalid update" do
+      patch "/api/v1/channels/#{channel.id}", params: { channel: { platform: "invalid" } }, headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
     end
   end
 

@@ -54,6 +54,11 @@ RSpec.describe "Api::V1::Expenses" do
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body["amount_cents"]).to eq(9999)
     end
+
+    it "returns 422 on invalid update" do
+      patch "/api/v1/expenses/#{expense.id}", params: { expense: { amount_cents: -1 } }, headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
   end
 
   describe "DELETE /api/v1/expenses/:id" do

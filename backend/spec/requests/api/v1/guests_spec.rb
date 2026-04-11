@@ -102,6 +102,12 @@ RSpec.describe "Api::V1::Guests" do
       patch "/api/v1/guests/#{guest.id}", params: { guest: { first_name: "X" } }, headers: headers
       expect(response).to have_http_status(:not_found)
     end
+
+    it "returns 422 when update makes guest invalid" do
+      guest = create(:guest, organization: organization)
+      patch "/api/v1/guests/#{guest.id}", params: { guest: { first_name: "" } }, headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
   end
 
   # --- Destroy ---

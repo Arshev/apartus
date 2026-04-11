@@ -69,4 +69,34 @@ RSpec.describe TelegramNotifier do
       expect(described_class.send_test(organization)).to be false
     end
   end
+
+  describe "error handling" do
+    it "logs error when API returns non-success" do
+      allow(Net::HTTP).to receive(:post_form).and_return(
+        instance_double(Net::HTTPBadRequest, is_a?: false, code: "400", body: '{"ok":false}')
+      )
+      expect(Rails.logger).to receive(:error).with(/TelegramNotifier failed/)
+      described_class.notify_booking(reservation)
+    end
+
+    it "catches and logs StandardError on send" do
+      allow(Net::HTTP).to receive(:post_form).and_raise(SocketError.new("network down"))
+      expect(Rails.logger).to receive(:error).with(/TelegramNotifier error/)
+      described_class.notify_booking(reservation)
+    end
+  end
+
+  describe ".format_price (private)" do
+    it "formats zero-decimal currency" do
+      config = { decimal_places: 0, symbol: "Rp", symbol_position: :before }
+      result = described_class.send(:format_price, 50000, config)
+      expect(result).to eq("Rp500")
+    end
+
+    it "formats symbol-after currency" do
+      config = { decimal_places: 2, symbol: "₽", symbol_position: :after }
+      result = described_class.send(:format_price, 10000, config)
+      expect(result).to eq("100.0 ₽")
+    end
+  end
 end

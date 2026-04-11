@@ -34,6 +34,13 @@ RSpec.describe "Api::V1::PricingRules" do
       }, headers: headers
       expect(response).to have_http_status(:not_found)
     end
+
+    it "returns 422 for invalid create (length_discount without min_nights)" do
+      post "/api/v1/pricing_rules", params: {
+        pricing_rule: { unit_id: unit.id, rule_type: "length_discount", min_nights: -1, discount_percent: 10 }
+      }, headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
   end
 
   describe "PATCH /api/v1/pricing_rules/:id" do
@@ -43,6 +50,11 @@ RSpec.describe "Api::V1::PricingRules" do
       patch "/api/v1/pricing_rules/#{rule.id}", params: { pricing_rule: { discount_percent: 20 } }, headers: headers
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body["discount_percent"]).to eq(20)
+    end
+
+    it "returns 422 on invalid update" do
+      patch "/api/v1/pricing_rules/#{rule.id}", params: { pricing_rule: { discount_percent: 999 } }, headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
     end
   end
 

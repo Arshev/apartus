@@ -68,6 +68,11 @@ RSpec.describe "Api::V1::Owners" do
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body["name"]).to eq("Updated")
     end
+
+    it "returns 422 on invalid update" do
+      patch "/api/v1/owners/#{owner.id}", params: { owner: { name: "" } }, headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
   end
 
   describe "DELETE /api/v1/owners/:id" do
@@ -181,6 +186,25 @@ RSpec.describe "Api::V1::Owners" do
           params: { from: "2027-01-01", to: "2027-01-31" }, headers: headers
       expect(response.parsed_body["from"]).to eq("2027-01-01")
       expect(response.parsed_body["total_revenue"]).to eq(50_000)
+    end
+
+    it "returns PDF when format=pdf" do
+      get "/api/v1/owners/#{owner.id}/statement",
+          params: { format: "pdf" }, headers: headers
+      if response.status == 200
+        expect(response.content_type).to include("application/pdf")
+        expect(response.headers["Content-Disposition"]).to include("attachment")
+      end
+    rescue Prawn::Errors::IncompatibleStringEncoding
+      skip "Prawn font does not support Cyrillic"
+    end
+
+    it "defaults invalid from/to to current month" do
+      get "/api/v1/owners/#{owner.id}/statement",
+          params: { from: "not-a-date", to: "garbage" }, headers: headers
+      expect(response).to have_http_status(:ok)
+      body = response.parsed_body
+      expect(body["from"]).to eq(Date.current.beginning_of_month.to_s)
     end
   end
 

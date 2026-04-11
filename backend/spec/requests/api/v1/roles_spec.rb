@@ -48,6 +48,11 @@ RSpec.describe "Api::V1::Roles" do
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body["name"]).to eq("New")
     end
+
+    it "returns 422 on invalid update" do
+      patch "/api/v1/roles/#{role.id}", params: { role: { name: "" } }, headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
   end
 
   describe "DELETE /api/v1/roles/:id" do

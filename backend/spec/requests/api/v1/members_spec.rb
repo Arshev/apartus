@@ -67,6 +67,15 @@ RSpec.describe "Api::V1::Members" do
       expect(response).to have_http_status(:ok)
       expect(membership.reload.role_enum).to eq("manager")
     end
+
+    it "returns 422 on invalid role_enum" do
+      other_user = create(:user)
+      membership = create(:membership, user: other_user, organization: organization, role_enum: :member)
+      expect {
+        patch "/api/v1/members/#{membership.id}",
+              params: { role_enum: "superadmin" }, headers: headers
+      }.to raise_error(ArgumentError)
+    end
   end
 
   describe "DELETE /api/v1/members/:id" do

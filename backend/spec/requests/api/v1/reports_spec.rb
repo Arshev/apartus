@@ -120,6 +120,14 @@ RSpec.describe "Api::V1::Reports" do
       expect(body["to"]).to eq(Date.current.end_of_month.to_s)
     end
 
+    it "defaults invalid date params to current month" do
+      get "/api/v1/reports/financial", params: { from: "not-a-date", to: "garbage" }, headers: headers
+      expect(response).to have_http_status(:ok)
+      body = response.parsed_body
+      expect(body["from"]).to eq(Date.current.beginning_of_month.to_s)
+      expect(body["to"]).to eq(Date.current.end_of_month.to_s)
+    end
+
     it "returns zeros for empty org" do
       get "/api/v1/reports/financial", headers: headers
       body = response.parsed_body

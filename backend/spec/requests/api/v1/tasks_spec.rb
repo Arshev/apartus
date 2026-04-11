@@ -54,6 +54,11 @@ RSpec.describe "Api::V1::Tasks" do
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body["status"]).to eq("completed")
     end
+
+    it "returns 422 on invalid update" do
+      patch "/api/v1/tasks/#{task.id}", params: { task: { title: "" } }, headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
   end
 
   describe "DELETE /api/v1/tasks/:id" do

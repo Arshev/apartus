@@ -63,8 +63,8 @@ cd frontend && yarn build
 - После merge каждой feature смотрим фактический процент покрытия и поднимаем floor до `floor(actual) - 1` (буфер против флейков).
 - **Никогда не понижаем** существующий порог без ADR.
 - Текущие значения (обновлять по мере работы):
-  - Backend: 94 (actual 95.18%; 1075 specs after line-coverage pass)
-  - Frontend: 93 (actual 94.21%; 409 specs across 72 files)
+  - Backend: 96 (actual 97.04%; 1101 specs — 54 lines uncoverable: PDF Cyrillic font, DB constraint rescues, rate_limit)
+  - Frontend: 93 (actual 94.41%; 409 specs — all JS 100%, remaining ~6% is Vue template rendering covered by E2E)
 
 ## Ownership Split
 

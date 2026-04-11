@@ -36,6 +36,49 @@ RSpec.describe "Api::V1::Reservations" do
     end
   end
 
+  describe "GET /api/v1/reservations/:id" do
+    it "returns reservation with full JSON" do
+      reservation = create(:reservation, unit: unit, guest: guest, check_in: "2026-04-01", check_out: "2026-04-05")
+      get "/api/v1/reservations/#{reservation.id}", headers: headers
+      expect(response).to have_http_status(:ok)
+      expect(parsed_body["id"]).to eq(reservation.id)
+      expect(parsed_body["unit_name"]).to eq(unit.name)
+      expect(parsed_body["guest_name"]).to eq(guest.full_name)
+    end
+
+    it "returns 404 for cross-org reservation" do
+      other_unit = create(:unit, property: create(:property))
+      other_res = create(:reservation, unit: other_unit, check_in: "2026-04-10", check_out: "2026-04-15")
+      get "/api/v1/reservations/#{other_res.id}", headers: headers
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
+  describe "PATCH /api/v1/reservations/:id" do
+    it "updates reservation notes" do
+      reservation = create(:reservation, unit: unit, check_in: "2026-03-01", check_out: "2026-03-05")
+      patch "/api/v1/reservations/#{reservation.id}",
+            params: { reservation: { notes: "VIP guest" } }, headers: headers
+      expect(response).to have_http_status(:ok)
+      expect(parsed_body["notes"]).to eq("VIP guest")
+    end
+
+    it "returns 422 on invalid update (check_out before check_in)" do
+      reservation = create(:reservation, unit: unit, check_in: "2026-03-10", check_out: "2026-03-15")
+      patch "/api/v1/reservations/#{reservation.id}",
+            params: { reservation: { check_out: "2026-03-08" } }, headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+
+    it "returns 404 for cross-org" do
+      other_unit = create(:unit, property: create(:property))
+      other_res = create(:reservation, unit: other_unit, check_in: "2026-03-20", check_out: "2026-03-25")
+      patch "/api/v1/reservations/#{other_res.id}",
+            params: { reservation: { notes: "hacked" } }, headers: headers
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
   describe "POST /api/v1/reservations" do
     it "creates reservation" do
       post "/api/v1/reservations", params: {
