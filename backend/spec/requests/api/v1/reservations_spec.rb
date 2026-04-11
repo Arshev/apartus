@@ -105,6 +105,73 @@ RSpec.describe "Api::V1::Reservations" do
       patch "/api/v1/reservations/#{reservation.id}/check_in", headers: headers
       expect(response).to have_http_status(:unprocessable_entity)
     end
+
+    it "check_out on confirmed → 422 (can't skip check_in)" do
+      patch "/api/v1/reservations/#{reservation.id}/check_out", headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+
+    it "cancel on cancelled → 422" do
+      reservation.update!(status: :cancelled)
+      patch "/api/v1/reservations/#{reservation.id}/cancel", headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+
+    it "cancel on checked_out → 422" do
+      reservation.update!(status: :checked_out)
+      patch "/api/v1/reservations/#{reservation.id}/cancel", headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+
+    it "returns 404 for cross-org reservation transition" do
+      other_org = create(:organization)
+      other_unit = create(:unit, property: create(:property, organization: other_org))
+      other_res = create(:reservation, unit: other_unit, check_in: "2026-11-01", check_out: "2026-11-05")
+      patch "/api/v1/reservations/#{other_res.id}/check_in", headers: headers
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
+  describe "date filtering" do
+    it "filters by from param (check_out >= from)" do
+      create(:reservation, unit: unit, check_in: "2027-01-01", check_out: "2027-01-05")
+      create(:reservation, unit: unit, check_in: "2027-02-01", check_out: "2027-02-05")
+      get "/api/v1/reservations", params: { from: "2027-01-20" }, headers: headers
+      expect(parsed_body.size).to eq(1)
+    end
+
+    it "filters by to param (check_in <= to)" do
+      create(:reservation, unit: unit, check_in: "2027-03-01", check_out: "2027-03-05")
+      create(:reservation, unit: unit, check_in: "2027-04-01", check_out: "2027-04-05")
+      get "/api/v1/reservations", params: { to: "2027-03-10" }, headers: headers
+      expect(parsed_body.size).to eq(1)
+    end
+
+    it "filters by status" do
+      create(:reservation, unit: unit, check_in: "2027-05-01", check_out: "2027-05-05", status: :confirmed)
+      create(:reservation, unit: unit, check_in: "2027-06-01", check_out: "2027-06-05", status: :cancelled)
+      get "/api/v1/reservations", params: { status: "cancelled" }, headers: headers
+      expect(parsed_body.size).to eq(1)
+      expect(parsed_body.first["status"]).to eq("cancelled")
+    end
+  end
+
+  describe "auto-price calculation on create" do
+    it "auto-calculates when total_price_cents is zero" do
+      post "/api/v1/reservations", params: {
+        reservation: { unit_id: unit.id, check_in: "2027-07-01", check_out: "2027-07-04", guests_count: 1, total_price_cents: 0 }
+      }, headers: headers
+      expect(response).to have_http_status(:created)
+      expect(parsed_body["total_price_cents"]).to be >= 0
+    end
+
+    it "preserves manual price when non-zero" do
+      post "/api/v1/reservations", params: {
+        reservation: { unit_id: unit.id, check_in: "2027-08-01", check_out: "2027-08-04", guests_count: 1, total_price_cents: 99_999 }
+      }, headers: headers
+      expect(response).to have_http_status(:created)
+      expect(parsed_body["total_price_cents"]).to eq(99_999)
+    end
   end
 
   describe "DELETE /api/v1/reservations/:id" do
@@ -112,6 +179,40 @@ RSpec.describe "Api::V1::Reservations" do
       reservation = create(:reservation, unit: unit, check_in: "2026-06-10", check_out: "2026-06-15")
       delete "/api/v1/reservations/#{reservation.id}", headers: headers
       expect(response).to have_http_status(:ok)
+    end
+
+    it "returns 404 for cross-org" do
+      other_org = create(:organization)
+      other_unit = create(:unit, property: create(:property, organization: other_org))
+      other_res = create(:reservation, unit: other_unit, check_in: "2026-12-01", check_out: "2026-12-05")
+      delete "/api/v1/reservations/#{other_res.id}", headers: headers
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
+  describe "GET /api/v1/guests/:id/timeline" do
+    it "returns guest reservations for org, ordered by check_in desc" do
+      guest = create(:guest, organization: organization)
+      r1 = create(:reservation, unit: unit, guest: guest, check_in: "2027-01-01", check_out: "2027-01-05")
+      r2 = create(:reservation, unit: unit, guest: guest, check_in: "2027-03-01", check_out: "2027-03-05")
+      get "/api/v1/guests/#{guest.id}/timeline", headers: headers
+      expect(response).to have_http_status(:ok)
+      expect(parsed_body.size).to eq(2)
+      expect(parsed_body.first["id"]).to eq(r2.id) # most recent first
+    end
+
+    it "returns empty array for guest with no reservations" do
+      guest = create(:guest, organization: organization)
+      get "/api/v1/guests/#{guest.id}/timeline", headers: headers
+      expect(response).to have_http_status(:ok)
+      expect(parsed_body).to eq([])
+    end
+
+    it "returns 404 for cross-org guest timeline" do
+      other_org = create(:organization)
+      other_guest = create(:guest, organization: other_org)
+      get "/api/v1/guests/#{other_guest.id}/timeline", headers: headers
+      expect(response).to have_http_status(:not_found)
     end
   end
 

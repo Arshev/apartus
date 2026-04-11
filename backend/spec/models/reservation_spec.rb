@@ -84,5 +84,48 @@ RSpec.describe Reservation do
       overlapping = build(:reservation, unit: unit, check_in: Date.current + 2, check_out: Date.current + 7, status: :confirmed)
       expect(overlapping).to be_valid
     end
+
+    it "allows same-day checkout/checkin (checkout on day X, checkin on day X)" do
+      create(:reservation, unit: unit, check_in: Date.current, check_out: Date.current + 3, status: :confirmed)
+      same_day = build(:reservation, unit: unit, check_in: Date.current + 3, check_out: Date.current + 6, status: :confirmed)
+      expect(same_day).to be_valid
+    end
+
+    it "prevents exact same date range" do
+      create(:reservation, unit: unit, check_in: Date.current + 10, check_out: Date.current + 15, status: :confirmed)
+      exact = build(:reservation, unit: unit, check_in: Date.current + 10, check_out: Date.current + 15, status: :confirmed)
+      expect(exact).not_to be_valid
+    end
+
+    it "allows overlapping on different units" do
+      other_unit = create(:unit, property: unit.property)
+      create(:reservation, unit: unit, check_in: Date.current, check_out: Date.current + 5, status: :confirmed)
+      other = build(:reservation, unit: other_unit, check_in: Date.current + 2, check_out: Date.current + 7, status: :confirmed)
+      expect(other).to be_valid
+    end
+
+    it "excludes self when updating a persisted reservation" do
+      reservation = create(:reservation, unit: unit, check_in: Date.current + 20, check_out: Date.current + 25, status: :confirmed)
+      reservation.guests_count = 3
+      expect(reservation).to be_valid
+    end
+
+    it "allows overlapping if new reservation is cancelled" do
+      create(:reservation, unit: unit, check_in: Date.current + 30, check_out: Date.current + 35, status: :confirmed)
+      cancelled = build(:reservation, unit: unit, check_in: Date.current + 32, check_out: Date.current + 37, status: :cancelled)
+      expect(cancelled).to be_valid
+    end
+
+    it "allows overlapping if existing is checked_out" do
+      create(:reservation, unit: unit, check_in: Date.current + 40, check_out: Date.current + 45, status: :checked_out)
+      overlap = build(:reservation, unit: unit, check_in: Date.current + 42, check_out: Date.current + 47, status: :confirmed)
+      expect(overlap).to be_valid
+    end
+
+    it "prevents overlap with checked_in reservation" do
+      create(:reservation, unit: unit, check_in: Date.current + 50, check_out: Date.current + 55, status: :checked_in)
+      overlap = build(:reservation, unit: unit, check_in: Date.current + 52, check_out: Date.current + 57, status: :confirmed)
+      expect(overlap).not_to be_valid
+    end
   end
 end

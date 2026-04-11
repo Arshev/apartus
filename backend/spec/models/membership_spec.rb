@@ -38,6 +38,16 @@ RSpec.describe Membership do
       membership = create(:membership, user: user, organization: organization)
       expect(membership.can?("properties.view")).to be false
     end
+
+    it "returns true for owner even for non-existent permission codes" do
+      membership = create(:membership, :owner, user: user, organization: organization)
+      expect(membership.can?("nonexistent.perm")).to be true
+    end
+
+    it "returns false for manager enum without role object" do
+      membership = create(:membership, :manager, user: user, organization: organization)
+      expect(membership.can?("properties.view")).to be false
+    end
   end
 
   describe "#permissions" do
@@ -53,6 +63,11 @@ RSpec.describe Membership do
       role = create(:role, organization: organization, permissions: %w[properties.view])
       membership = create(:membership, user: user, organization: organization, role: role)
       expect(membership.permissions).to eq(%w[properties.view])
+    end
+
+    it "returns empty array for member without role" do
+      membership = create(:membership, user: user, organization: organization)
+      expect(membership.permissions).to eq([])
     end
   end
 end

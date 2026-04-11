@@ -63,8 +63,8 @@ cd frontend && yarn build
 - После merge каждой feature смотрим фактический процент покрытия и поднимаем floor до `floor(actual) - 1` (буфер против флейков).
 - **Никогда не понижаем** существующий порог без ADR.
 - Текущие значения (обновлять по мере работы):
-  - Backend: 89 (actual 90.35%; 895 specs after full coverage pass)
-  - Frontend: 93 (actual 94.21%; 382 specs across 72 files after full coverage pass)
+  - Backend: 91 (actual 92.0%; 974 specs after deep logic pass)
+  - Frontend: 93 (actual 94.21%; 396 specs across 72 files after deep logic pass)
 
 ## Ownership Split
 
