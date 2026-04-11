@@ -11,5 +11,5 @@ audience: humans_and_agents
 
 # FT-HW2-FE5: Branches Tree UI
 
-- [`feature.md`](feature.md) — scope, design, verify
+- [`feature.md`](feature.md) — Branch tree with add/edit/delete, expand/collapse, parent selector
 - [`implementation-plan.md`](implementation-plan.md) — execution plan

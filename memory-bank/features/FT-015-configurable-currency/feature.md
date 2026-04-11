@@ -27,3 +27,21 @@ audience: humans_and_agents
 - `REQ-07` Settings → General: currency selector (v-select from supported list).
 - `REQ-08` Booking widget uses org currency.
 - `REQ-09` Specs.
+
+## Design
+
+- `DEC-01` `CurrencyConfig` concern: hash constant with symbol, decimal_places, symbol_position per currency.
+- `DEC-02` Organization.currency validated against `CurrencyConfig.codes`. Default "RUB".
+- `DEC-03` Frontend `formatMoney(cents, currencyCode)` mirrors backend formatting logic.
+- `DEC-04` All views use `formatMoney` instead of hardcoded "₽". Auth store provides `organization.currency`.
+- `DEC-05` Settings → General: v-select from `CURRENCY_LIST` (code + symbol label).
+
+## Verify
+
+- `SC-01` formatMoney: RUB → "150.00 ₽" (symbol after), USD → "$150.00" (symbol before).
+- `SC-02` formatMoney: UZS → "1500 сўм" (zero decimal places).
+- `SC-03` formatMoney: null/undefined → "—".
+- `SC-04` Unknown currency falls back to USD format.
+- `SC-05` Settings save persists currency change.
+- `EVID-01` `spec/models/concerns/currency_config_spec.rb`
+- `EVID-02` `frontend/src/__tests__/utils/currency.test.js`

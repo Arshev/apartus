@@ -14,5 +14,5 @@ audience: humans_and_agents
 
 ## Аннотированный индекс
 
-- [`feature.md`](feature.md) — scope, design, verify
+- [`feature.md`](feature.md) — Unit list/form nested under Property, type/status/capacity/price
 - [`implementation-plan.md`](implementation-plan.md) — execution plan

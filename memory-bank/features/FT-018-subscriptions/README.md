@@ -17,4 +17,4 @@ audience: humans_and_agents
 
 ## Аннотированный индекс
 
-- [`feature.md`](feature.md) — scope (REQ-01..05): PlanConfig, org.plan field, helper methods, API, frontend gating
+- [`feature.md`](feature.md) — Plan config: starter/professional/business/enterprise limits + feature gating

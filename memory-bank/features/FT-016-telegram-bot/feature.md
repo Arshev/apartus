@@ -28,3 +28,24 @@ audience: humans_and_agents
 ### Non-Scope
 - `NS-01` Two-way commands (manage bookings via Telegram).
 - `NS-02` Multiple chat targets per event type.
+
+## Design
+
+- `DEC-01` `TelegramNotifier` — class with class methods, calls Telegram Bot API via `Net::HTTP.post_form`.
+- `DEC-02` Settings stored in `organization.settings` JSONB: `telegram_bot_token`, `telegram_chat_id`.
+- `DEC-03` `configured?(org)` checks both fields present. Skips silently if not configured.
+- `DEC-04` Message format: Markdown with emoji, reservation details (property, unit, guest, dates, price, status).
+- `DEC-05` Error handling: `StandardError` rescue logs to `Rails.logger.error`, never crashes the caller.
+- `DEC-06` Test button: `POST /organization/test_telegram` sends "🔔 Тестовое уведомление" message.
+
+## Verify
+
+- `SC-01` notify_booking sends POST to Telegram API with chat_id and formatted message.
+- `SC-02` Skips when not configured (no API call).
+- `SC-03` HTTP error logged, not raised.
+- `SC-04` SocketError caught and logged.
+- `SC-05` test_telegram returns true on success, false when not configured.
+- `SC-06` Settings UI: test button disabled when fields empty, enabled when filled.
+- `EVID-01` `spec/services/telegram_notifier_spec.rb`
+- `EVID-02` `spec/requests/api/v1/organizations_spec.rb` (test_telegram endpoint)
+- `EVID-03` `e2e/settings.spec.js` (Integrations tab)

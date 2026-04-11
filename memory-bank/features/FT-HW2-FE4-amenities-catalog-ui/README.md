@@ -11,5 +11,5 @@ audience: humans_and_agents
 
 # FT-HW2-FE4: Amenities Catalog UI
 
-- [`feature.md`](feature.md) — scope, design, verify
+- [`feature.md`](feature.md) — Amenities catalog CRUD dialog + unit attach/detach chips
 - [`implementation-plan.md`](implementation-plan.md) — execution plan
