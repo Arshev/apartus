@@ -24,7 +24,12 @@
 | Продукт, users, MVP scope, capability roadmap | [`memory-bank/domain/problem.md`](memory-bank/domain/problem.md) |
 | Стек, module boundaries, API/error/data конвенции | [`memory-bank/domain/architecture.md`](memory-bank/domain/architecture.md) |
 | Текущие модели и связи | [`memory-bank/domain/schema.md`](memory-bank/domain/schema.md) |
-| Frontend стек, компоненты, i18n | [`memory-bank/domain/frontend.md`](memory-bank/domain/frontend.md) |
+| Frontend стек, routes, компоненты, i18n | [`memory-bank/domain/frontend.md`](memory-bank/domain/frontend.md) |
+| API endpoints, params, response shapes | [`memory-bank/domain/api-reference.md`](memory-bank/domain/api-reference.md) |
+| Статус-машины (Reservation, Task) | [`memory-bank/domain/state-machines.md`](memory-bank/domain/state-machines.md) |
+| Permissions, roles, UI gating | [`memory-bank/domain/permissions.md`](memory-bank/domain/permissions.md) |
+| Money as cents, currencies, commission | [`memory-bank/domain/money-and-currency.md`](memory-bank/domain/money-and-currency.md) |
+| Use cases (cross-feature flows) | [`memory-bank/use-cases/README.md`](memory-bank/use-cases/README.md) |
 | Testing policy, coverage ratchet, simplify review | [`memory-bank/engineering/testing-policy.md`](memory-bank/engineering/testing-policy.md) |
 | Coding style, reference implementations, constraints | [`memory-bank/engineering/coding-style.md`](memory-bank/engineering/coding-style.md) |
 | Git workflow, коммиты, PR | [`memory-bank/engineering/git-workflow.md`](memory-bank/engineering/git-workflow.md) |

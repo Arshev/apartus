@@ -41,14 +41,25 @@ frontend/
 
 ## Key Variables
 
-| Variable | Layer | Description | Default |
-|---|---|---|---|
-| `DATABASE_URL` | backend | PostgreSQL connection | `postgresql://localhost/apartus_dev` |
-| `JWT_SECRET` | backend | JWT signing secret | Rails credentials |
-| `RAILS_MASTER_KEY` | backend | Rails credentials encryption | `config/master.key` |
-| `VITE_API_BASE_URL` | frontend | Backend API origin | `http://localhost:3000/api/v1` |
+| Variable | Layer | Required | Description | Default |
+|---|---|---|---|---|
+| `DATABASE_URL` | backend | prod | PostgreSQL connection string | `postgresql://localhost/apartus_dev` |
+| `DB_HOST` | backend | CI | Database host | `localhost` |
+| `DB_USERNAME` | backend | CI | Database user | `apartus` |
+| `DB_PASSWORD` | backend | CI | Database password | `apartus` |
+| `APARTUS_DATABASE_PASSWORD` | backend | prod | Production DB password | — |
+| `RAILS_MAX_THREADS` | backend | no | Puma thread count | `3` |
+| `JWT_SECRET` | backend | prod | JWT signing secret | Rails credentials |
+| `RAILS_MASTER_KEY` | backend | prod | Encrypted credentials key | `config/master.key` |
+| `RAILS_ENV` | backend | always | Environment | `development` |
+| `VITE_API_BASE_URL` | frontend | no | Backend API origin | `http://localhost:3000/api/v1` |
 
-Это не полный список — консультируйся с `backend/config/` и `frontend/.env` для актуального состояния.
+### CI-specific Variables (set in `.github/workflows/ci.yml`)
+
+| Variable | Purpose |
+|---|---|
+| `GITHUB_TOKEN` | GitHub API access for CI actions |
+| `AQUA_GITHUB_TOKEN` | Tool bootstrapping (aqua package manager) |
 
 ## Secrets
 
