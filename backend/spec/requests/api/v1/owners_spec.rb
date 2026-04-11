@@ -191,12 +191,9 @@ RSpec.describe "Api::V1::Owners" do
     it "returns PDF when format=pdf" do
       get "/api/v1/owners/#{owner.id}/statement",
           params: { format: "pdf" }, headers: headers
-      if response.status == 200
-        expect(response.content_type).to include("application/pdf")
-        expect(response.headers["Content-Disposition"]).to include("attachment")
-      end
-    rescue Prawn::Errors::IncompatibleStringEncoding
-      skip "Prawn font does not support Cyrillic"
+      expect(response).to have_http_status(:ok)
+      expect(response.content_type).to include("application/pdf")
+      expect(response.headers["Content-Disposition"]).to include("attachment")
     end
 
     it "defaults invalid from/to to current month" do

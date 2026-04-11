@@ -2,9 +2,12 @@ module Pdf
   class BasePdf
     include Prawn::View
 
+    FONT_DIR = Rails.root.join("app/assets/fonts")
+
     def initialize(organization)
       @organization = organization
       @currency = CurrencyConfig.config_for(organization.currency)
+      register_fonts
     end
 
     private
@@ -15,6 +18,18 @@ module Pdf
         (cents / 100).to_s
       @currency[:symbol_position] == :before ?
         "#{@currency[:symbol]}#{value}" : "#{value} #{@currency[:symbol]}"
+    end
+
+    def register_fonts
+      if File.exist?(FONT_DIR.join("Arial.ttf"))
+        document.font_families.update(
+          "Arial" => {
+            normal: FONT_DIR.join("Arial.ttf").to_s,
+            bold: FONT_DIR.join("ArialBold.ttf").to_s
+          }
+        )
+        document.font "Arial"
+      end
     end
 
     def header(title)

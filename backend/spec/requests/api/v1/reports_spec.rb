@@ -150,14 +150,10 @@ RSpec.describe "Api::V1::Reports" do
   describe "GET /api/v1/reports/financial/pdf" do
     it "returns PDF content-type attachment" do
       get "/api/v1/reports/financial/pdf", headers: headers
-      # PDF may fail due to Cyrillic font — both 200 and error are valid
-      if response.status == 200
-        expect(response.content_type).to include("application/pdf")
-        expect(response.headers["Content-Disposition"]).to include("attachment")
-        expect(response.headers["Content-Disposition"]).to include(".pdf")
-      end
-    rescue Prawn::Errors::IncompatibleStringEncoding
-      skip "Prawn font does not support Cyrillic"
+      expect(response).to have_http_status(:ok)
+      expect(response.content_type).to include("application/pdf")
+      expect(response.headers["Content-Disposition"]).to include("attachment")
+      expect(response.headers["Content-Disposition"]).to include(".pdf")
     end
 
     it "returns 403 for unauthorized user" do

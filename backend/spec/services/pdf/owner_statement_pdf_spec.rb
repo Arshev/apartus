@@ -19,12 +19,17 @@ RSpec.describe Pdf::OwnerStatementPdf do
   end
 
   describe "#render_pdf" do
-    it "returns a non-empty PDF binary" do
+    it "returns a valid PDF binary starting with %PDF" do
       pdf = described_class.new(organization, data).render_pdf
       expect(pdf).to be_a(String)
       expect(pdf.bytesize).to be > 100
-    rescue Prawn::Errors::IncompatibleStringEncoding, Encoding::UndefinedConversionError
-      skip "Prawn default font does not support Cyrillic glyphs"
+      expect(pdf.b[0..3]).to eq("%PDF")
+    end
+
+    it "renders without error for empty properties" do
+      empty_data = data.merge(properties: [])
+      pdf = described_class.new(organization, empty_data).render_pdf
+      expect(pdf.bytesize).to be > 100
     end
   end
 end
