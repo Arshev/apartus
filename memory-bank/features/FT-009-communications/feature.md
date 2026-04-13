@@ -15,6 +15,7 @@ audience: humans_and_agents
 ## Scope
 
 **Backend:**
+
 - `REQ-01` `GuestMailer` with 3 emails: `booking_confirmation(reservation)`, `check_in_reminder(reservation)`, `check_out_thank_you(reservation)`.
 - `REQ-02` Auto-send `booking_confirmation` on reservation create (if guest has email).
 - `REQ-03` Auto-send `check_in_reminder` on check_in action.
@@ -24,10 +25,12 @@ audience: humans_and_agents
 - `REQ-07` `GET /api/v1/reservations/:id/notifications` — list sent notifications.
 
 **Frontend:**
+
 - `REQ-08` Reservation detail/edit: notification history panel (read-only list of sent emails).
 - `REQ-09` Specs.
 
 ### Non-Scope
+
 - `NS-01` Telegram/SMS channels.
 - `NS-02` Custom email templates editor.
 - `NS-03` Scheduled reminders (cron-based).

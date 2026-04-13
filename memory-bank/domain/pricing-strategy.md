@@ -83,6 +83,7 @@ Business дешевле Professional при ~40 юнитах — стимул к
 ### Break-even
 
 Channex $130/мес — фиксированный расход на нашу платформу (не per-customer).
+
 - **3 платящих клиента** покрывают Channex
 - **10 клиентов по Professional (avg 15 units)** = MRR ~75 000₽ (~$800/мес). Маржа ~90% до поддержки.
 - **50 клиентов** = MRR ~370 000₽ (~$4000/мес). Здоровый бизнес.
@@ -97,6 +98,7 @@ Channex $130/мес — фиксированный расход на нашу п
 ## Free Tier (Starter) — product-led growth
 
 **Включено** (near-zero cost):
+
 - До 3 юнитов
 - Календарь, бронирования, гости
 - iCal sync
@@ -104,6 +106,7 @@ Channex $130/мес — фиксированный расход на нашу п
 - 1 пользователь
 
 **Исключено** (upgrade triggers):
+
 - Channel manager (наш главный cost)
 - Виджет бронирования
 - Автоматизация сообщений
@@ -116,17 +119,20 @@ Channex $130/мес — фиксированный расход на нашу п
 ## Go-to-Market Phases
 
 ### Phase 1 (Launch, 0-6 мес)
+
 - Free Starter + один paid tier (Professional, упрощённо)
 - Агрессивная цена: 2 900₽ + 300₽/unit (СНГ), $29 + $3/unit (мир)
 - Цель: 50 платящих клиентов, валидация WTP
 
 ### Phase 2 (Growth, 6-18 мес)
+
 - Добавить Business tier
 - Поднять Professional до целевых цен
 - Годовая скидка 20-25%
 - Цель: 200+ клиентов, positive unit economics
 
 ### Phase 3 (Scale, 18+ мес)
+
 - Enterprise с custom pricing
 - Add-on marketplace (revenue management, dynamic pricing, guest screening)
 - Комиссионная модель как опция (3-5% per booking, без подписки)

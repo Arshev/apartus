@@ -30,22 +30,24 @@ audience: humans_and_agents
 
 ## Main Flow
 
-### Export (Apartus → площадка):
+### Export (Apartus → площадка)
+
 1. Менеджер создаёт канал: выбирает юнит, платформу.
 2. Система генерирует `ical_export_token` (SecureRandom.urlsafe_base64).
 3. Export URL: `/api/v1/public/ical/:token.ics` — публичный, без auth.
 4. Менеджер копирует URL (кнопка copy) → вставляет в настройки площадки.
 5. Площадка периодически fetch'ит iCal → видит бронирования.
 
-### Import (площадка → Apartus):
-6. Менеджер вводит iCal import URL от площадки → сохраняет.
-7. Нажимает «Sync» → `POST /channels/:id/sync`.
-8. `ChannelSyncJob` (ActiveJob):
+### Import (площадка → Apartus)
+
+1. Менеджер вводит iCal import URL от площадки → сохраняет.
+2. Нажимает «Sync» → `POST /channels/:id/sync`.
+3. `ChannelSyncJob` (ActiveJob):
    a. Fetch iCal URL → parse VEVENT блоки (DTSTART, DTEND, UID, SUMMARY).
    b. Для каждого event: check if reservation exists (by check_in + check_out + notes:"ical:UID").
    c. Если новый → create Reservation (confirmed, guests_count=1, price=0).
    d. Update `channel.last_synced_at`.
-9. Бронирования появляются в календаре и списке.
+4. Бронирования появляются в календаре и списке.
 
 ## Alternate Flows / Exceptions
 

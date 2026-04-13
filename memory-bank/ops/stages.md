@@ -23,5 +23,5 @@ Apartus находится в фазе разработки, production environm
 
 ## CI Access
 
-- GitHub Actions: https://github.com/Arshev/apartus/actions
+- GitHub Actions: <https://github.com/Arshev/apartus/actions>
 - Coverage badges: auto-update на push в `main`.

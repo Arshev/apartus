@@ -27,7 +27,7 @@ audience: humans_and_agents
 - Язык — английский.
 - Финальный trailer:
 
-  ```
+  ```text
   Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
   ```
 

@@ -12,7 +12,10 @@
     "MD036": false,
     "no-emphasis-as-heading": false,
     "MD013": false,
-    "line-length": false
+    "line-length": false,
+    "MD025": false,
+    "single-title": false,
+    "single-h1": false
   },
   "ignores": [
     "backend/**",

@@ -67,14 +67,14 @@ Canonical feature package: [`../features/FT-HW1-01-property-crud/feature.md`](..
 
 ## Frontend (Vue 3 / JavaScript)
 
-### Structure
+### Frontend Structure
 
 - `<script setup>` Composition API.
 - Pinia для shared state, не props drilling.
 - Vuetify 3 компоненты как базовый UI kit.
 - API клиенты — в `src/services/api/`, axios с interceptors.
 
-### Conventions
+### Frontend Conventions
 
 - **No TypeScript** — см. [`../adr/ADR-002-no-typescript-frontend.md`](../adr/ADR-002-no-typescript-frontend.md).
 - **Composition API** — canonical стиль; Options API только для унаследованного кода.
@@ -86,6 +86,7 @@ Canonical feature package: [`../features/FT-HW1-01-property-crud/feature.md`](..
 ### Full-Stack Delivery Rule
 
 Каждый новый backend endpoint сопровождается frontend surface'ом в том же feature:
+
 1. **API client** (`src/api/<resource>.js`) — thin axios wrapper
 2. **Pinia store** (`src/stores/<resource>.js`) — items/loading/error + CRUD actions
 3. **View** (`src/views/<Resource>*.vue`) — list + form + delete

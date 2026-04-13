@@ -173,6 +173,7 @@ feature.md в Apartus объединяет Brief (What/Problem) и Spec (How/Ver
 ## Combined Review Sessions
 
 Для standard features (large template) допустимо объединить feature review и plan review в одну сессию при условии:
+
 - Это два отдельных прохода (сначала feature.md, потом plan)
 - Review выполняется отдельным агентом (enforcement: автор ≠ ревьюер)
 - Каждый артефакт проходит свой checklist полностью

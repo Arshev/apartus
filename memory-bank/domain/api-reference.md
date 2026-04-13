@@ -22,6 +22,7 @@ Base URL: `/api/v1`. All authenticated endpoints require `Authorization: Bearer 
 ## Error Response Format
 
 All errors return JSON:
+
 - Validation errors: `{ "error": ["message1", "message2"] }` (array)
 - Other errors: `{ "error": "message" }` (string)
 

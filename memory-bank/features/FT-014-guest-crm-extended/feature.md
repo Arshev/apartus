@@ -14,6 +14,7 @@ audience: humans_and_agents
 # FT-014: Guest CRM Extended
 
 ## Scope
+
 - `REQ-01` Guest gets `tags` (text array) and `source` (string) fields.
 - `REQ-02` `GET /api/v1/guests/:id/timeline` — reservation history.
 - `REQ-03` Frontend: tags chips on guest form, timeline on guest detail.

@@ -33,12 +33,14 @@ MVP требует связь Reservation → Guest (WF-04 в problem.md). Мо�
 ### Scope
 
 **Backend:**
+
 - `REQ-01` Model `Guest`: `organization_id` (FK), `first_name` (required), `last_name` (required), `email` (optional, unique per org if present), `phone` (optional), `notes` (text, optional). Multi-tenant scoped.
 - `REQ-02` REST API `GET/POST/PATCH/DELETE /api/v1/guests`, `GET /api/v1/guests/:id`. Org-scoped via `Current.organization.guests`. 404 on cross-org. Pundit policy (owner/manager full, member read-only).
 - `REQ-03` Migration: `create_guests` с FK, indexes, unique partial index on `[organization_id, LOWER(email)] WHERE email IS NOT NULL`.
 - `REQ-04` Backend specs: request spec (happy + auth + authz + validation + cross-org), model spec, factory.
 
 **Frontend:**
+
 - `REQ-05` API client `api/guests.js`: list, get, create, update, destroy.
 - `REQ-06` Pinia store `stores/guests.js`: items, loading, error + CRUD actions (FE2 pattern).
 - `REQ-07` `GuestListView.vue` (`/guests`): `v-data-table` с name, email, phone, actions. Empty state. Delete confirmation. Search/filter by name later (NS).

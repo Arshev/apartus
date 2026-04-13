@@ -32,6 +32,7 @@ All money values stored as **integer cents** (ADR-004). Column suffix: `_cents`.
 ## Commission Rates
 
 `Owner.commission_rate` stored as **basis points** (integer):
+
 - 1500 = 15.0%
 - 2000 = 20.0%
 - 500 = 5.0%
@@ -65,6 +66,7 @@ Each organization has `currency` field (string, default "RUB").
 ## Display (Frontend)
 
 `formatMoney(cents, currencyCode)` in `src/utils/currency.js`:
+
 - `formatMoney(15000, 'RUB')` → `"150.00 ₽"`
 - `formatMoney(15000, 'USD')` → `"$150.00"`
 - `formatMoney(150000, 'UZS')` → `"1500 сўм"` (zero decimals)

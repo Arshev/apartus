@@ -26,6 +26,7 @@ MVP core workflow WF-02: ручное создание бронирований,
 ### Scope
 
 **Backend:**
+
 - `REQ-01` Model `Reservation`: `unit_id` (FK), `guest_id` (FK, optional — блокировки без гостя), `check_in` (date, required), `check_out` (date, required, > check_in), `status` (enum: confirmed/checked_in/checked_out/cancelled), `guests_count` (integer, ≥1), `total_price_cents` (integer, ≥0, default 0), `notes` (text, optional). Multi-tenant через unit.property.organization.
 - `REQ-02` **Date overlap validation**: два confirmed/checked_in бронирования одного unit не могут пересекаться по датам. Cancelled — не блокируют. Custom validation + DB exclusion constraint.
 - `REQ-03` REST API `CRUD /api/v1/reservations`. Org-scoped: `Current.organization.units.joins(:property)` → reservations. Query params: `unit_id` (filter by unit), `from`/`to` (date range filter для календаря). 404 cross-org.
@@ -33,6 +34,7 @@ MVP core workflow WF-02: ручное создание бронирований,
 - `REQ-05` Backend specs: request spec, model spec (overlap validation, status transitions), factory.
 
 **Frontend:**
+
 - `REQ-06` API client `api/reservations.js`: list (with filters), get, create, update, destroy, checkIn, checkOut, cancel.
 - `REQ-07` Pinia store `stores/reservations.js`.
 - `REQ-08` `ReservationListView.vue` (`/reservations`): table с unit name, guest name, check_in/out, status, price, actions. Filter by status. Status badges с цветами.

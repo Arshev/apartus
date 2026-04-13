@@ -17,7 +17,7 @@ canonical_for:
 
 ## Архитектурный паттерн: Adapter + Event Bus
 
-```
+```text
 [Booking Event] → EventBus → [ChannelManagerAdapter]
                             → [PaymentAdapter]
                             → [NotificationAdapter]

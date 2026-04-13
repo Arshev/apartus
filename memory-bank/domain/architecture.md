@@ -43,7 +43,7 @@ canonical_for:
 
 Monorepo — см. [`../adr/ADR-001-monorepo-structure.md`](../adr/ADR-001-monorepo-structure.md):
 
-```
+```text
 apartus/
 ├── backend/     Rails API
 ├── frontend/    Vue SPA

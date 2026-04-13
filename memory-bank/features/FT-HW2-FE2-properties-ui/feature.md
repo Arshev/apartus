@@ -80,6 +80,7 @@ Branch selector в create/edit форме: inline `GET /api/v1/branches` чер�
 Validation: client-side через Vuetify `v-form` rules, backend errors маппятся по полю через helper.
 
 Reference patterns из FE1, использованные в FE2:
+
 1. **Layout composition** — PropertyListView/PropertyFormView рендерятся в `DefaultLayout → v-main → router-view`.
 2. **Route meta + guard** — `meta.requiresAuth: true`.
 3. **Pinia store shape** — `loading`, `error`, `items`, async actions с try/catch/finally.

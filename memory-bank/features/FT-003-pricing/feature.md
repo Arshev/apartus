@@ -23,6 +23,7 @@ MVP WF-03: базовое ценообразование. Сейчас total_pri
 ### Scope
 
 **Backend:**
+
 - `REQ-01` Поле `base_price_cents` (integer, ≥0, default 0) на модели Unit. Migration.
 - `REQ-02` Model `SeasonalPrice`: `unit_id` (FK), `start_date`, `end_date`, `price_cents` (integer, ≥0). No overlap validation per unit. Org-scoped через unit.
 - `REQ-03` API `CRUD /api/v1/units/:unit_id/seasonal_prices`. Nested under unit.
@@ -31,6 +32,7 @@ MVP WF-03: базовое ценообразование. Сейчас total_pri
 - `REQ-06` Backend specs.
 
 **Frontend:**
+
 - `REQ-07` Unit form: поле `base_price_cents` (цена за ночь).
 - `REQ-08` Unit detail: seasonal prices table + dialog CRUD.
 - `REQ-09` Reservation form: при выборе unit + dates → авторасчёт total_price_cents (вызов API или frontend калькулятор).

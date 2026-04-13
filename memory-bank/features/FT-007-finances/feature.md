@@ -15,6 +15,7 @@ audience: humans_and_agents
 ## Scope
 
 **Backend:**
+
 - `REQ-01` Model `Expense`: `organization_id` (FK), `property_id` (FK, optional), `category` (enum: maintenance/utilities/cleaning/supplies/other), `amount_cents` (integer, >0), `description` (text), `expense_date` (date). Org-scoped.
 - `REQ-02` REST CRUD `/api/v1/expenses`. Filter by property_id, category, date range.
 - `REQ-03` `GET /api/v1/reports/financial?from=&to=` — aggregated report:
@@ -29,6 +30,7 @@ audience: humans_and_agents
 - `REQ-04` Backend specs.
 
 **Frontend:**
+
 - `REQ-05` `/expenses` — expense list + CRUD (dialog-based, simple).
 - `REQ-06` `/reports` — financial report page with KPI cards + breakdowns.
 - `REQ-07` API clients + specs.
