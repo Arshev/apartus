@@ -90,18 +90,31 @@ Apartus — SaaS Property Management System (PMS) для управления к
 | Reservation calendar | yes | done full-stack (FT-002) | `features/FT-002-reservations/` |
 | Pricing (base + seasonal) | yes | done full-stack (FT-003) | `features/FT-003-pricing/` |
 | Property/Unit photos | yes | done full-stack (FT-004) | `features/FT-004-photos/` |
-| Channel Manager, Widget, Finances, Owners, CRM full, Tasks, Communications, Loyalty, Dynamic pricing | no (post-MVP) | not started | — |
+| Dashboard analytics | yes | done full-stack (FT-005) | `features/FT-005-dashboard-analytics/` |
+| Calendar view | yes | done full-stack (FT-006) | `features/FT-006-calendar-view/` |
+| Finances (expenses + reports) | yes | done full-stack (FT-007) | `features/FT-007-finances/` |
+| Tasks (kanban) | yes | done full-stack (FT-008) | `features/FT-008-tasks/` |
+| Communications (email) | yes | done full-stack (FT-009) | `features/FT-009-communications/` |
+| Booking widget | yes | done full-stack (FT-010) | `features/FT-010-booking-widget/` |
+| Channel Manager (iCal) | yes | done full-stack (FT-011) | `features/FT-011-channel-manager/` |
+| Owner module | yes | done full-stack (FT-012) | `features/FT-012-owner-module/` |
+| Dynamic pricing | yes | done full-stack (FT-013) | `features/FT-013-dynamic-pricing/` |
+| Guest CRM extended | yes | done full-stack (FT-014) | `features/FT-014-guest-crm-extended/` |
+| Configurable currency | yes | done full-stack (FT-015) | `features/FT-015-configurable-currency/` |
+| Telegram notifications | no (platform) | done full-stack (FT-016) | `features/FT-016-telegram-bot/` |
+| PDF export | no (platform) | done full-stack (FT-017) | `features/FT-017-pdf-export/` |
+| Subscription plans | no (platform) | done full-stack (FT-018) | `features/FT-018-subscriptions/` |
 
 ## Backlog (запланировано, не начато)
 
-| Item | Description | Priority |
-|---|---|---|
-| Configurable currency | Валюта per organization (currency code + symbol + decimal places в org settings). Сейчас hardcoded ₽. Требует: поле `currency` в Organization, frontend formatter с symbol/locale, API возвращает currency рядом с money fields. | high |
-| Multi-currency | Поддержка нескольких валют в одной org (конвертация, курсы) | low |
-| i18n (vue-i18n) | Вынос UI строк в i18n файлы, переключение языка | medium |
-| Visual calendar (month view) | Помесячный grid-календарь помимо timeline | medium |
-| PDF export (reports, statements) | Генерация PDF для отчётов и актов собственникам | medium |
-| Drag-and-drop calendar | Перетаскивание бронирований на timeline | low |
+| Item | Description | Priority | Feature |
+|---|---|---|---|
+| i18n (vue-i18n) | Вынос UI строк в i18n файлы, переключение языка ru/en | high | FT-019 (planned) |
+| Multi-currency | Поддержка нескольких валют в одной org (конвертация, курсы) | low | — |
+| Visual calendar (month view) | Помесячный grid-календарь помимо timeline | medium | — |
+| Drag-and-drop calendar | Перетаскивание бронирований на timeline | low | — |
+| AI yield management | Автоматическая оптимизация цен на основе спроса | low | — |
+| Unified Inbox | Единый inbox для сообщений из всех каналов | low | — |
 | AI yield management | ML-based dynamic pricing на основе исторических данных | low |
 | Telegram bot | Уведомления + управление через Telegram | low |
 | Unified Inbox | Агрегация сообщений из каналов + email | low |

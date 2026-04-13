@@ -7,6 +7,7 @@ derived_from:
   - architecture.md
 status: active
 audience: humans_and_agents
+last_verified: 2026-04-13
 canonical_for:
   - apartus_data_model_snapshot
 ---

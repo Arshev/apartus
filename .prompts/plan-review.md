@@ -1,5 +1,7 @@
 # Prompt: Plan Review (Design Ready → Plan Ready)
 
+**ENFORCEMENT:** Автор implementation-plan.md НЕ МОЖЕТ быть ревьюером. Review ОБЯЗАН выполняться отдельным агентом с чистым контекстом. См. [`memory-bank/engineering/autonomy-boundaries.md`](../memory-bank/engineering/autonomy-boundaries.md) секция "Lifecycle Enforcement".
+
 Ревью `implementation-plan.md` по gate "Design Ready → Plan Ready".
 
 ## Checklist
@@ -21,3 +23,5 @@
 Для каждого fail: цитата, почему проблема, как исправить.
 
 Если 0 замечаний — "0 замечаний, план готов к `status: active` (Plan Ready), feature переводится в `delivery_status: in_progress`".
+
+Типичное число итераций: 1-3. Если замечания не уменьшаются за 3 итерации — проблема upstream (feature.md), эскалируй.

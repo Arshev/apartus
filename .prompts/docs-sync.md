@@ -21,6 +21,10 @@
 - Дублировать один и тот же факт в нескольких местах (SSoT violation).
 - Оставлять "TODO: sync docs" в коде — сразу обновляй.
 
+## Freshness markers
+
+После обновления canonical owner — обнови `last_verified: YYYY-MM-DD` в frontmatter high-churn документов (schema.md, testing-policy.md, features/README.md, api-reference.md, frontend.md). Подробнее: [`memory-bank/dna/lifecycle.md`](../memory-bank/dna/lifecycle.md) секция "Staleness Detection".
+
 ## Выход
 
 Список тронутых документов с коротким описанием изменений + подтверждение, что всё в актуальной консистентности.

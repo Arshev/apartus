@@ -17,6 +17,8 @@ canonical_for:
 
 # FT-XXX: Feature Name
 
+> **Как использовать:** копируй только содержимое секций "Instantiated Frontmatter" (YAML) и "Instantiated Body" (markdown). Всё остальное — wrapper-документация, не копируется.
+
 Этот файл описывает wrapper-template. Инстанцируемый `feature.md` живет ниже как embedded contract и копируется без wrapper frontmatter и history.
 
 ## Wrapper Notes

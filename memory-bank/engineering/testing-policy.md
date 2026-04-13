@@ -12,6 +12,7 @@ canonical_for:
   - coverage_ratchet_rules
   - simplify_review_discipline
 audience: humans_and_agents
+last_verified: 2026-04-13
 ---
 
 # Testing Policy
@@ -62,9 +63,10 @@ cd frontend && yarn build
 
 - После merge каждой feature смотрим фактический процент покрытия и поднимаем floor до `floor(actual) - 1` (буфер против флейков).
 - **Никогда не понижаем** существующий порог без ADR.
-- Текущие значения (обновлять по мере работы):
-  - Backend: 98 (actual 99.23%; 1105 specs, 0 pending — 14 lines uncoverable: DB constraint rescues, rate_limit, ActiveStorage error)
-  - Frontend: 93 (actual 94.41%; 409 specs — all JS 100%, remaining ~6% is Vue template rendering covered by 220 E2E specs)
+- Текущие ratchet thresholds (enforced через CI):
+  - Backend: `SimpleCov.minimum_coverage line: 98` (`backend/spec/spec_helper.rb`)
+  - Frontend: `test.coverage.thresholds.lines: 93` (`frontend/vitest.config.js`)
+- Фактические числа (spec counts, actual %) — в CI output. Не дублируются здесь, чтобы не устаревали.
 
 ## Ownership Split
 
@@ -117,8 +119,9 @@ cd frontend && yarn build
 
 ## Verification Context Separation
 
-1. Функциональная верификация (tests pass, SC-* покрыты)
-2. Simplify review (код минимально сложен)
-3. Acceptance по `SC-*` end-to-end
+1. **Функциональная верификация** — tests pass, SC-* покрыты
+2. **Agent-first code review** — соответствие спеке, безопасность, архитектура (см. [`.prompts/code-review.md`](../../.prompts/code-review.md))
+3. **Simplify review** — код минимально сложен
+4. **Acceptance** — end-to-end по `SC-*`
 
-Для мелких feature допустимо в одной сессии, но simplify review никогда не пропускается.
+Каждый проход — логически отдельный. Для мелких features допустимо в одной сессии, но simplify review никогда не пропускается.

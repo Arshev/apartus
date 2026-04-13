@@ -32,7 +32,7 @@ audience: humans_and_agents
 2a. **Full-stack delivery rule.** Каждый новый API endpoint должен быть закрыт frontend surface'ом (API client + store + UI) в рамках того же feature package. Вынос frontend в отдельную фичу допустим только если backend и frontend разрабатываются разными людьми с явным handoff через `feature.md`. Агент, реализующий backend CRUD, обязан в `Change Surface` указать frontend touchpoints и либо реализовать их, либо зафиксировать gap как `NS-*` с обоснованием и deadline в `DEC-*`. Цель — не допускать накопления "backend без UI" долга.
 3. `feature.md` — canonical owner intent, delivery-scoped target outcome/KPI, design и verify для delivery-единицы.
 4. `README.md` создается вместе с `feature.md` и остается routing-слоем на всем lifecycle.
-5. `implementation-plan.md` — derived execution-документ. Он не должен существовать, пока sibling `feature.md` не стал design-ready.
+5. `implementation-plan.md` — derived execution-документ. Он не должен существовать, пока sibling `feature.md` не стал design-ready. **Исключение:** для short features (`short.md`) implementation-plan не обязателен — execution checklist может быть встроен в feature.md (см. "Short Feature Fast Track" ниже).
 6. Для canonical `feature.md`, feature-level `README.md` и `implementation-plan.md` используй wrapper-шаблоны из `memory-bank/flows/templates/feature/`: сам template-файл имеет `doc_function: template`, а frontmatter/body инстанцируемого документа живут внутри embedded template contract.
 7. Смысл стабильных идентификаторов (`REQ-*`, `NS-*`, `CHK-*`, `STEP-*` и т.д.) задается в секции «Stable Identifiers» ниже.
 8. Acceptance scenarios (`SC-*`) покрывают vertical slice end-to-end: от входного события до наблюдаемого результата через все затронутые слои. Тестирование отдельного слоя в изоляции допустимо как implementation detail плана, но не заменяет end-to-end acceptance.
@@ -51,6 +51,17 @@ audience: humans_and_agents
 
 Если хотя бы одно условие нарушается, агент обязан выбрать или сделать upgrade до `large.md` до продолжения работы. Upgrade обязателен и в том случае, если фича стартовала как `short.md`, но по ходу работы потребовала `ASM-*`, `DEC-*`, `CTR-*`, `FM-*`, больше одного acceptance scenario или больше одного `CHK-*` / `EVID-*`.
 
+## Short Feature Fast Track
+
+Для фич, использующих `short.md` template, допускается упрощённый flow:
+
+1. **Implementation-plan не обязателен.** Вместо отдельного `implementation-plan.md` используй секцию "Execution Checklist" прямо в `feature.md` — список шагов без формальных `STEP-*`/`PRE-*`/`OQ-*`.
+2. **Feature review в той же сессии.** Draft и review могут быть в одной сессии (но review — по-прежнему отдельный проход через Agent tool, не self-review).
+3. **Lifecycle сокращается:** Draft → Design Ready → Execution → Done (пропускается Plan Ready gate).
+4. **Code review и simplify review** остаются обязательными.
+
+**Upgrade rule:** если по ходу работы фича вырастает за пределы short template — upgrade до large.md и полный flow.
+
 ## Lifecycle
 
 ```mermaid
@@ -62,6 +73,7 @@ flowchart LR
     PR --> CL
     EX --> DN["Done<br/>delivery_status: done<br/>plan: archived"]
     EX --> CL
+    DR -->|"short only"| EX
 ```
 
 ## Transition Gates
@@ -129,16 +141,15 @@ flowchart LR
 
 ## Test Ownership Summary
 
-Canonical testing policy живёт в [../engineering/testing-policy.md](../engineering/testing-policy.md). Ниже — выжимка, достаточная для создания feature package без обращения к policy-документу.
+Canonical source: [../engineering/testing-policy.md](../engineering/testing-policy.md). Ключевые правила для feature package:
 
-1. **Canonical test cases** delivery-единицы задаются в `feature.md` через `SC-*`, feature-specific `NEG-*`, `CHK-*` и `EVID-*`. `implementation-plan.md` владеет только стратегией исполнения: какие suites добавить, какие gaps временно manual-only и почему.
-2. **Sufficient coverage** = покрыт основной changed behavior, новые или измененные contracts, критичные failure modes из `FM-*` и feature-specific negative/edge scenarios, если они меняют verdict. Процент line coverage сам по себе недостаточен.
-3. **Manual-only допустим** только как явное исключение (live infra, hardware, недетерминированная среда). Для каждого gap — причина, ручная процедура или `EVID-*`, owner follow-up и approval ref через `AG-*`.
-4. **К Design Ready** `feature.md` уже фиксирует test case inventory: минимум один `SC-*`, traceability к `REQ-*`. К `Done` — automated tests добавлены, обязательные suites зелёные локально и в CI.
-5. **Simplify review** — отдельный проход после функциональных тестов, до closure. Цель: убедиться, что код минимально сложен. Три похожие строки лучше premature abstraction. Complexity оправдана только со ссылкой на `CON-*`, `FM-*` или `DEC-*`.
-6. **Verification context separation** — функциональная верификация, simplify review и acceptance test — три логически отдельных прохода. Между проходами агент формулирует выводы до начала следующего. Для short features допустимо в одной сессии, но simplify review не пропускается.
+- **Test cases** задаются в `feature.md` (`SC-*`, `NEG-*`, `CHK-*`, `EVID-*`). `implementation-plan.md` владеет только стратегией исполнения.
+- **К Design Ready** — минимум один `SC-*`, traceability к `REQ-*`. К `Done` — automated tests добавлены, suites зелёные.
+- **Verification passes** — см. [testing-policy.md](../engineering/testing-policy.md#verification-context-separation).
 
-## Stable Identifiers
+## Appendix: Stable Identifiers
+
+> Reference-секция. При первом знакомстве достаточно знать: `REQ-*` (scope), `NS-*` (non-scope), `SC-*` (acceptance scenarios), `CHK-*` (checks), `EVID-*` (evidence). Остальные — по мере необходимости.
 
 ### Feature IDs
 

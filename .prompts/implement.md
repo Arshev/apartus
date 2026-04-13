@@ -7,7 +7,7 @@
 1. Прочитай sibling `feature.md` — canonical owner scope/verify.
 2. Прочитай `implementation-plan.md` целиком.
 3. Убедись что `feature.md` → `status: active`, `delivery_status: in_progress`, `implementation-plan.md` → `status: active`.
-4. Прочитай [`memory-bank/engineering/coding-style.md`](../memory-bank/engineering/coding-style.md), [`memory-bank/engineering/testing-policy.md`](../memory-bank/engineering/testing-policy.md), [`memory-bank/engineering/autonomy-boundaries.md`](../memory-bank/engineering/autonomy-boundaries.md).
+4. Прочитай [`memory-bank/engineering/coding-style.md`](../memory-bank/engineering/coding-style.md), [`memory-bank/engineering/testing-policy.md`](../memory-bank/engineering/testing-policy.md), [`memory-bank/engineering/autonomy-boundaries.md`](../memory-bank/engineering/autonomy-boundaries.md), [`memory-bank/engineering/git-workflow.md`](../memory-bank/engineering/git-workflow.md) (branching, commit conventions).
 
 ## Цикл исполнения
 
@@ -23,13 +23,14 @@
 ## После всех STEP
 
 1. Запусти все `CHK-*` из feature.md — все pass/fail результаты в evidence.
-2. **Simplify review** — отдельный проход: premature abstractions, dead code, duplication, over-engineering. Три похожие строки ≠ проблема. Complexity должна быть оправдана `CON-*` / `FM-*` / `DEC-*`.
-3. **Acceptance** — прогонись по `SC-*` end-to-end.
-4. Обнови upstream по lifecycle rules ([`memory-bank/dna/lifecycle.md`](../memory-bank/dna/lifecycle.md)):
+2. **Agent-first code review** — запусти `.prompts/code-review.md` как отдельный проход. Проверь соответствие спеке, безопасность, тесты, архитектуру. Итерируй до 0 замечаний.
+3. **Simplify review** — отдельный проход. Правила: [`memory-bank/engineering/testing-policy.md`](../memory-bank/engineering/testing-policy.md) секция "Simplify Review".
+4. **Acceptance** — прогонись по `SC-*` end-to-end.
+5. Обнови upstream по lifecycle rules ([`memory-bank/dna/lifecycle.md`](../memory-bank/dna/lifecycle.md)):
    - Если код изменил schema → обнови `memory-bank/domain/schema.md`.
    - Если решение нетривиальное → новый ADR.
    - Обнови `feature.md` → `delivery_status: done`, `implementation-plan.md` → `status: archived`.
-5. Fine-grained коммиты по ходу (не batch в конце).
+6. Fine-grained коммиты по ходу (не batch в конце).
 
 ## Выход
 
