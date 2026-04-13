@@ -15,6 +15,7 @@ audience: humans_and_agents
 ## Scope
 
 **Backend:**
+
 - `REQ-01` Model `Owner`: `organization_id` (FK), `name`, `email`, `phone`, `commission_rate` (integer, basis points, e.g. 1500 = 15%), `notes`.
 - `REQ-02` `Property` gets optional `owner_id` FK — links property to its owner.
 - `REQ-03` CRUD API `/api/v1/owners`.
@@ -26,12 +27,14 @@ audience: humans_and_agents
 - `REQ-05` Backend specs.
 
 **Frontend:**
+
 - `REQ-06` `/owners` — owner list + CRUD.
 - `REQ-07` Property form: owner selector.
 - `REQ-08` Owner statement page with KPI cards.
 - `REQ-09` API + store + specs + sidebar.
 
 ### Non-Scope
+
 - `NS-01` Payment processing / bank transfers.
 - `NS-02` PDF statement export.
 - `NS-03` Owner self-service portal.

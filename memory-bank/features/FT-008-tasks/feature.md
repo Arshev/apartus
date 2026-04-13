@@ -15,11 +15,13 @@ audience: humans_and_agents
 ## Scope
 
 **Backend:**
+
 - `REQ-01` Model `Task`: `organization_id` (FK), `property_id` (FK, optional), `unit_id` (FK, optional), `assigned_to_id` (FK User, optional), `title` (required), `description` (text), `status` (enum: pending/in_progress/completed), `priority` (enum: low/medium/high/urgent), `due_date` (date, optional), `category` (enum: cleaning/maintenance/inspection/other).
 - `REQ-02` REST CRUD `/api/v1/tasks`. Filter by status, priority, property_id, assigned_to_id.
 - `REQ-03` Backend specs.
 
 **Frontend:**
+
 - `REQ-04` `/tasks` — kanban board: 3 columns (pending / in_progress / completed). Cards show title, priority badge, due date, assignee.
 - `REQ-05` Create/edit task via dialog.
 - `REQ-06` Drag (click) to change status (move between columns).

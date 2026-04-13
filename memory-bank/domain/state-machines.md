@@ -17,7 +17,7 @@ canonical_for:
 
 ## Reservation Status
 
-```
+```text
 confirmed ──→ checked_in ──→ checked_out
     │              │
     └──→ cancelled ←┘
@@ -38,7 +38,7 @@ confirmed ──→ checked_in ──→ checked_out
 
 ## Task Status
 
-```
+```text
 pending ──→ in_progress ──→ completed
 ```
 

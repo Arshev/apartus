@@ -18,7 +18,7 @@ audience: humans_and_agents
 
 ### Backend file layout
 
-```
+```text
 backend/config/
 ├── application.rb
 ├── database.yml
@@ -33,7 +33,7 @@ backend/config/
 
 ### Frontend env
 
-```
+```text
 frontend/
 ├── .env                  # committed defaults
 └── .env.local            # gitignored overrides

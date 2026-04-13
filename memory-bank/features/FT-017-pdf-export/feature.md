@@ -16,6 +16,7 @@ audience: humans_and_agents
 ## Scope
 
 **Backend:**
+
 - `REQ-01` Prawn-based PDF generation: `Pdf::BasePdf`, `Pdf::FinancialReportPdf`, `Pdf::OwnerStatementPdf`.
 - `REQ-02` `Pdf::BasePdf` — registers Arial TTF font (Cyrillic), provides `fmt(cents)` and `header(title)`.
 - `REQ-03` `GET /api/v1/reports/financial/pdf` — financial report PDF attachment.
@@ -24,10 +25,12 @@ audience: humans_and_agents
 - `REQ-06` Owner PDF: owner name, commission, summary, per-property breakdown.
 
 **Frontend:**
+
 - `REQ-07` Reports: "Скачать PDF" button → `downloadFinancialReport()`.
 - `REQ-08` Owner Statement: "PDF" button → `downloadOwnerStatement(ownerId)`.
 
 ### Non-Scope
+
 - `NS-01` Custom PDF templates or branding.
 - `NS-02` PDF preview in browser.
 

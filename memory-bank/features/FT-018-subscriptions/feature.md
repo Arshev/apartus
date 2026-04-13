@@ -16,6 +16,7 @@ audience: humans_and_agents
 ## Scope
 
 **Backend:**
+
 - `REQ-01` `PlanConfig` concern: 4 plans with limits (max_units, max_users, max_channels) and feature flags (channel_manager, booking_widget, automation, pdf_export).
 - `REQ-02` `Organization.plan` field (string, default "starter", validated).
 - `REQ-03` Helper methods: `can_add_units?`, `can_add_users?`, `has_feature?(feature)`.
@@ -23,9 +24,11 @@ audience: humans_and_agents
 - `REQ-05` Plan config in organization API response.
 
 **Frontend:**
+
 - `REQ-06` Frontend reads `plan_config` from organization response.
 
 ### Non-Scope
+
 - `NS-01` Payment integration.
 - `NS-02` API-level enforcement (future).
 - `NS-03` Plan upgrade/downgrade UI.

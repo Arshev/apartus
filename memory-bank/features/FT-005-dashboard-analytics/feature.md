@@ -15,6 +15,7 @@ audience: humans_and_agents
 ## Scope
 
 **Backend:**
+
 - `REQ-01` `GET /api/v1/dashboard` — агрегированные метрики за период (default: текущий месяц):
   - `total_units` — кол-во юнитов в org
   - `occupied_units` — юниты с active (confirmed/checked_in) бронированием на сегодня
@@ -25,6 +26,7 @@ audience: humans_and_agents
   - `reservations_by_status` — count per status { confirmed, checked_in, checked_out, cancelled }
 
 **Frontend:**
+
 - `REQ-02` Заменить текущий DashboardView (приветствие) на информативный dashboard:
   - KPI cards: Total Units, Occupancy Rate (%), Revenue This Month (₽)
   - Upcoming check-ins/outs tables (compact)

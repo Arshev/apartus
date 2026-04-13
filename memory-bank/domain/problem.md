@@ -115,9 +115,9 @@ Apartus — SaaS Property Management System (PMS) для управления к
 | Drag-and-drop calendar | Перетаскивание бронирований на timeline | low | — |
 | AI yield management | Автоматическая оптимизация цен на основе спроса | low | — |
 | Unified Inbox | Единый inbox для сообщений из всех каналов | low | — |
-| AI yield management | ML-based dynamic pricing на основе исторических данных | low |
-| Telegram bot | Уведомления + управление через Telegram | low |
-| Unified Inbox | Агрегация сообщений из каналов + email | low |
+| AI yield management | ML-based dynamic pricing на основе исторических данных | low | — |
+| Telegram bot | Уведомления + управление через Telegram | low | — |
+| Unified Inbox | Агрегация сообщений из каналов + email | low | — |
 
 ## Source Documents
 

@@ -16,6 +16,7 @@ audience: humans_and_agents
 ## Scope
 
 **Backend:**
+
 - `REQ-01` Model `Channel`: `unit_id` (FK), `platform` (enum: booking_com/airbnb/ostrovok/other), `ical_export_url` (auto-generated unique token), `ical_import_url` (URL to external calendar), `sync_enabled` (boolean), `last_synced_at`.
 - `REQ-02` **iCal Export** (`GET /api/v1/public/ical/:token.ics`): generates ICS file from unit's reservations. No auth — token-based access. VEVENT per active reservation.
 - `REQ-03` **iCal Import**: `ChannelSyncJob` (ActiveJob) fetches external iCal URL, parses events, creates/updates reservations with `source: "ical"` marker. Runs on manual trigger or periodic (cron placeholder).
@@ -23,12 +24,14 @@ audience: humans_and_agents
 - `REQ-05` Backend specs.
 
 **Frontend:**
+
 - `REQ-06` `/channels` — channel connections list: unit name, platform, export URL (copyable), import URL, sync status, last synced.
 - `REQ-07` Dialog to add/edit channel connection. "Sync Now" button for manual import.
 - `REQ-08` API client + store + specs.
 - `REQ-09` Sidebar nav.
 
 ### Non-Scope
+
 - `NS-01` OAuth-based API integrations (Booking.com Partner API, Airbnb API).
 - `NS-02` Two-way rate/price sync.
 - `NS-03` Automatic periodic sync (cron setup — infrastructure concern).
