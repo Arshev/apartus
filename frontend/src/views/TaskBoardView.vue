@@ -1,12 +1,12 @@
 <template>
-  <v-container fluid>
-    <div class="d-flex align-center mb-4">
-      <h1 class="text-h4">Задачи</h1>
+  <v-container fluid class="pa-6">
+    <div class="d-flex align-center mb-6">
+      <h1 class="text-h5 font-weight-bold">Задачи</h1>
       <v-spacer />
       <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate">Новая задача</v-btn>
     </div>
 
-    <v-progress-linear v-if="store.loading" indeterminate class="mb-4" />
+    <v-progress-linear v-if="store.loading" indeterminate color="primary" class="mb-4" />
     <v-alert v-if="store.error" type="error" class="mb-4" closable @click:close="store.error = null">
       {{ store.error }}
     </v-alert>
@@ -14,37 +14,58 @@
     <v-row>
       <v-col v-for="col in columns" :key="col.status" cols="12" md="4">
         <v-card variant="outlined">
-          <v-card-title class="text-subtitle-1">{{ col.title }} ({{ col.items.length }})</v-card-title>
-          <v-card-text>
+          <div class="d-flex align-center px-4 py-3">
+            <v-icon size="12" :color="col.color" class="mr-2">mdi-circle</v-icon>
+            <span class="text-body-1 font-weight-bold">{{ col.title }}</span>
+            <v-chip size="x-small" class="ml-2" :color="col.color" variant="tonal">{{ col.items.length }}</v-chip>
+          </div>
+          <v-divider />
+          <div class="pa-2">
             <v-card
               v-for="task in col.items"
               :key="task.id"
-              class="mb-2"
-              variant="tonal"
-              :color="priorityColor(task.priority)"
+              class="mb-2 task-card"
+              :class="`border-priority-${task.priority}`"
+              variant="flat"
             >
-              <v-card-title class="text-body-1">{{ task.title }}</v-card-title>
-              <v-card-subtitle>
-                <v-chip size="x-small" :color="priorityColor(task.priority)">{{ priorityLabel(task.priority) }}</v-chip>
-                <span v-if="task.due_date" class="ml-2 text-caption">{{ task.due_date }}</span>
-                <span v-if="task.assigned_to_name" class="ml-2 text-caption">→ {{ task.assigned_to_name }}</span>
-              </v-card-subtitle>
-              <v-card-actions>
-                <v-btn v-if="task.status !== 'completed'" size="x-small" variant="text"
-                  @click="moveForward(task)">{{ task.status === 'pending' ? 'В работу' : 'Завершить' }}</v-btn>
-                <v-btn size="x-small" variant="text" @click="openEdit(task)">Изменить</v-btn>
-                <v-btn size="x-small" variant="text" color="error" @click="confirmDelete(task)">Удалить</v-btn>
-              </v-card-actions>
+              <v-card-text class="pa-3 pb-1">
+                <div class="text-body-2 font-weight-medium mb-1">{{ task.title }}</div>
+                <div class="d-flex flex-wrap align-center" style="gap:6px">
+                  <span v-if="task.due_date" class="d-flex align-center text-caption text-medium-emphasis">
+                    <v-icon size="12" class="mr-1">mdi-calendar-outline</v-icon>{{ task.due_date }}
+                  </span>
+                  <span v-if="task.assigned_to_name" class="d-flex align-center text-caption text-medium-emphasis">
+                    <v-icon size="12" class="mr-1">mdi-account-outline</v-icon>{{ task.assigned_to_name }}
+                  </span>
+                </div>
+              </v-card-text>
+              <div class="d-flex align-center px-3 pb-2" style="gap:4px">
+                <v-chip size="x-small" :color="priorityColor(task.priority)" variant="flat" label>
+                  {{ priorityLabel(task.priority) }}
+                </v-chip>
+                <v-spacer />
+                <v-btn
+                  v-if="task.status !== 'completed'"
+                  size="x-small"
+                  variant="tonal"
+                  color="primary"
+                  @click="moveForward(task)"
+                >
+                  {{ task.status === 'pending' ? 'В работу' : 'Завершить' }}
+                </v-btn>
+                <v-btn size="x-small" icon="mdi-pencil" variant="text" @click="openEdit(task)" />
+                <v-btn size="x-small" icon="mdi-delete" variant="text" color="error" @click="confirmDelete(task)" />
+              </div>
             </v-card>
-            <div v-if="!col.items.length" class="text-medium-emphasis text-center pa-4">Пусто</div>
-          </v-card-text>
+            <div v-if="!col.items.length" class="text-medium-emphasis text-caption text-center pa-6">Задач нет</div>
+          </div>
         </v-card>
       </v-col>
     </v-row>
 
     <v-dialog v-model="formDialog" max-width="500">
       <v-card>
-        <v-card-title>{{ editing ? 'Редактировать' : 'Новая задача' }}</v-card-title>
+        <v-card-title>{{ editing ? 'Редактировать задачу' : 'Новая задача' }}</v-card-title>
         <v-card-text>
           <v-text-field v-model="form.title" label="Название" class="mb-2" />
           <v-select v-model="form.priority" label="Приоритет" :items="priorities" item-title="label" item-value="value" class="mb-2" />
@@ -82,9 +103,9 @@ import { useTasksStore } from '../stores/tasks'
 const store = useTasksStore()
 
 const columns = computed(() => [
-  { status: 'pending', title: 'Ожидает', items: store.pending },
-  { status: 'in_progress', title: 'В работе', items: store.inProgress },
-  { status: 'completed', title: 'Завершено', items: store.completed },
+  { status: 'pending', title: 'Ожидает', color: 'warning', items: store.pending },
+  { status: 'in_progress', title: 'В работе', color: 'info', items: store.inProgress },
+  { status: 'completed', title: 'Завершено', color: 'success', items: store.completed },
 ])
 
 const priorities = [
@@ -100,7 +121,7 @@ const categories = [
   { label: 'Прочее', value: 'other' },
 ]
 
-const priorityColors = { low: 'grey', medium: 'blue', high: 'orange', urgent: 'red' }
+const priorityColors = { low: 'priority-low', medium: 'priority-medium', high: 'priority-high', urgent: 'priority-urgent' }
 function priorityColor(p) { return priorityColors[p] || 'grey' }
 function priorityLabel(p) { return priorities.find((pr) => pr.value === p)?.label || p }
 
@@ -138,7 +159,7 @@ async function handleSubmit() {
     snackbarText.value = editing.value ? 'Обновлено' : 'Создано'
     snackbarColor.value = 'success'
     snackbar.value = true
-  } catch (e) { console.error(e);
+  } catch (e) { console.error(e)
     snackbarText.value = store.error || 'Ошибка'
     snackbarColor.value = 'error'
     snackbar.value = true
@@ -151,7 +172,7 @@ async function moveForward(task) {
   const next = task.status === 'pending' ? 'in_progress' : 'completed'
   try {
     await store.update(task.id, { status: next })
-  } catch (e) { console.error(e);
+  } catch (e) { console.error(e)
     snackbarText.value = store.error || 'Ошибка'
     snackbarColor.value = 'error'
     snackbar.value = true
@@ -166,7 +187,7 @@ async function handleDelete() {
     snackbarText.value = 'Удалено'
     snackbarColor.value = 'success'
     snackbar.value = true
-  } catch (e) { console.error(e);
+  } catch (e) { console.error(e)
     snackbarText.value = store.error || 'Ошибка'
     snackbarColor.value = 'error'
     snackbar.value = true
@@ -183,3 +204,14 @@ defineExpose({
   editing, form, formSubmitting,
 })
 </script>
+
+<style scoped>
+.task-card {
+  border-left: 3px solid transparent;
+  background: rgb(var(--v-theme-surface-light));
+}
+.border-priority-low    { border-left-color: rgb(var(--v-theme-priority-low)); }
+.border-priority-medium { border-left-color: rgb(var(--v-theme-priority-medium)); }
+.border-priority-high   { border-left-color: rgb(var(--v-theme-priority-high)); }
+.border-priority-urgent { border-left-color: rgb(var(--v-theme-priority-urgent)); }
+</style>

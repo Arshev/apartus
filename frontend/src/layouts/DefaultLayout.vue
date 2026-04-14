@@ -3,7 +3,11 @@
     <AppTopbar @toggle-drawer="drawer = !drawer" />
     <AppSidebar v-model="drawer" />
     <v-main>
-      <router-view />
+      <router-view v-slot="{ Component }">
+        <transition name="page" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
     </v-main>
   </v-app>
 </template>

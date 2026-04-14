@@ -7,4 +7,11 @@ export default defineConfig({
     vue(),
     vuetify({ autoImport: true }),
   ],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler',
+      },
+    },
+  },
 })

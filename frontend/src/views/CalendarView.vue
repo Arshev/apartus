@@ -141,21 +141,22 @@ defineExpose({ startDate, dateRange, unitRows, reservations, loading, shiftDays,
 
 <style scoped>
 .calendar-grid {
-  border: 1px solid #e0e0e0;
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   overflow-x: auto;
+  border-radius: 8px;
 }
 .calendar-header-cell {
   padding: 6px 4px;
-  background: #f5f5f5;
-  border-bottom: 1px solid #e0e0e0;
-  border-right: 1px solid #e0e0e0;
+  background: rgb(var(--v-theme-surface-light));
+  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   font-weight: 500;
 }
 .calendar-unit-cell {
   padding: 8px 6px;
-  border-bottom: 1px solid #e0e0e0;
-  border-right: 1px solid #e0e0e0;
-  background: #fafafa;
+  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  background: rgb(var(--v-theme-surface));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -167,31 +168,33 @@ defineExpose({ startDate, dateRange, unitRows, reservations, loading, shiftDays,
 }
 .calendar-day-cell {
   min-height: 36px;
-  border-bottom: 1px solid #e0e0e0;
-  border-right: 1px solid #f0f0f0;
+  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-right: 1px solid rgba(var(--v-border-color), calc(var(--v-border-opacity) * 0.5));
   cursor: pointer;
   position: relative;
 }
 .calendar-day-cell:hover {
-  background: #e3f2fd;
+  background: rgba(var(--v-theme-primary), 0.08);
 }
 .calendar-bar {
   height: 24px;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   position: relative;
   margin: 2px 0;
 }
-.bar-confirmed { background: #42a5f5; }
-.bar-checked_in { background: #66bb6a; }
-.bar-checked_out { background: #bdbdbd; }
+.bar-confirmed { background: rgb(var(--v-theme-status-confirmed)); }
+.bar-checked_in { background: rgb(var(--v-theme-status-checked-in)); }
+.bar-checked_out { background: rgb(var(--v-theme-status-checked-out)); }
 .bar-label {
   color: white;
-  padding: 0 4px;
+  padding: 0 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
   line-height: 24px;
+  font-size: 12px;
+  font-weight: 500;
 }
 </style>

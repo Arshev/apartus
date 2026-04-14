@@ -1,72 +1,83 @@
 <template>
-  <v-container>
-    <div class="d-flex align-center mb-4">
-      <h1 class="text-h4">Финансовый отчёт</h1>
+  <v-container fluid class="pa-6">
+    <div class="d-flex align-center mb-6">
+      <h1 class="text-h5 font-weight-bold">Финансовый отчёт</h1>
       <v-spacer />
       <v-btn variant="outlined" prepend-icon="mdi-file-pdf-box" @click="downloadPdf" :loading="downloading">Скачать PDF</v-btn>
     </div>
 
-    <v-progress-linear v-if="loading" indeterminate class="mb-4" />
+    <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
     <v-alert v-if="error" type="error" class="mb-4">{{ error }}</v-alert>
 
     <template v-if="data">
-      <v-row class="mb-4">
+      <!-- Finance KPI — full-color like RentProg -->
+      <v-row class="mb-6">
         <v-col cols="12" sm="4">
-          <v-card color="green" variant="tonal">
-            <v-card-text class="text-center">
-              <div class="text-h4">{{ formatPrice(data.total_revenue) }}</div>
-              <div class="text-subtitle-1">Выручка</div>
+          <v-card color="finance-revenue" variant="flat">
+            <v-card-text class="pa-4">
+              <div class="d-flex align-center mb-2">
+                <v-icon size="20" class="mr-2">mdi-trending-up</v-icon>
+                <span class="text-caption font-weight-medium text-uppercase">Выручка</span>
+              </div>
+              <div class="text-h4 font-weight-bold">{{ formatPrice(data.total_revenue) }}</div>
             </v-card-text>
           </v-card>
         </v-col>
         <v-col cols="12" sm="4">
-          <v-card color="red" variant="tonal">
-            <v-card-text class="text-center">
-              <div class="text-h4">{{ formatPrice(data.total_expenses) }}</div>
-              <div class="text-subtitle-1">Расходы</div>
+          <v-card color="finance-expense" variant="flat">
+            <v-card-text class="pa-4">
+              <div class="d-flex align-center mb-2">
+                <v-icon size="20" class="mr-2">mdi-trending-down</v-icon>
+                <span class="text-caption font-weight-medium text-uppercase">Расходы</span>
+              </div>
+              <div class="text-h4 font-weight-bold">{{ formatPrice(data.total_expenses) }}</div>
             </v-card-text>
           </v-card>
         </v-col>
         <v-col cols="12" sm="4">
-          <v-card :color="data.net_income >= 0 ? 'green' : 'red'" variant="tonal">
-            <v-card-text class="text-center">
-              <div class="text-h4">{{ formatPrice(data.net_income) }}</div>
-              <div class="text-subtitle-1">Чистый доход</div>
+          <v-card :color="data.net_income >= 0 ? 'finance-revenue' : 'finance-expense'" variant="flat">
+            <v-card-text class="pa-4">
+              <div class="d-flex align-center mb-2">
+                <v-icon size="20" class="mr-2">mdi-cash-multiple</v-icon>
+                <span class="text-caption font-weight-medium text-uppercase">Чистый доход</span>
+              </div>
+              <div class="text-h4 font-weight-bold">{{ formatPrice(data.net_income) }}</div>
             </v-card-text>
           </v-card>
         </v-col>
       </v-row>
 
-      <v-row class="mb-4">
+      <!-- Metrics row -->
+      <v-row class="mb-6">
         <v-col cols="6" sm="3">
-          <v-card>
-            <v-card-text class="text-center">
-              <div class="text-h5">{{ (data.occupancy_rate * 100).toFixed(1) }}%</div>
-              <div class="text-caption">Загрузка</div>
+          <v-card variant="outlined">
+            <v-card-text class="text-center pa-3">
+              <div class="text-h5 font-weight-bold">{{ (data.occupancy_rate * 100).toFixed(1) }}%</div>
+              <div class="text-caption text-medium-emphasis">Загрузка</div>
             </v-card-text>
           </v-card>
         </v-col>
         <v-col cols="6" sm="3">
-          <v-card>
-            <v-card-text class="text-center">
-              <div class="text-h5">{{ formatPrice(data.adr) }}</div>
-              <div class="text-caption">ADR</div>
+          <v-card variant="outlined">
+            <v-card-text class="text-center pa-3">
+              <div class="text-h5 font-weight-bold">{{ formatPrice(data.adr) }}</div>
+              <div class="text-caption text-medium-emphasis">ADR</div>
             </v-card-text>
           </v-card>
         </v-col>
         <v-col cols="6" sm="3">
-          <v-card>
-            <v-card-text class="text-center">
-              <div class="text-h5">{{ formatPrice(data.revpar) }}</div>
-              <div class="text-caption">RevPAR</div>
+          <v-card variant="outlined">
+            <v-card-text class="text-center pa-3">
+              <div class="text-h5 font-weight-bold">{{ formatPrice(data.revpar) }}</div>
+              <div class="text-caption text-medium-emphasis">RevPAR</div>
             </v-card-text>
           </v-card>
         </v-col>
         <v-col cols="6" sm="3">
-          <v-card>
-            <v-card-text class="text-center">
-              <div class="text-h5">{{ data.occupied_nights }} / {{ data.total_room_nights }}</div>
-              <div class="text-caption">Ночей</div>
+          <v-card variant="outlined">
+            <v-card-text class="text-center pa-3">
+              <div class="text-h5 font-weight-bold">{{ data.occupied_nights }} / {{ data.total_room_nights }}</div>
+              <div class="text-caption text-medium-emphasis">Ночей</div>
             </v-card-text>
           </v-card>
         </v-col>

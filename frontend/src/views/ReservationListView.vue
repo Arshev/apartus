@@ -1,7 +1,7 @@
 <template>
   <v-container>
-    <div class="d-flex align-center mb-4">
-      <h1 class="text-h4">Бронирования</h1>
+    <div class="d-flex align-center mb-6">
+      <h1 class="text-h5 font-weight-bold">Бронирования</h1>
       <v-spacer />
       <v-btn color="primary" prepend-icon="mdi-plus" :to="'/reservations/new'">Новое бронирование</v-btn>
     </div>
@@ -19,7 +19,7 @@
       hover
     >
       <template v-slot:item.status="{ item }">
-        <v-chip :color="statusColor(item.status)" size="small" variant="elevated">
+        <v-chip :color="statusColor(item.status)" size="small" variant="flat" label>
           {{ statusLabel(item.status) }}
         </v-chip>
       </template>
@@ -27,11 +27,11 @@
         {{ formatPrice(item.total_price_cents) }}
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-btn v-if="item.status === 'confirmed'" size="x-small" color="green" variant="text" @click="doCheckIn(item)">Check-in</v-btn>
-        <v-btn v-if="item.status === 'checked_in'" size="x-small" color="grey" variant="text" @click="doCheckOut(item)">Check-out</v-btn>
-        <v-btn v-if="item.status === 'confirmed' || item.status === 'checked_in'" size="x-small" color="error" variant="text" @click="doCancel(item)">Отмена</v-btn>
+        <v-btn v-if="item.status === 'confirmed'" size="x-small" color="primary" variant="tonal" class="mr-1" @click="doCheckIn(item)">Check-in</v-btn>
+        <v-btn v-if="item.status === 'checked_in'" size="x-small" color="secondary" variant="tonal" class="mr-1" @click="doCheckOut(item)">Check-out</v-btn>
+        <v-btn v-if="item.status === 'confirmed' || item.status === 'checked_in'" size="x-small" color="error" variant="text" class="mr-1" @click="doCancel(item)">Отмена</v-btn>
         <v-btn icon="mdi-pencil" variant="text" size="small" :to="`/reservations/${item.id}/edit`" />
-        <v-btn icon="mdi-delete" variant="text" size="small" color="error" @click="confirmDelete(item)" />
+        <v-btn icon="mdi-delete" variant="text" size="small" @click="confirmDelete(item)" />
       </template>
     </v-data-table>
 
@@ -82,7 +82,7 @@ const headers = [
   { title: '', key: 'actions', sortable: false, align: 'end' },
 ]
 
-const statusColors = { confirmed: 'blue', checked_in: 'green', checked_out: 'grey', cancelled: 'red' }
+const statusColors = { confirmed: 'status-confirmed', checked_in: 'status-checked-in', checked_out: 'status-checked-out', cancelled: 'status-cancelled' }
 const statusLabels = { confirmed: 'Подтверждено', checked_in: 'Заселён', checked_out: 'Выселен', cancelled: 'Отменено' }
 
 function statusColor(s) { return statusColors[s] || 'grey' }

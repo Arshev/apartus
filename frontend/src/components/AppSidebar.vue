@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)">
+  <v-navigation-drawer :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)" border="e">
     <!-- Organization switcher -->
     <v-menu v-if="authStore.isAuthenticated">
       <template v-slot:activator="{ props }">
@@ -9,7 +9,7 @@
           subtitle="Организация"
           prepend-icon="mdi-domain"
           append-icon="mdi-chevron-down"
-          class="py-3"
+          class="py-3 mx-2 mt-1"
         />
       </template>
       <v-list>
@@ -25,15 +25,17 @@
     </v-menu>
     <v-list-item v-else title="Apartus" subtitle="PMS" class="py-4" />
 
-    <v-divider />
+    <v-divider class="mb-1" />
 
-    <v-list density="compact" nav>
+    <v-list density="compact" nav color="primary" class="px-2">
       <v-list-item
         v-for="item in navItems"
         :key="item.title"
         :prepend-icon="item.icon"
         :title="item.title"
         :to="item.to"
+        rounded="lg"
+        class="mb-0.5"
       />
     </v-list>
   </v-navigation-drawer>
