@@ -1,51 +1,51 @@
 <template>
   <v-app>
     <v-container class="pa-4" style="max-width: 600px">
-      <h2 class="text-h5 mb-4">Забронировать — {{ orgName }}</h2>
+      <h2 class="text-h5 mb-4">{{ $t('bookingWidget.title', { orgName }) }}</h2>
 
-      <v-text-field v-model="checkIn" label="Дата заезда" type="date" class="mb-2" />
-      <v-text-field v-model="checkOut" label="Дата выезда" type="date" class="mb-2" />
-      <v-btn color="primary" :loading="searching" @click="search" class="mb-4">Найти</v-btn>
+      <v-text-field v-model="checkIn" :label="$t('bookingWidget.form.checkIn')" type="date" class="mb-2" />
+      <v-text-field v-model="checkOut" :label="$t('bookingWidget.form.checkOut')" type="date" class="mb-2" />
+      <v-btn color="primary" :loading="searching" @click="search" class="mb-4">{{ $t('bookingWidget.searchButton') }}</v-btn>
 
       <v-alert v-if="error" type="error" class="mb-4">{{ error }}</v-alert>
 
       <div v-if="units.length">
         <v-card v-for="unit in units" :key="unit.id" class="mb-3" variant="outlined">
           <v-card-title>{{ unit.property_name }} — {{ unit.name }}</v-card-title>
-          <v-card-subtitle>{{ unit.unit_type }} · до {{ unit.capacity }} гостей · {{ formatPrice(unit.total_price_cents) }}</v-card-subtitle>
+          <v-card-subtitle>{{ unit.unit_type }} · {{ $t('bookingWidget.guestsLabel', { n: unit.capacity }) }} · {{ formatPrice(unit.total_price_cents) }}</v-card-subtitle>
           <v-card-actions>
-            <v-btn color="primary" size="small" @click="selectUnit(unit)">Забронировать</v-btn>
+            <v-btn color="primary" size="small" @click="selectUnit(unit)">{{ $t('bookingWidget.bookButton') }}</v-btn>
           </v-card-actions>
         </v-card>
       </div>
 
-      <v-empty-state v-else-if="searched && !searching" icon="mdi-calendar-remove" title="Нет доступных юнитов" />
+      <v-empty-state v-else-if="searched && !searching" icon="mdi-calendar-remove" :title="$t('bookingWidget.emptyState.title')" />
 
       <v-dialog v-model="bookingDialog" max-width="400">
         <v-card>
-          <v-card-title>Бронирование</v-card-title>
+          <v-card-title>{{ $t('bookingWidget.dialog.bookingTitle') }}</v-card-title>
           <v-card-text>
             <p class="mb-2"><strong>{{ selectedUnit?.property_name }} — {{ selectedUnit?.name }}</strong></p>
             <p class="mb-4">{{ checkIn }} → {{ checkOut }} · {{ formatPrice(selectedUnit?.total_price_cents) }}</p>
-            <v-text-field v-model="guestName" label="Ваше имя" class="mb-2" />
-            <v-text-field v-model="guestEmail" label="Email" type="email" class="mb-2" />
-            <v-text-field v-model="guestPhone" label="Телефон" class="mb-2" />
+            <v-text-field v-model="guestName" :label="$t('bookingWidget.form.guestName')" class="mb-2" />
+            <v-text-field v-model="guestEmail" :label="$t('bookingWidget.form.guestEmail')" type="email" class="mb-2" />
+            <v-text-field v-model="guestPhone" :label="$t('bookingWidget.form.guestPhone')" class="mb-2" />
           </v-card-text>
           <v-card-actions>
             <v-spacer />
-            <v-btn @click="bookingDialog = false">Отмена</v-btn>
-            <v-btn color="primary" :loading="booking" @click="confirmBooking">Подтвердить</v-btn>
+            <v-btn @click="bookingDialog = false">{{ $t('common.cancel') }}</v-btn>
+            <v-btn color="primary" :loading="booking" @click="confirmBooking">{{ $t('bookingWidget.confirmButton') }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
 
       <v-dialog v-model="successDialog" max-width="400">
         <v-card>
-          <v-card-title>Бронирование подтверждено!</v-card-title>
-          <v-card-text>Мы отправили подтверждение на ваш email.</v-card-text>
+          <v-card-title>{{ $t('bookingWidget.dialog.successTitle') }}</v-card-title>
+          <v-card-text>{{ $t('bookingWidget.dialog.successText') }}</v-card-text>
           <v-card-actions>
             <v-spacer />
-            <v-btn color="primary" @click="successDialog = false">Ок</v-btn>
+            <v-btn color="primary" @click="successDialog = false">{{ $t('common.ok') }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -55,10 +55,12 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import * as publicBookingApi from '../api/publicBooking'
 import { formatMoney } from '../utils/currency'
 
+const { t } = useI18n()
 const route = useRoute()
 const slug = route.params.slug
 const orgCurrency = ref('RUB')
@@ -80,7 +82,7 @@ const booking = ref(false)
 const successDialog = ref(false)
 
 function formatPrice(cents) {
-  return cents > 0 ? formatMoney(cents, orgCurrency.value) : 'Бесплатно'
+  return cents > 0 ? formatMoney(cents, orgCurrency.value) : t('common.free')
 }
 
 async function search() {
@@ -94,7 +96,7 @@ async function search() {
     orgName.value = data.organization
     orgCurrency.value = data.currency || 'RUB'
   } catch (e) { console.error(e);
-    error.value = 'Не удалось загрузить доступность'
+    error.value = t('bookingWidget.messages.loadError')
   } finally {
     searching.value = false
   }
@@ -122,7 +124,7 @@ async function confirmBooking() {
     successDialog.value = true
     units.value = []
   } catch (e) {
-    error.value = e.response?.data?.error?.join?.(', ') || e.response?.data?.error || 'Ошибка бронирования'
+    error.value = e.response?.data?.error?.join?.(', ') || e.response?.data?.error || t('bookingWidget.messages.bookingError')
   } finally {
     booking.value = false
   }

@@ -39,9 +39,9 @@ describe('ReportsView', () => {
     expect(wrapper.vm.data.total_revenue).toBe(100000)
   })
 
-  it('categoryLabels covers all', () => {
+  it('expenseCategoryLabel covers all', () => {
     const wrapper = mountWithVuetify(ReportsView)
-    expect(wrapper.vm.categoryLabels).toHaveProperty('cleaning')
-    expect(wrapper.vm.categoryLabels).toHaveProperty('maintenance')
+    expect(wrapper.vm.expenseCategoryLabel('cleaning')).toBe('Уборка')
+    expect(wrapper.vm.expenseCategoryLabel('maintenance')).toBe('Обслуживание')
   })
 })

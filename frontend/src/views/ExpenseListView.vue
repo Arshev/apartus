@@ -1,9 +1,9 @@
 <template>
   <v-container>
     <div class="d-flex align-center mb-4">
-      <h1 class="text-h4">Расходы</h1>
+      <h1 class="text-h4">{{ $t('expenses.title') }}</h1>
       <v-spacer />
-      <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate">Добавить</v-btn>
+      <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate">{{ $t('common.add') }}</v-btn>
     </div>
 
     <v-alert v-if="store.error" type="error" class="mb-4" closable @click:close="store.error = null">
@@ -18,7 +18,7 @@
       density="comfortable"
     >
       <template v-slot:item.category="{ item }">
-        {{ categoryLabels[item.category] || item.category }}
+        {{ categoryLabel(item.category) }}
       </template>
       <template v-slot:item.amount_cents="{ item }">
         {{ formatMoney(item.amount_cents, authStore.organization?.currency || 'RUB') }}
@@ -29,32 +29,32 @@
       </template>
     </v-data-table>
 
-    <v-empty-state v-else-if="!store.loading" icon="mdi-cash-minus" title="Нет расходов" />
+    <v-empty-state v-else-if="!store.loading" icon="mdi-cash-minus" :title="$t('expenses.emptyState.title')" />
 
     <v-dialog v-model="formDialog" max-width="500">
       <v-card>
-        <v-card-title>{{ editing ? 'Редактировать' : 'Новый расход' }}</v-card-title>
+        <v-card-title>{{ editing ? $t('expenses.editTitle') : $t('expenses.createTitle') }}</v-card-title>
         <v-card-text>
-          <v-select v-model="form.category" label="Категория" :items="categories" item-title="label" item-value="value" class="mb-2" />
-          <v-text-field v-model.number="form.amount_rub" label="Сумма" type="number" step="0.01" class="mb-2" />
-          <v-text-field v-model="form.expense_date" label="Дата" type="date" class="mb-2" />
-          <v-textarea v-model="form.description" label="Описание" rows="2" />
+          <v-select v-model="form.category" :label="$t('expenses.form.category')" :items="categories" item-title="label" item-value="value" class="mb-2" />
+          <v-text-field v-model.number="form.amount_rub" :label="$t('expenses.form.amount')" type="number" step="0.01" class="mb-2" />
+          <v-text-field v-model="form.expense_date" :label="$t('expenses.form.date')" type="date" class="mb-2" />
+          <v-textarea v-model="form.description" :label="$t('expenses.form.description')" rows="2" />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn @click="formDialog = false">Отмена</v-btn>
-          <v-btn color="primary" :loading="formSubmitting" @click="handleSubmit">{{ editing ? 'Сохранить' : 'Создать' }}</v-btn>
+          <v-btn @click="formDialog = false">{{ $t('common.cancel') }}</v-btn>
+          <v-btn color="primary" :loading="formSubmitting" @click="handleSubmit">{{ editing ? $t('common.save') : $t('common.add') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <v-dialog v-model="deleteDialog" max-width="400">
       <v-card>
-        <v-card-title>Удалить расход?</v-card-title>
+        <v-card-title>{{ $t('expenses.dialog.deleteTitle') }}</v-card-title>
         <v-card-actions>
           <v-spacer />
-          <v-btn @click="deleteDialog = false">Отмена</v-btn>
-          <v-btn color="error" @click="handleDelete">Удалить</v-btn>
+          <v-btn @click="deleteDialog = false">{{ $t('common.cancel') }}</v-btn>
+          <v-btn color="error" @click="handleDelete">{{ $t('common.delete') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -64,23 +64,34 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { formatMoney } from '../utils/currency'
 import { useExpensesStore } from '../stores/expenses'
 import { useAuthStore } from '../stores/auth'
 
+const { t } = useI18n()
 const store = useExpensesStore()
 const authStore = useAuthStore()
-const headers = [
-  { title: 'Дата', key: 'expense_date' },
-  { title: 'Категория', key: 'category' },
-  { title: 'Сумма', key: 'amount_cents' },
-  { title: 'Описание', key: 'description' },
-  { title: '', key: 'actions', sortable: false, align: 'end' },
-]
 
-const categoryLabels = { maintenance: 'Обслуживание', utilities: 'Коммунальные', cleaning: 'Уборка', supplies: 'Расходники', other: 'Прочее' }
-const categories = Object.entries(categoryLabels).map(([value, label]) => ({ value, label }))
+const headers = computed(() => [
+  { title: t('expenses.columns.date'), key: 'expense_date' },
+  { title: t('expenses.columns.category'), key: 'category' },
+  { title: t('expenses.columns.amount'), key: 'amount_cents' },
+  { title: t('expenses.columns.description'), key: 'description' },
+  { title: '', key: 'actions', sortable: false, align: 'end' },
+])
+
+const categoryKeys = { maintenance: 'maintenance', utilities: 'utilities', cleaning: 'cleaning', supplies: 'supplies', other: 'other' }
+function categoryLabel(cat) { return t(`expenses.categories.${categoryKeys[cat] || 'other'}`) }
+
+const categories = computed(() => [
+  { label: t('expenses.categories.maintenance'), value: 'maintenance' },
+  { label: t('expenses.categories.utilities'), value: 'utilities' },
+  { label: t('expenses.categories.cleaning'), value: 'cleaning' },
+  { label: t('expenses.categories.supplies'), value: 'supplies' },
+  { label: t('expenses.categories.other'), value: 'other' },
+])
 
 const formDialog = ref(false)
 const editing = ref(null)
@@ -111,16 +122,16 @@ async function handleSubmit() {
   try {
     if (editing.value) {
       await store.update(editing.value.id, payload)
-      snackbarText.value = 'Обновлено'
+      snackbarText.value = t('common.messages.saved')
     } else {
       await store.create(payload)
-      snackbarText.value = 'Создано'
+      snackbarText.value = t('common.messages.saved')
     }
     snackbarColor.value = 'success'
     snackbar.value = true
     formDialog.value = false
   } catch (e) { console.error(e);
-    snackbarText.value = store.error || 'Ошибка'
+    snackbarText.value = store.error || t('common.messages.error')
     snackbarColor.value = 'error'
     snackbar.value = true
   } finally {
@@ -133,11 +144,11 @@ function confirmDelete(item) { deleting.value = item; deleteDialog.value = true 
 async function handleDelete() {
   try {
     await store.destroy(deleting.value.id)
-    snackbarText.value = 'Удалено'
+    snackbarText.value = t('common.messages.deleted')
     snackbarColor.value = 'success'
     snackbar.value = true
   } catch (e) { console.error(e);
-    snackbarText.value = store.error || 'Ошибка'
+    snackbarText.value = store.error || t('common.messages.error')
     snackbarColor.value = 'error'
     snackbar.value = true
   } finally {
@@ -147,5 +158,5 @@ async function handleDelete() {
 
 onMounted(() => store.fetchAll())
 
-defineExpose({ openCreate, openEdit, handleSubmit, confirmDelete, handleDelete, headers, categoryLabels, editing, form, formSubmitting })
+defineExpose({ openCreate, openEdit, handleSubmit, confirmDelete, handleDelete, headers, categoryLabel, editing, form, formSubmitting })
 </script>

@@ -1,10 +1,10 @@
 <template>
   <v-container>
     <div class="d-flex align-center mb-4">
-      <h1 class="text-h4">Филиалы</h1>
+      <h1 class="text-h4">{{ $t('branches.title') }}</h1>
       <v-spacer />
       <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate(null)">
-        Добавить
+        {{ $t('common.add') }}
       </v-btn>
     </div>
 
@@ -28,23 +28,23 @@
     <v-empty-state
       v-else-if="!store.loading && !store.error"
       icon="mdi-source-branch"
-      title="Нет филиалов"
-      text="Создайте корневой филиал организации."
+      :title="$t('branches.emptyState.title')"
+      :text="$t('branches.emptyState.text')"
     >
       <template v-slot:actions>
-        <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate(null)">Добавить</v-btn>
+        <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate(null)">{{ $t('common.add') }}</v-btn>
       </template>
     </v-empty-state>
 
     <!-- Create/Edit dialog -->
     <v-dialog v-model="formDialog" max-width="400">
       <v-card>
-        <v-card-title>{{ editingBranch ? 'Редактировать филиал' : 'Новый филиал' }}</v-card-title>
+        <v-card-title>{{ editingBranch ? $t('branches.editTitle') : $t('branches.createTitle') }}</v-card-title>
         <v-card-text>
-          <v-text-field v-model="formName" label="Название" :rules="[rules.required]" autofocus class="mb-2" />
+          <v-text-field v-model="formName" :label="$t('branches.form.name')" :rules="[rules.required]" autofocus class="mb-2" />
           <v-select
             v-model="formParentId"
-            label="Родительский филиал"
+            :label="$t('branches.form.parentBranch')"
             :items="parentOptions"
             item-title="name"
             item-value="id"
@@ -53,9 +53,9 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn @click="formDialog = false">Отмена</v-btn>
+          <v-btn @click="formDialog = false">{{ $t('common.cancel') }}</v-btn>
           <v-btn color="primary" :loading="formSubmitting" @click="handleFormSubmit">
-            {{ editingBranch ? 'Сохранить' : 'Создать' }}
+            {{ editingBranch ? $t('common.save') : $t('common.create') }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -64,14 +64,14 @@
     <!-- Delete dialog -->
     <v-dialog v-model="deleteDialog" max-width="400">
       <v-card>
-        <v-card-title>Удалить филиал?</v-card-title>
+        <v-card-title>{{ $t('branches.dialog.deleteTitle') }}</v-card-title>
         <v-card-text>
-          Филиал «{{ deletingBranch?.name }}» будет удалён.
+          {{ $t('branches.dialog.deleteText', { name: deletingBranch?.name }) }}
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn @click="deleteDialog = false">Отмена</v-btn>
-          <v-btn color="error" @click="handleDelete">Удалить</v-btn>
+          <v-btn @click="deleteDialog = false">{{ $t('common.cancel') }}</v-btn>
+          <v-btn color="error" @click="handleDelete">{{ $t('common.delete') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -84,13 +84,15 @@
 
 <script setup>
 import { ref, computed, onMounted, defineAsyncComponent } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useBranchesStore } from '../stores/branches'
 
 const BranchNode = defineAsyncComponent(() => import('./BranchNode.vue'))
 
+const { t } = useI18n()
 const store = useBranchesStore()
 
-const rules = { required: (v) => !!v || 'Обязательное поле' }
+const rules = { required: (v) => !!v || t('common.validation.required') }
 
 const formDialog = ref(false)
 const editingBranch = ref(null)
@@ -131,16 +133,16 @@ async function handleFormSubmit() {
     const data = { name: formName.value.trim(), parent_branch_id: formParentId.value || null }
     if (editingBranch.value) {
       await store.update(editingBranch.value.id, data)
-      snackbarText.value = 'Филиал обновлён'
+      snackbarText.value = t('branches.messages.updated')
     } else {
       await store.create(data)
-      snackbarText.value = 'Филиал создан'
+      snackbarText.value = t('branches.messages.created')
     }
     snackbarColor.value = 'success'
     snackbar.value = true
     formDialog.value = false
   } catch (e) { console.error(e);
-    snackbarText.value = store.error || 'Ошибка'
+    snackbarText.value = store.error || t('common.messages.error')
     snackbarColor.value = 'error'
     snackbar.value = true
   } finally {
@@ -156,11 +158,11 @@ function confirmDelete(branch) {
 async function handleDelete() {
   try {
     await store.destroy(deletingBranch.value.id)
-    snackbarText.value = 'Филиал удалён'
+    snackbarText.value = t('branches.messages.deleted')
     snackbarColor.value = 'success'
     snackbar.value = true
   } catch (e) { console.error(e);
-    snackbarText.value = store.error || 'Не удалось удалить'
+    snackbarText.value = store.error || t('common.messages.deleteError')
     snackbarColor.value = 'error'
     snackbar.value = true
   } finally {

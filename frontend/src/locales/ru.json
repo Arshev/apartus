@@ -1,0 +1,632 @@
+{
+  "common": {
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "add": "Добавить",
+    "create": "Создать",
+    "edit": "Редактировать",
+    "retry": "Повторить",
+    "today": "Сегодня",
+    "ok": "Ок",
+    "yes": "Да",
+    "no": "Нет",
+    "search": "Найти",
+    "free": "Бесплатно",
+    "blocking": "Блокировка",
+    "noData": "Нет данных",
+    "columns": {
+      "name": "Название",
+      "address": "Адрес",
+      "type": "Тип",
+      "status": "Статус",
+      "actions": "",
+      "email": "Email",
+      "phone": "Телефон",
+      "date": "Дата",
+      "description": "Описание"
+    },
+    "form": {
+      "name": "Название",
+      "email": "Email",
+      "phone": "Телефон",
+      "description": "Описание",
+      "notes": "Заметки"
+    },
+    "validation": {
+      "required": "Обязательное поле",
+      "invalidEmail": "Некорректный email",
+      "minOne": "Минимум 1",
+      "maxLength5000": "Максимум 5000 символов",
+      "capacityRange": "От 1 до 100",
+      "minLength8": "Минимум 8 символов",
+      "passwordsMismatch": "Пароли не совпадают"
+    },
+    "messages": {
+      "saved": "Сохранено",
+      "created": "Создано",
+      "updated": "Обновлено",
+      "deleted": "Удалено",
+      "error": "Ошибка",
+      "saveError": "Ошибка сохранения",
+      "loadError": "Не удалось загрузить данные",
+      "deleteError": "Не удалось удалить"
+    }
+  },
+  "nav": {
+    "home": "Главная",
+    "reservations": "Бронирования",
+    "calendar": "Календарь",
+    "guests": "Гости",
+    "properties": "Объекты",
+    "owners": "Собственники",
+    "channels": "Каналы",
+    "tasks": "Задачи",
+    "expenses": "Расходы",
+    "reports": "Отчёты",
+    "amenities": "Удобства",
+    "branches": "Филиалы",
+    "settings": "Настройки",
+    "organization": "Организация",
+    "selectOrganization": "Выберите организацию"
+  },
+  "topbar": {
+    "logout": "Выйти"
+  },
+  "dashboard": {
+    "greeting": "Здравствуйте, {name}",
+    "kpi": {
+      "units": "Юнитов",
+      "occupancy": "Загрузка",
+      "revenue": "Выручка",
+      "reservations": "Брони"
+    },
+    "statuses": {
+      "confirmed": "Подтверждено",
+      "checkedIn": "Заселено",
+      "checkedOut": "Выселено",
+      "cancelled": "Отменено"
+    },
+    "checkIns": "Заезды (7 дней)",
+    "checkOuts": "Выезды (7 дней)",
+    "noCheckIns": "Нет предстоящих заездов",
+    "noCheckOuts": "Нет предстоящих выездов",
+    "messages": {
+      "loadError": "Не удалось загрузить данные"
+    }
+  },
+  "calendar": {
+    "title": "Календарь",
+    "unitColumn": "Юнит",
+    "emptyState": {
+      "title": "Нет юнитов",
+      "text": "Добавьте объекты и юниты для отображения календаря."
+    },
+    "messages": {
+      "loadError": "Не удалось загрузить данные календаря"
+    }
+  },
+  "properties": {
+    "title": "Объекты",
+    "addButton": "Добавить объект",
+    "editTitle": "Редактировать объект",
+    "createTitle": "Новый объект",
+    "columns": {
+      "name": "Название",
+      "address": "Адрес",
+      "type": "Тип"
+    },
+    "types": {
+      "apartment": "Квартира",
+      "hotel": "Отель",
+      "house": "Дом",
+      "hostel": "Хостел"
+    },
+    "form": {
+      "name": "Название",
+      "address": "Адрес",
+      "propertyType": "Тип объекта",
+      "description": "Описание",
+      "branch": "Филиал",
+      "branchLoadError": "Не удалось загрузить филиалы"
+    },
+    "unitsButton": "Помещения",
+    "emptyState": {
+      "title": "Нет объектов",
+      "text": "Добавьте первый объект недвижимости."
+    },
+    "dialog": {
+      "deleteTitle": "Удалить объект?",
+      "deleteText": "Объект «{name}» будет удалён. Это действие необратимо."
+    },
+    "messages": {
+      "deleted": "Объект удалён",
+      "deleteError": "Не удалось удалить объект",
+      "created": "Объект создан",
+      "updated": "Объект обновлён",
+      "loadError": "Не удалось загрузить объект"
+    }
+  },
+  "units": {
+    "title": "Помещения",
+    "editTitle": "Редактировать помещение",
+    "createTitle": "Новое помещение",
+    "columns": {
+      "name": "Название",
+      "type": "Тип",
+      "capacity": "Вместимость",
+      "status": "Статус"
+    },
+    "types": {
+      "room": "Комната",
+      "apartment": "Квартира",
+      "bed": "Место",
+      "studio": "Студия"
+    },
+    "statuses": {
+      "available": "Доступен",
+      "maintenance": "Обслуживание",
+      "blocked": "Заблокирован"
+    },
+    "form": {
+      "name": "Название",
+      "unitType": "Тип помещения",
+      "capacity": "Вместимость",
+      "status": "Статус",
+      "pricePerNight": "Цена за ночь",
+      "amenities": "Удобства"
+    },
+    "emptyState": {
+      "title": "Нет помещений",
+      "text": "Добавьте первое помещение в этот объект."
+    },
+    "dialog": {
+      "deleteTitle": "Удалить помещение?",
+      "deleteText": "Помещение «{name}» будет удалено."
+    },
+    "messages": {
+      "deleted": "Помещение удалено",
+      "created": "Помещение создано",
+      "updated": "Помещение обновлено",
+      "loadError": "Не удалось загрузить помещение",
+      "amenitiesError": "Не удалось обновить удобства",
+      "amenitiesLoadError": "Не удалось загрузить удобства"
+    }
+  },
+  "amenities": {
+    "title": "Удобства",
+    "editTitle": "Редактировать удобство",
+    "createTitle": "Новое удобство",
+    "columns": {
+      "name": "Название"
+    },
+    "form": {
+      "name": "Название"
+    },
+    "emptyState": {
+      "title": "Нет удобств",
+      "text": "Создайте первое удобство для каталога организации."
+    },
+    "dialog": {
+      "deleteTitle": "Удалить удобство?",
+      "deleteText": "Удобство «{name}» будет удалено."
+    },
+    "messages": {
+      "created": "Удобство создано",
+      "updated": "Удобство обновлено",
+      "deleted": "Удобство удалено"
+    }
+  },
+  "branches": {
+    "title": "Филиалы",
+    "editTitle": "Редактировать филиал",
+    "createTitle": "Новый филиал",
+    "addChildTitle": "Добавить дочерний",
+    "form": {
+      "name": "Название",
+      "parentBranch": "Родительский филиал"
+    },
+    "emptyState": {
+      "title": "Нет филиалов",
+      "text": "Создайте корневой филиал организации."
+    },
+    "dialog": {
+      "deleteTitle": "Удалить филиал?",
+      "deleteText": "Филиал «{name}» будет удалён."
+    },
+    "messages": {
+      "created": "Филиал создан",
+      "updated": "Филиал обновлён",
+      "deleted": "Филиал удалён"
+    }
+  },
+  "reservations": {
+    "title": "Бронирования",
+    "addButton": "Новое бронирование",
+    "editTitle": "Редактировать бронирование",
+    "createTitle": "Новое бронирование",
+    "columns": {
+      "unit": "Юнит",
+      "guest": "Гость",
+      "checkIn": "Заезд",
+      "checkOut": "Выезд",
+      "status": "Статус",
+      "price": "Цена"
+    },
+    "statuses": {
+      "confirmed": "Подтверждено",
+      "checkedIn": "Заселён",
+      "checkedOut": "Выселен",
+      "cancelled": "Отменено"
+    },
+    "form": {
+      "unit": "Юнит",
+      "guest": "Гость (необязательно)",
+      "checkInDate": "Дата заезда",
+      "checkOutDate": "Дата выезда",
+      "guestsCount": "Количество гостей",
+      "price": "Цена",
+      "notes": "Заметки",
+      "priceCalcError": "Не удалось рассчитать цену автоматически"
+    },
+    "emptyState": {
+      "title": "Нет бронирований",
+      "text": "Создайте первое бронирование."
+    },
+    "dialog": {
+      "deleteTitle": "Удалить бронирование?",
+      "deleteText": "Бронирование будет удалено."
+    },
+    "messages": {
+      "deleted": "Бронирование удалено",
+      "cancelled": "Бронирование отменено",
+      "checkInDone": "Check-in выполнен",
+      "checkOutDone": "Check-out выполнен",
+      "loadError": "Не удалось загрузить бронирование",
+      "formLoadError": "Не удалось загрузить данные для формы"
+    }
+  },
+  "guests": {
+    "title": "Гости",
+    "addButton": "Добавить гостя",
+    "editTitle": "Редактировать гостя",
+    "createTitle": "Новый гость",
+    "columns": {
+      "name": "Имя",
+      "email": "Email",
+      "phone": "Телефон"
+    },
+    "form": {
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "email": "Email",
+      "phone": "Телефон",
+      "notes": "Заметки"
+    },
+    "emptyState": {
+      "title": "Нет гостей",
+      "text": "Добавьте первого гостя."
+    },
+    "dialog": {
+      "deleteTitle": "Удалить гостя?",
+      "deleteText": "Гость «{firstName} {lastName}» будет удалён."
+    },
+    "messages": {
+      "deleted": "Гость удалён",
+      "created": "Гость создан",
+      "updated": "Гость обновлён",
+      "loadError": "Не удалось загрузить гостя"
+    }
+  },
+  "owners": {
+    "title": "Собственники",
+    "editTitle": "Редактировать",
+    "createTitle": "Новый собственник",
+    "reportButton": "Отчёт",
+    "columns": {
+      "name": "Имя",
+      "email": "Email",
+      "commission": "Комиссия",
+      "propertiesCount": "Объектов"
+    },
+    "form": {
+      "name": "Имя",
+      "email": "Email",
+      "phone": "Телефон",
+      "commissionPct": "Комиссия (%)",
+      "notes": "Заметки"
+    },
+    "emptyState": {
+      "title": "Нет собственников"
+    },
+    "dialog": {
+      "deleteTitle": "Удалить собственника?"
+    },
+    "statement": {
+      "title": "Отчёт собственника",
+      "downloadPdf": "PDF",
+      "revenue": "Выручка",
+      "commission": "Комиссия",
+      "expenses": "Расходы",
+      "payout": "К выплате",
+      "byProperties": "По объектам",
+      "columns": {
+        "property": "Объект",
+        "revenue": "Выручка",
+        "commission": "Комиссия",
+        "expenses": "Расходы",
+        "payout": "К выплате"
+      },
+      "messages": {
+        "loadError": "Не удалось загрузить отчёт"
+      }
+    }
+  },
+  "channels": {
+    "title": "Каналы продаж",
+    "addButton": "Добавить канал",
+    "editTitle": "Редактировать канал",
+    "createTitle": "Новый канал",
+    "columns": {
+      "unit": "Юнит",
+      "property": "Объект",
+      "platform": "Площадка",
+      "icalExport": "iCal Export",
+      "lastSynced": "Последняя синхр."
+    },
+    "platforms": {
+      "bookingCom": "Booking.com",
+      "airbnb": "Airbnb",
+      "ostrovok": "Островок",
+      "other": "Другое"
+    },
+    "form": {
+      "unit": "Юнит",
+      "platform": "Площадка",
+      "icalImportUrl": "iCal Import URL (от площадки)"
+    },
+    "emptyState": {
+      "title": "Нет каналов",
+      "text": "Подключите Booking.com, Airbnb или другие площадки через iCal."
+    },
+    "dialog": {
+      "deleteTitle": "Удалить канал?"
+    },
+    "messages": {
+      "urlCopied": "URL скопирован",
+      "created": "Канал создан",
+      "deleted": "Канал удалён",
+      "syncStarted": "Синхронизация запущена"
+    }
+  },
+  "tasks": {
+    "title": "Задачи",
+    "addButton": "Новая задача",
+    "editTitle": "Редактировать задачу",
+    "createTitle": "Новая задача",
+    "columns": {
+      "pending": "Ожидает",
+      "inProgress": "В работе",
+      "completed": "Завершено"
+    },
+    "emptyColumn": "Задач нет",
+    "moveToWork": "В работу",
+    "complete": "Завершить",
+    "priorities": {
+      "low": "Низкий",
+      "medium": "Средний",
+      "high": "Высокий",
+      "urgent": "Срочный"
+    },
+    "categories": {
+      "cleaning": "Уборка",
+      "maintenance": "Обслуживание",
+      "inspection": "Инспекция",
+      "other": "Прочее"
+    },
+    "form": {
+      "title": "Название",
+      "priority": "Приоритет",
+      "category": "Категория",
+      "dueDate": "Срок",
+      "description": "Описание"
+    },
+    "dialog": {
+      "deleteTitle": "Удалить задачу?"
+    }
+  },
+  "expenses": {
+    "title": "Расходы",
+    "editTitle": "Редактировать",
+    "createTitle": "Новый расход",
+    "columns": {
+      "date": "Дата",
+      "category": "Категория",
+      "amount": "Сумма",
+      "description": "Описание"
+    },
+    "categories": {
+      "maintenance": "Обслуживание",
+      "utilities": "Коммунальные",
+      "cleaning": "Уборка",
+      "supplies": "Расходники",
+      "other": "Прочее"
+    },
+    "form": {
+      "category": "Категория",
+      "amount": "Сумма",
+      "date": "Дата",
+      "description": "Описание"
+    },
+    "emptyState": {
+      "title": "Нет расходов"
+    },
+    "dialog": {
+      "deleteTitle": "Удалить расход?"
+    }
+  },
+  "reports": {
+    "title": "Финансовый отчёт",
+    "downloadPdf": "Скачать PDF",
+    "kpi": {
+      "revenue": "Выручка",
+      "expenses": "Расходы",
+      "netIncome": "Чистый доход"
+    },
+    "metrics": {
+      "occupancy": "Загрузка",
+      "adr": "ADR",
+      "revpar": "RevPAR",
+      "nights": "Ночей"
+    },
+    "revenueByProperty": "Выручка по объектам",
+    "expensesByCategory": "Расходы по категориям",
+    "messages": {
+      "loadError": "Не удалось загрузить отчёт"
+    }
+  },
+  "settings": {
+    "title": "Настройки организации",
+    "tabs": {
+      "general": "Общие",
+      "integrations": "Интеграции",
+      "members": "Участники",
+      "roles": "Роли"
+    },
+    "general": {
+      "orgName": "Название организации",
+      "currency": "Валюта",
+      "language": "Язык интерфейса",
+      "loadError": "Не удалось загрузить настройки"
+    },
+    "integrations": {
+      "telegramTitle": "Telegram уведомления",
+      "botToken": "Bot Token (от {'@'}BotFather)",
+      "chatId": "Chat ID",
+      "testButton": "Тест",
+      "testSuccess": "Тестовое сообщение отправлено!",
+      "testError": "Не удалось отправить тестовое сообщение",
+      "saveError": "Не удалось сохранить",
+      "instructions": "1. Создайте бота через {'@'}BotFather в Telegram\n2. Скопируйте Bot Token сюда\n3. Добавьте бота в группу или напишите ему /start\n4. Узнайте Chat ID через {'@'}getmyid_bot\n5. Нажмите «Тест» для проверки"
+    },
+    "members": {
+      "title": "Участники",
+      "addTitle": "Добавить участника",
+      "editTitle": "Редактировать роль",
+      "columns": {
+        "member": "Участник",
+        "role": "Роль"
+      },
+      "form": {
+        "email": "Email",
+        "firstName": "Имя",
+        "lastName": "Фамилия",
+        "password": "Пароль",
+        "role": "Роль"
+      },
+      "roles": {
+        "member": "Участник",
+        "manager": "Менеджер",
+        "owner": "Владелец"
+      },
+      "emptyState": {
+        "title": "Нет участников"
+      },
+      "dialog": {
+        "deleteTitle": "Удалить участника?",
+        "deleteText": "{name} будет удалён из организации."
+      },
+      "messages": {
+        "roleUpdated": "Роль обновлена",
+        "memberAdded": "Участник добавлен",
+        "memberDeleted": "Участник удалён"
+      }
+    },
+    "roles": {
+      "title": "Роли",
+      "addTitle": "Новая роль",
+      "editTitle": "Редактировать роль",
+      "columns": {
+        "name": "Название",
+        "code": "Код",
+        "isSystem": "Системная",
+        "membersCount": "Участников"
+      },
+      "form": {
+        "name": "Название",
+        "code": "Код"
+      },
+      "emptyState": {
+        "title": "Нет ролей"
+      },
+      "dialog": {
+        "deleteTitle": "Удалить роль?",
+        "deleteText": "Роль «{name}» будет удалена."
+      },
+      "messages": {
+        "created": "Роль создана",
+        "updated": "Роль обновлена",
+        "deleted": "Роль удалена"
+      }
+    }
+  },
+  "bookingWidget": {
+    "title": "Забронировать — {orgName}",
+    "form": {
+      "checkIn": "Дата заезда",
+      "checkOut": "Дата выезда",
+      "guestName": "Ваше имя",
+      "guestEmail": "Email",
+      "guestPhone": "Телефон"
+    },
+    "searchButton": "Найти",
+    "bookButton": "Забронировать",
+    "confirmButton": "Подтвердить",
+    "guestsLabel": "гостей",
+    "emptyState": {
+      "title": "Нет доступных юнитов"
+    },
+    "dialog": {
+      "bookingTitle": "Бронирование",
+      "successTitle": "Бронирование подтверждено!",
+      "successText": "Мы отправили подтверждение на ваш email."
+    },
+    "messages": {
+      "loadError": "Не удалось загрузить доступность",
+      "bookingError": "Ошибка бронирования"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Apartus",
+      "emailLabel": "Email",
+      "passwordLabel": "Пароль",
+      "submitButton": "Войти",
+      "noAccount": "Нет аккаунта?",
+      "registerLink": "Регистрация"
+    },
+    "register": {
+      "title": "Регистрация",
+      "orgNameLabel": "Название организации",
+      "firstNameLabel": "Имя",
+      "lastNameLabel": "Фамилия",
+      "emailLabel": "Email",
+      "passwordLabel": "Пароль",
+      "passwordConfirmLabel": "Подтверждение пароля",
+      "submitButton": "Создать аккаунт",
+      "hasAccount": "Уже есть аккаунт?",
+      "loginLink": "Войти"
+    },
+    "selectOrganization": {
+      "title": "Выберите организацию"
+    }
+  },
+  "placeholder": {
+    "title": "Скоро",
+    "text": "Раздел «{title}» появится в одной из следующих фич HW-2."
+  },
+  "languages": {
+    "ru": "Русский",
+    "en": "English"
+  }
+}

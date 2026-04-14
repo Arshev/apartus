@@ -2,9 +2,9 @@
   <v-container>
     <div class="d-flex align-center mb-4">
       <v-btn variant="text" icon="mdi-arrow-left" :to="'/owners'" />
-      <h1 class="text-h4 ml-2">Отчёт собственника</h1>
+      <h1 class="text-h4 ml-2">{{ $t('owners.statement.title') }}</h1>
       <v-spacer />
-      <v-btn variant="outlined" prepend-icon="mdi-file-pdf-box" @click="downloadPdf" :loading="downloading">PDF</v-btn>
+      <v-btn variant="outlined" prepend-icon="mdi-file-pdf-box" @click="downloadPdf" :loading="downloading">{{ $t('owners.statement.downloadPdf') }}</v-btn>
     </div>
 
     <v-progress-linear v-if="loading" indeterminate class="mb-4" />
@@ -18,7 +18,7 @@
           <v-card color="green" variant="tonal">
             <v-card-text class="text-center">
               <div class="text-h5">{{ fmt(data.total_revenue) }}</div>
-              <div class="text-caption">Выручка</div>
+              <div class="text-caption">{{ $t('owners.statement.revenue') }}</div>
             </v-card-text>
           </v-card>
         </v-col>
@@ -26,7 +26,7 @@
           <v-card color="orange" variant="tonal">
             <v-card-text class="text-center">
               <div class="text-h5">{{ fmt(data.commission) }}</div>
-              <div class="text-caption">Комиссия</div>
+              <div class="text-caption">{{ $t('owners.statement.commission') }}</div>
             </v-card-text>
           </v-card>
         </v-col>
@@ -34,7 +34,7 @@
           <v-card color="red" variant="tonal">
             <v-card-text class="text-center">
               <div class="text-h5">{{ fmt(data.total_expenses) }}</div>
-              <div class="text-caption">Расходы</div>
+              <div class="text-caption">{{ $t('owners.statement.expenses') }}</div>
             </v-card-text>
           </v-card>
         </v-col>
@@ -42,14 +42,14 @@
           <v-card :color="data.net_payout >= 0 ? 'green' : 'red'" variant="tonal">
             <v-card-text class="text-center">
               <div class="text-h5">{{ fmt(data.net_payout) }}</div>
-              <div class="text-caption">К выплате</div>
+              <div class="text-caption">{{ $t('owners.statement.payout') }}</div>
             </v-card-text>
           </v-card>
         </v-col>
       </v-row>
 
       <v-card>
-        <v-card-title>По объектам</v-card-title>
+        <v-card-title>{{ $t('owners.statement.byProperties') }}</v-card-title>
         <v-data-table :headers="propHeaders" :items="data.properties" density="compact">
           <template v-slot:item.revenue="{ item }">{{ fmt(item.revenue) }}</template>
           <template v-slot:item.commission="{ item }">{{ fmt(item.commission) }}</template>
@@ -62,13 +62,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import * as ownersApi from '../api/owners'
 import { downloadOwnerStatement } from '../api/pdfExport'
 import { formatMoney } from '../utils/currency'
 
+const { t } = useI18n()
 const route = useRoute()
 const authStore = useAuthStore()
 const data = ref(null)
@@ -83,13 +85,13 @@ async function downloadPdf() {
   finally { downloading.value = false }
 }
 
-const propHeaders = [
-  { title: 'Объект', key: 'property_name' },
-  { title: 'Выручка', key: 'revenue' },
-  { title: 'Комиссия', key: 'commission' },
-  { title: 'Расходы', key: 'expenses' },
-  { title: 'К выплате', key: 'payout' },
-]
+const propHeaders = computed(() => [
+  { title: t('owners.statement.columns.property'), key: 'property_name' },
+  { title: t('owners.statement.columns.revenue'), key: 'revenue' },
+  { title: t('owners.statement.columns.commission'), key: 'commission' },
+  { title: t('owners.statement.columns.expenses'), key: 'expenses' },
+  { title: t('owners.statement.columns.payout'), key: 'payout' },
+])
 
 function fmt(cents) { return formatMoney(cents, authStore.organization?.currency || 'RUB') }
 
@@ -100,7 +102,7 @@ async function loadStatement() {
     data.value = await ownersApi.statement(route.params.id)
   } catch (e) {
     console.error(e)
-    error.value = 'Не удалось загрузить отчёт'
+    error.value = t('owners.statement.messages.loadError')
   } finally {
     loading.value = false
   }

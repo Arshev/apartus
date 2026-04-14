@@ -1,9 +1,9 @@
 <template>
   <v-container fluid class="pa-6">
     <div class="d-flex align-center mb-6">
-      <h1 class="text-h5 font-weight-bold">Задачи</h1>
+      <h1 class="text-h5 font-weight-bold">{{ $t('tasks.title') }}</h1>
       <v-spacer />
-      <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate">Новая задача</v-btn>
+      <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate">{{ $t('tasks.addButton') }}</v-btn>
     </div>
 
     <v-progress-linear v-if="store.loading" indeterminate color="primary" class="mb-4" />
@@ -51,13 +51,13 @@
                   color="primary"
                   @click="moveForward(task)"
                 >
-                  {{ task.status === 'pending' ? 'В работу' : 'Завершить' }}
+                  {{ task.status === 'pending' ? $t('tasks.moveToWork') : $t('tasks.complete') }}
                 </v-btn>
                 <v-btn size="x-small" icon="mdi-pencil" variant="text" @click="openEdit(task)" />
                 <v-btn size="x-small" icon="mdi-delete" variant="text" color="error" @click="confirmDelete(task)" />
               </div>
             </v-card>
-            <div v-if="!col.items.length" class="text-medium-emphasis text-caption text-center pa-6">Задач нет</div>
+            <div v-if="!col.items.length" class="text-medium-emphasis text-caption text-center pa-6">{{ $t('tasks.emptyColumn') }}</div>
           </div>
         </v-card>
       </v-col>
@@ -65,29 +65,29 @@
 
     <v-dialog v-model="formDialog" max-width="500">
       <v-card>
-        <v-card-title>{{ editing ? 'Редактировать задачу' : 'Новая задача' }}</v-card-title>
+        <v-card-title>{{ editing ? $t('tasks.editTitle') : $t('tasks.createTitle') }}</v-card-title>
         <v-card-text>
-          <v-text-field v-model="form.title" label="Название" class="mb-2" />
-          <v-select v-model="form.priority" label="Приоритет" :items="priorities" item-title="label" item-value="value" class="mb-2" />
-          <v-select v-model="form.category" label="Категория" :items="categories" item-title="label" item-value="value" class="mb-2" />
-          <v-text-field v-model="form.due_date" label="Срок" type="date" class="mb-2" />
-          <v-textarea v-model="form.description" label="Описание" rows="2" />
+          <v-text-field v-model="form.title" :label="$t('tasks.form.title')" class="mb-2" />
+          <v-select v-model="form.priority" :label="$t('tasks.form.priority')" :items="priorities" item-title="label" item-value="value" class="mb-2" />
+          <v-select v-model="form.category" :label="$t('tasks.form.category')" :items="categories" item-title="label" item-value="value" class="mb-2" />
+          <v-text-field v-model="form.due_date" :label="$t('tasks.form.dueDate')" type="date" class="mb-2" />
+          <v-textarea v-model="form.description" :label="$t('tasks.form.description')" rows="2" />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn @click="formDialog = false">Отмена</v-btn>
-          <v-btn color="primary" :loading="formSubmitting" @click="handleSubmit">{{ editing ? 'Сохранить' : 'Создать' }}</v-btn>
+          <v-btn @click="formDialog = false">{{ $t('common.cancel') }}</v-btn>
+          <v-btn color="primary" :loading="formSubmitting" @click="handleSubmit">{{ editing ? $t('common.save') : $t('common.add') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <v-dialog v-model="deleteDialog" max-width="400">
       <v-card>
-        <v-card-title>Удалить задачу?</v-card-title>
+        <v-card-title>{{ $t('tasks.dialog.deleteTitle') }}</v-card-title>
         <v-card-actions>
           <v-spacer />
-          <v-btn @click="deleteDialog = false">Отмена</v-btn>
-          <v-btn color="error" @click="handleDelete">Удалить</v-btn>
+          <v-btn @click="deleteDialog = false">{{ $t('common.cancel') }}</v-btn>
+          <v-btn color="error" @click="handleDelete">{{ $t('common.delete') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -98,32 +98,34 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useTasksStore } from '../stores/tasks'
 
+const { t } = useI18n()
 const store = useTasksStore()
 
 const columns = computed(() => [
-  { status: 'pending', title: 'Ожидает', color: 'warning', items: store.pending },
-  { status: 'in_progress', title: 'В работе', color: 'info', items: store.inProgress },
-  { status: 'completed', title: 'Завершено', color: 'success', items: store.completed },
+  { status: 'pending', title: t('tasks.columns.pending'), color: 'warning', items: store.pending },
+  { status: 'in_progress', title: t('tasks.columns.inProgress'), color: 'info', items: store.inProgress },
+  { status: 'completed', title: t('tasks.columns.completed'), color: 'success', items: store.completed },
 ])
 
-const priorities = [
-  { label: 'Низкий', value: 'low' },
-  { label: 'Средний', value: 'medium' },
-  { label: 'Высокий', value: 'high' },
-  { label: 'Срочный', value: 'urgent' },
-]
-const categories = [
-  { label: 'Уборка', value: 'cleaning' },
-  { label: 'Обслуживание', value: 'maintenance' },
-  { label: 'Инспекция', value: 'inspection' },
-  { label: 'Прочее', value: 'other' },
-]
+const priorities = computed(() => [
+  { label: t('tasks.priorities.low'), value: 'low' },
+  { label: t('tasks.priorities.medium'), value: 'medium' },
+  { label: t('tasks.priorities.high'), value: 'high' },
+  { label: t('tasks.priorities.urgent'), value: 'urgent' },
+])
+const categories = computed(() => [
+  { label: t('tasks.categories.cleaning'), value: 'cleaning' },
+  { label: t('tasks.categories.maintenance'), value: 'maintenance' },
+  { label: t('tasks.categories.inspection'), value: 'inspection' },
+  { label: t('tasks.categories.other'), value: 'other' },
+])
 
 const priorityColors = { low: 'priority-low', medium: 'priority-medium', high: 'priority-high', urgent: 'priority-urgent' }
 function priorityColor(p) { return priorityColors[p] || 'grey' }
-function priorityLabel(p) { return priorities.find((pr) => pr.value === p)?.label || p }
+function priorityLabel(p) { return priorities.value.find((pr) => pr.value === p)?.label || p }
 
 const formDialog = ref(false)
 const editing = ref(null)
@@ -156,11 +158,11 @@ async function handleSubmit() {
       await store.create(form.value)
     }
     formDialog.value = false
-    snackbarText.value = editing.value ? 'Обновлено' : 'Создано'
+    snackbarText.value = t(editing.value ? 'common.messages.saved' : 'common.messages.saved')
     snackbarColor.value = 'success'
     snackbar.value = true
   } catch (e) { console.error(e)
-    snackbarText.value = store.error || 'Ошибка'
+    snackbarText.value = store.error || t('common.messages.error')
     snackbarColor.value = 'error'
     snackbar.value = true
   } finally {
@@ -173,7 +175,7 @@ async function moveForward(task) {
   try {
     await store.update(task.id, { status: next })
   } catch (e) { console.error(e)
-    snackbarText.value = store.error || 'Ошибка'
+    snackbarText.value = store.error || t('common.messages.error')
     snackbarColor.value = 'error'
     snackbar.value = true
   }
@@ -184,11 +186,11 @@ function confirmDelete(task) { deleting.value = task; deleteDialog.value = true 
 async function handleDelete() {
   try {
     await store.destroy(deleting.value.id)
-    snackbarText.value = 'Удалено'
+    snackbarText.value = t('common.messages.deleted')
     snackbarColor.value = 'success'
     snackbar.value = true
   } catch (e) { console.error(e)
-    snackbarText.value = store.error || 'Ошибка'
+    snackbarText.value = store.error || t('common.messages.error')
     snackbarColor.value = 'error'
     snackbar.value = true
   } finally {

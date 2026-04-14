@@ -2,6 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import * as authApi from '../api/auth'
 import { setAuthToken, setRefreshToken, removeAuthTokens, getAuthToken } from '../api/client'
+import i18n from '../plugins/i18n'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
@@ -95,6 +96,10 @@ export const useAuthStore = defineStore('auth', () => {
       if (response.organization) {
         organization.value = response.organization
         membership.value = response.membership
+        const locale = response.organization.settings?.locale
+        if (locale && ['ru', 'en'].includes(locale)) {
+          i18n.global.locale.value = locale
+        }
       }
       return response
     } catch (e) {
@@ -106,7 +111,7 @@ export const useAuthStore = defineStore('auth', () => {
         organizations.value = []
         membership.value = null
       } else {
-        error.value = 'Ошибка соединения с сервером'
+        error.value = i18n.global.t('common.messages.loadError')
       }
     } finally {
       loading.value = false

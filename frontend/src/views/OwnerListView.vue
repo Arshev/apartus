@@ -1,9 +1,9 @@
 <template>
   <v-container>
     <div class="d-flex align-center mb-4">
-      <h1 class="text-h4">Собственники</h1>
+      <h1 class="text-h4">{{ $t('owners.title') }}</h1>
       <v-spacer />
-      <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate">Добавить</v-btn>
+      <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate">{{ $t('common.add') }}</v-btn>
     </div>
 
     <v-alert v-if="store.error" type="error" class="mb-4" closable @click:close="store.error = null">
@@ -21,39 +21,39 @@
         {{ (item.commission_rate / 100).toFixed(1) }}%
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-btn size="x-small" variant="text" color="primary" :to="`/owners/${item.id}/statement`">Отчёт</v-btn>
+        <v-btn size="x-small" variant="text" color="primary" :to="`/owners/${item.id}/statement`">{{ $t('owners.reportButton') }}</v-btn>
         <v-btn icon="mdi-pencil" variant="text" size="small" @click="openEdit(item)" />
         <v-btn icon="mdi-delete" variant="text" size="small" color="error" @click="confirmDelete(item)" />
       </template>
     </v-data-table>
 
-    <v-empty-state v-else-if="!store.loading" icon="mdi-account-key" title="Нет собственников" />
+    <v-empty-state v-else-if="!store.loading" icon="mdi-account-key" :title="$t('owners.emptyState.title')" />
 
     <v-dialog v-model="formDialog" max-width="500">
       <v-card>
-        <v-card-title>{{ editing ? 'Редактировать' : 'Новый собственник' }}</v-card-title>
+        <v-card-title>{{ editing ? $t('owners.editTitle') : $t('owners.createTitle') }}</v-card-title>
         <v-card-text>
-          <v-text-field v-model="form.name" label="Имя" class="mb-2" />
-          <v-text-field v-model="form.email" label="Email" class="mb-2" />
-          <v-text-field v-model="form.phone" label="Телефон" class="mb-2" />
-          <v-text-field v-model.number="form.commission_pct" label="Комиссия (%)" type="number" step="0.1" class="mb-2" />
-          <v-textarea v-model="form.notes" label="Заметки" rows="2" />
+          <v-text-field v-model="form.name" :label="$t('owners.form.name')" class="mb-2" />
+          <v-text-field v-model="form.email" :label="$t('owners.form.email')" class="mb-2" />
+          <v-text-field v-model="form.phone" :label="$t('owners.form.phone')" class="mb-2" />
+          <v-text-field v-model.number="form.commission_pct" :label="$t('owners.form.commissionPct')" type="number" step="0.1" class="mb-2" />
+          <v-textarea v-model="form.notes" :label="$t('owners.form.notes')" rows="2" />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn @click="formDialog = false">Отмена</v-btn>
-          <v-btn color="primary" :loading="formSubmitting" @click="handleSubmit">{{ editing ? 'Сохранить' : 'Создать' }}</v-btn>
+          <v-btn @click="formDialog = false">{{ $t('common.cancel') }}</v-btn>
+          <v-btn color="primary" :loading="formSubmitting" @click="handleSubmit">{{ editing ? $t('common.save') : $t('common.create') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <v-dialog v-model="deleteDialog" max-width="400">
       <v-card>
-        <v-card-title>Удалить собственника?</v-card-title>
+        <v-card-title>{{ $t('owners.dialog.deleteTitle') }}</v-card-title>
         <v-card-actions>
           <v-spacer />
-          <v-btn @click="deleteDialog = false">Отмена</v-btn>
-          <v-btn color="error" @click="handleDelete">Удалить</v-btn>
+          <v-btn @click="deleteDialog = false">{{ $t('common.cancel') }}</v-btn>
+          <v-btn color="error" @click="handleDelete">{{ $t('common.delete') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -63,18 +63,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useOwnersStore } from '../stores/owners'
 
+const { t } = useI18n()
 const store = useOwnersStore()
 
-const headers = [
-  { title: 'Имя', key: 'name' },
-  { title: 'Email', key: 'email' },
-  { title: 'Комиссия', key: 'commission_rate' },
-  { title: 'Объектов', key: 'properties_count' },
+const headers = computed(() => [
+  { title: t('owners.columns.name'), key: 'name' },
+  { title: t('owners.columns.email'), key: 'email' },
+  { title: t('owners.columns.commission'), key: 'commission_rate' },
+  { title: t('owners.columns.propertiesCount'), key: 'properties_count' },
   { title: '', key: 'actions', sortable: false, align: 'end' },
-]
+])
 
 const formDialog = ref(false)
 const editing = ref(null)
@@ -106,12 +108,12 @@ async function handleSubmit() {
     if (editing.value) { await store.update(editing.value.id, payload) }
     else { await store.create(payload) }
     formDialog.value = false
-    snackbarText.value = editing.value ? 'Обновлено' : 'Создано'
+    snackbarText.value = editing.value ? t('common.messages.updated') : t('common.messages.created')
     snackbarColor.value = 'success'
     snackbar.value = true
   } catch (e) {
     console.error(e)
-    snackbarText.value = store.error || 'Ошибка'
+    snackbarText.value = store.error || t('common.messages.error')
     snackbarColor.value = 'error'
     snackbar.value = true
   } finally {
@@ -124,12 +126,12 @@ function confirmDelete(item) { deleting.value = item; deleteDialog.value = true 
 async function handleDelete() {
   try {
     await store.destroy(deleting.value.id)
-    snackbarText.value = 'Удалено'
+    snackbarText.value = t('common.messages.deleted')
     snackbarColor.value = 'success'
     snackbar.value = true
   } catch (e) {
     console.error(e)
-    snackbarText.value = store.error || 'Ошибка'
+    snackbarText.value = store.error || t('common.messages.error')
     snackbarColor.value = 'error'
     snackbar.value = true
   } finally {

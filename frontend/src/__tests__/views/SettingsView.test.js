@@ -61,7 +61,7 @@ describe('SettingsView', () => {
 
     wrapper.vm.orgForm.name = 'New Name'
     await wrapper.vm.handleOrgSave()
-    expect(orgApi.update).toHaveBeenCalledWith({ name: 'New Name', currency: 'RUB' })
+    expect(orgApi.update).toHaveBeenCalledWith({ name: 'New Name', currency: 'RUB', settings: { locale: 'ru' } })
     expect(wrapper.vm.orgSnackbar).toBe(true)
   })
 

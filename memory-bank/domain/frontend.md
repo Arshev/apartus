@@ -65,10 +65,18 @@ Apartus frontend — это одно приложение, SPA.
 
 ## Localization
 
-- Основной язык — русский (UI копии русские by default).
-- Английский — вторичный (планируется vue-i18n).
-- На HW-2 фичах строки оставляем inline на русском. Вынос в i18n — отдельная фаза (Phase 12 roadmap).
-- Не коммитим bilingual UI строки в feature UI без отдельного i18n решения.
+- **vue-i18n** (Composition API mode, `legacy: false`) — canonical i18n решение (FT-019).
+- Два locale: `ru` (default, fallback), `en`.
+- Locale files: `src/locales/ru.json`, `src/locales/en.json` — hierarchical JSON по views/components.
+- Plugin: `src/plugins/i18n.js` — подключается в `main.js` после pinia, до router.
+- В `<template>`: `$t('key')` или `{{ $t('key', { param }) }}` для интерполяции.
+- В `<script setup>`: `import { useI18n } from 'vue-i18n'` + `const { t } = useI18n()` + `t('key')`.
+- Массивы с переводимыми строками (headers, options) оборачиваем в `computed()` для реактивности.
+- Language switcher: Settings → General → v-select ru/en. Сохраняется в `organization.settings.locale` через PATCH `/organization`.
+- При boot: `fetchCurrentUser()` читает `organization.settings.locale` и устанавливает `i18n.global.locale.value`.
+- Fallback: отсутствующий ключ в en.json → показывается русский текст. Невалидный locale → ru.
+- Vuetify built-in strings (pagination, no-data) пока на дефолтном Vuetify locale — Vuetify locale adapter не интегрирован (known gap).
+- Новые фичи обязаны добавлять строки в оба locale-файла и использовать `$t()` / `t()` вместо hardcoded текста.
 
 ## Views (22 routes)
 

@@ -7,7 +7,7 @@
     <v-icon size="small" class="mr-2">mdi-source-branch</v-icon>
     <span class="text-body-1">{{ node.name }}</span>
     <v-spacer />
-    <v-btn icon="mdi-plus" variant="text" size="x-small" title="Добавить дочерний" @click="$emit('addChild', node.id)" />
+    <v-btn icon="mdi-plus" variant="text" size="x-small" :title="$t('branches.addChildTitle')" @click="$emit('addChild', node.id)" />
     <v-btn icon="mdi-pencil" variant="text" size="x-small" @click="$emit('edit', node)" />
     <v-btn icon="mdi-delete" variant="text" size="x-small" color="error" @click="$emit('delete', node)" />
   </div>

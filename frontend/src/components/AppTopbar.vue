@@ -20,7 +20,7 @@
           </v-btn>
         </template>
         <v-list>
-          <v-list-item @click="handleLogout" prepend-icon="mdi-logout" title="Выйти" />
+          <v-list-item @click="handleLogout" prepend-icon="mdi-logout" :title="$t('topbar.logout')" />
         </v-list>
       </v-menu>
     </template>

@@ -1,12 +1,12 @@
 <template>
   <v-container>
-    <h1 class="text-h4 mb-4">Настройки организации</h1>
+    <h1 class="text-h4 mb-4">{{ $t('settings.title') }}</h1>
 
     <v-tabs v-model="tab" class="mb-4">
-      <v-tab value="general">Общие</v-tab>
-      <v-tab value="integrations">Интеграции</v-tab>
-      <v-tab value="members">Участники</v-tab>
-      <v-tab value="roles">Роли</v-tab>
+      <v-tab value="general">{{ $t('settings.tabs.general') }}</v-tab>
+      <v-tab value="integrations">{{ $t('settings.tabs.integrations') }}</v-tab>
+      <v-tab value="members">{{ $t('settings.tabs.members') }}</v-tab>
+      <v-tab value="roles">{{ $t('settings.tabs.roles') }}</v-tab>
     </v-tabs>
 
     <v-window v-model="tab">
@@ -15,43 +15,38 @@
           {{ Array.isArray(orgError) ? orgError.join(', ') : orgError }}
         </v-alert>
         <v-form @submit.prevent="handleOrgSave" :disabled="orgSaving">
-          <v-text-field v-model="orgForm.name" label="Название организации" class="mb-2" />
-          <v-select v-model="orgForm.currency" label="Валюта" :items="currencyList" item-title="label" item-value="code" class="mb-2" />
-          <v-btn type="submit" color="primary" :loading="orgSaving">Сохранить</v-btn>
+          <v-text-field v-model="orgForm.name" :label="$t('settings.general.orgName')" class="mb-2" />
+          <v-select v-model="orgForm.currency" :label="$t('settings.general.currency')" :items="currencyList" item-title="label" item-value="code" class="mb-2" />
+          <v-select v-model="orgForm.locale" :label="$t('settings.general.language')" :items="localeOptions" item-title="label" item-value="value" class="mb-2" />
+          <v-btn type="submit" color="primary" :loading="orgSaving">{{ $t('common.save') }}</v-btn>
         </v-form>
-        <v-snackbar v-model="orgSnackbar" :timeout="3000" color="success">Сохранено</v-snackbar>
+        <v-snackbar v-model="orgSnackbar" :timeout="3000" color="success">{{ $t('common.messages.saved') }}</v-snackbar>
       </v-window-item>
 
       <v-window-item value="integrations">
-        <h2 class="text-h5 mb-4">Telegram уведомления</h2>
+        <h2 class="text-h5 mb-4">{{ $t('settings.integrations.telegramTitle') }}</h2>
         <v-alert v-if="telegramError" type="error" class="mb-4" closable @click:close="telegramError = null">
           {{ telegramError }}
         </v-alert>
         <v-alert v-if="telegramSuccess" type="success" class="mb-4" closable @click:close="telegramSuccess = false">
-          Тестовое сообщение отправлено!
+          {{ $t('settings.integrations.testSuccess') }}
         </v-alert>
-        <v-text-field v-model="telegramForm.bot_token" label="Bot Token (от @BotFather)" class="mb-2" />
-        <v-text-field v-model="telegramForm.chat_id" label="Chat ID" class="mb-2" />
+        <v-text-field v-model="telegramForm.bot_token" :label="$t('settings.integrations.botToken')" class="mb-2" />
+        <v-text-field v-model="telegramForm.chat_id" :label="$t('settings.integrations.chatId')" class="mb-2" />
         <div class="d-flex ga-2 mb-4">
-          <v-btn color="primary" :loading="telegramSaving" @click="saveTelegram">Сохранить</v-btn>
-          <v-btn variant="outlined" :loading="telegramTesting" @click="testTelegram" :disabled="!telegramForm.bot_token || !telegramForm.chat_id">Тест</v-btn>
+          <v-btn color="primary" :loading="telegramSaving" @click="saveTelegram">{{ $t('common.save') }}</v-btn>
+          <v-btn variant="outlined" :loading="telegramTesting" @click="testTelegram" :disabled="!telegramForm.bot_token || !telegramForm.chat_id">{{ $t('settings.integrations.testButton') }}</v-btn>
         </div>
         <v-card variant="outlined" class="pa-3">
-          <p class="text-body-2 text-medium-emphasis">
-            1. Создайте бота через <a href="https://t.me/BotFather" target="_blank">@BotFather</a> в Telegram<br>
-            2. Скопируйте Bot Token сюда<br>
-            3. Добавьте бота в группу или напишите ему /start<br>
-            4. Узнайте Chat ID через <a href="https://t.me/getmyid_bot" target="_blank">@getmyid_bot</a><br>
-            5. Нажмите "Тест" для проверки
-          </p>
+          <p class="text-body-2 text-medium-emphasis" style="white-space: pre-line">{{ $t('settings.integrations.instructions') }}</p>
         </v-card>
       </v-window-item>
 
       <v-window-item value="members">
         <div class="d-flex align-center mb-4">
-          <h2 class="text-h5">Участники</h2>
+          <h2 class="text-h5">{{ $t('settings.members.title') }}</h2>
           <v-spacer />
-          <v-btn color="primary" prepend-icon="mdi-plus" @click="openAddMember">Добавить</v-btn>
+          <v-btn color="primary" prepend-icon="mdi-plus" @click="openAddMember">{{ $t('common.add') }}</v-btn>
         </div>
 
         <v-alert v-if="membersStore.error" type="error" class="mb-4" closable @click:close="membersStore.error = null">
@@ -76,22 +71,22 @@
             <v-btn icon="mdi-delete" variant="text" size="small" color="error" @click="confirmDeleteMember(item)" />
           </template>
         </v-data-table>
-        <v-empty-state v-else-if="!membersStore.loading" icon="mdi-account-group" title="Нет участников" />
+        <v-empty-state v-else-if="!membersStore.loading" icon="mdi-account-group" :title="$t('settings.members.emptyState.title')" />
 
         <!-- Add/Edit member dialog -->
         <v-dialog v-model="memberDialog" max-width="500">
           <v-card>
-            <v-card-title>{{ editingMember ? 'Редактировать роль' : 'Добавить участника' }}</v-card-title>
+            <v-card-title>{{ editingMember ? $t('settings.members.editTitle') : $t('settings.members.addTitle') }}</v-card-title>
             <v-card-text>
               <template v-if="!editingMember">
-                <v-text-field v-model="memberForm.email" label="Email" class="mb-2" />
-                <v-text-field v-model="memberForm.first_name" label="Имя" class="mb-2" />
-                <v-text-field v-model="memberForm.last_name" label="Фамилия" class="mb-2" />
-                <v-text-field v-model="memberForm.password" label="Пароль" type="password" class="mb-2" />
+                <v-text-field v-model="memberForm.email" :label="$t('settings.members.form.email')" class="mb-2" />
+                <v-text-field v-model="memberForm.first_name" :label="$t('settings.members.form.firstName')" class="mb-2" />
+                <v-text-field v-model="memberForm.last_name" :label="$t('settings.members.form.lastName')" class="mb-2" />
+                <v-text-field v-model="memberForm.password" :label="$t('settings.members.form.password')" type="password" class="mb-2" />
               </template>
               <v-select
                 v-model="memberForm.role"
-                label="Роль"
+                :label="$t('settings.members.form.role')"
                 :items="roleOptions"
                 item-title="label"
                 item-value="value"
@@ -100,9 +95,9 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer />
-              <v-btn @click="memberDialog = false">Отмена</v-btn>
+              <v-btn @click="memberDialog = false">{{ $t('common.cancel') }}</v-btn>
               <v-btn color="primary" :loading="memberSubmitting" @click="handleMemberSubmit">
-                {{ editingMember ? 'Сохранить' : 'Добавить' }}
+                {{ editingMember ? $t('common.save') : $t('common.add') }}
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -111,12 +106,12 @@
         <!-- Delete member dialog -->
         <v-dialog v-model="deleteMemberDialog" max-width="400">
           <v-card>
-            <v-card-title>Удалить участника?</v-card-title>
-            <v-card-text>{{ deletingMember?.user?.full_name }} будет удалён из организации.</v-card-text>
+            <v-card-title>{{ $t('settings.members.dialog.deleteTitle') }}</v-card-title>
+            <v-card-text>{{ $t('settings.members.dialog.deleteText', { name: deletingMember?.user?.full_name }) }}</v-card-text>
             <v-card-actions>
               <v-spacer />
-              <v-btn @click="deleteMemberDialog = false">Отмена</v-btn>
-              <v-btn color="error" @click="handleDeleteMember">Удалить</v-btn>
+              <v-btn @click="deleteMemberDialog = false">{{ $t('common.cancel') }}</v-btn>
+              <v-btn color="error" @click="handleDeleteMember">{{ $t('common.delete') }}</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -128,9 +123,9 @@
 
       <v-window-item value="roles">
         <div class="d-flex align-center mb-4">
-          <h2 class="text-h5">Роли</h2>
+          <h2 class="text-h5">{{ $t('settings.roles.title') }}</h2>
           <v-spacer />
-          <v-btn color="primary" prepend-icon="mdi-plus" @click="openAddRole">Добавить</v-btn>
+          <v-btn color="primary" prepend-icon="mdi-plus" @click="openAddRole">{{ $t('common.add') }}</v-btn>
         </div>
 
         <v-alert v-if="rolesStore.error" type="error" class="mb-4" closable @click:close="rolesStore.error = null">
@@ -145,28 +140,28 @@
           density="comfortable"
         >
           <template v-slot:item.is_system="{ item }">
-            {{ item.is_system ? 'Да' : 'Нет' }}
+            {{ item.is_system ? $t('common.yes') : $t('common.no') }}
           </template>
           <template v-slot:item.actions="{ item }">
             <v-btn icon="mdi-pencil" variant="text" size="small" @click="openEditRole(item)" :disabled="item.is_system" />
             <v-btn icon="mdi-delete" variant="text" size="small" color="error" @click="confirmDeleteRole(item)" :disabled="item.is_system" />
           </template>
         </v-data-table>
-        <v-empty-state v-else-if="!rolesStore.loading" icon="mdi-shield-account" title="Нет ролей" />
+        <v-empty-state v-else-if="!rolesStore.loading" icon="mdi-shield-account" :title="$t('settings.roles.emptyState.title')" />
 
         <!-- Role dialog -->
         <v-dialog v-model="roleDialog" max-width="500">
           <v-card>
-            <v-card-title>{{ editingRole ? 'Редактировать роль' : 'Новая роль' }}</v-card-title>
+            <v-card-title>{{ editingRole ? $t('settings.roles.editTitle') : $t('settings.roles.addTitle') }}</v-card-title>
             <v-card-text>
-              <v-text-field v-model="roleForm.name" label="Название" class="mb-2" />
-              <v-text-field v-model="roleForm.code" label="Код" class="mb-2" />
+              <v-text-field v-model="roleForm.name" :label="$t('settings.roles.form.name')" class="mb-2" />
+              <v-text-field v-model="roleForm.code" :label="$t('settings.roles.form.code')" class="mb-2" />
             </v-card-text>
             <v-card-actions>
               <v-spacer />
-              <v-btn @click="roleDialog = false">Отмена</v-btn>
+              <v-btn @click="roleDialog = false">{{ $t('common.cancel') }}</v-btn>
               <v-btn color="primary" :loading="roleSubmitting" @click="handleRoleSubmit">
-                {{ editingRole ? 'Сохранить' : 'Создать' }}
+                {{ editingRole ? $t('common.save') : $t('common.add') }}
               </v-btn>
             </v-card-actions>
           </v-card>
@@ -175,12 +170,12 @@
         <!-- Delete role dialog -->
         <v-dialog v-model="deleteRoleDialog" max-width="400">
           <v-card>
-            <v-card-title>Удалить роль?</v-card-title>
-            <v-card-text>Роль «{{ deletingRole?.name }}» будет удалена.</v-card-text>
+            <v-card-title>{{ $t('settings.roles.dialog.deleteTitle') }}</v-card-title>
+            <v-card-text>{{ $t('settings.roles.dialog.deleteText', { name: deletingRole?.name }) }}</v-card-text>
             <v-card-actions>
               <v-spacer />
-              <v-btn @click="deleteRoleDialog = false">Отмена</v-btn>
-              <v-btn color="error" @click="handleDeleteRole">Удалить</v-btn>
+              <v-btn @click="deleteRoleDialog = false">{{ $t('common.cancel') }}</v-btn>
+              <v-btn color="error" @click="handleDeleteRole">{{ $t('common.delete') }}</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -194,14 +189,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import { useMembersStore } from '../stores/members'
 import { useRolesStore } from '../stores/roles'
 import * as organizationsApi from '../api/organizations'
 import apiClient from '../api/client'
 import { CURRENCY_LIST } from '../utils/currency'
+import i18n from '../plugins/i18n'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const membersStore = useMembersStore()
 const rolesStore = useRolesStore()
@@ -228,7 +226,7 @@ async function saveTelegram() {
     telegramSuccess.value = false
   } catch (e) {
     console.error(e)
-    telegramError.value = 'Не удалось сохранить'
+    telegramError.value = t('settings.integrations.saveError')
   } finally {
     telegramSaving.value = false
   }
@@ -244,15 +242,19 @@ async function testTelegram() {
     telegramSuccess.value = true
   } catch (e) {
     console.error(e)
-    telegramError.value = 'Не удалось отправить тестовое сообщение'
+    telegramError.value = t('settings.integrations.testError')
   } finally {
     telegramTesting.value = false
   }
 }
 
 // -- General tab --
-const orgForm = ref({ name: '', currency: 'RUB' })
+const orgForm = ref({ name: '', currency: 'RUB', locale: 'ru' })
 const currencyList = CURRENCY_LIST
+const localeOptions = [
+  { label: 'Русский', value: 'ru' },
+  { label: 'English', value: 'en' },
+]
 const orgSaving = ref(false)
 const orgError = ref(null)
 const orgSnackbar = ref(false)
@@ -263,10 +265,11 @@ async function loadOrg() {
     const org = await organizationsApi.get()
     orgForm.value.name = org.name
     orgForm.value.currency = org.currency || 'RUB'
+    orgForm.value.locale = org.settings?.locale || 'ru'
     telegramForm.value.bot_token = org.settings?.telegram_bot_token || ''
     telegramForm.value.chat_id = org.settings?.telegram_chat_id || ''
   } catch (e) { console.error(e);
-    orgError.value = 'Не удалось загрузить настройки'
+    orgError.value = t('settings.general.loadError')
   }
 }
 
@@ -274,30 +277,35 @@ async function handleOrgSave() {
   orgSaving.value = true
   orgError.value = null
   try {
-    await organizationsApi.update(orgForm.value)
+    await organizationsApi.update({
+      name: orgForm.value.name,
+      currency: orgForm.value.currency,
+      settings: { locale: orgForm.value.locale },
+    })
+    i18n.global.locale.value = orgForm.value.locale
     orgSnackbar.value = true
   } catch (e) {
-    orgError.value = e.response?.data?.error || 'Ошибка сохранения'
+    orgError.value = e.response?.data?.error || t('common.messages.error')
   } finally {
     orgSaving.value = false
   }
 }
 
 // -- Members tab --
-const memberHeaders = [
-  { title: 'Участник', key: 'user' },
-  { title: 'Роль', key: 'role' },
+const memberHeaders = computed(() => [
+  { title: t('settings.members.columns.member'), key: 'user' },
+  { title: t('settings.members.columns.role'), key: 'role' },
   { title: '', key: 'actions', sortable: false, align: 'end' },
-]
+])
 
-const roleOptions = [
-  { label: 'Участник', value: 'member' },
-  { label: 'Менеджер', value: 'manager' },
-  { label: 'Владелец', value: 'owner' },
-]
+const roleOptions = computed(() => [
+  { label: t('settings.members.roles.member'), value: 'member' },
+  { label: t('settings.members.roles.manager'), value: 'manager' },
+  { label: t('settings.members.roles.owner'), value: 'owner' },
+])
 
 function roleLabel(role) {
-  return roleOptions.find((r) => r.value === role)?.label || role
+  return roleOptions.value.find((r) => r.value === role)?.label || role
 }
 
 const memberDialog = ref(false)
@@ -327,16 +335,16 @@ async function handleMemberSubmit() {
   try {
     if (editingMember.value) {
       await membersStore.update(editingMember.value.id, { role_enum: memberForm.value.role })
-      memberSnackbarText.value = 'Роль обновлена'
+      memberSnackbarText.value = t('settings.members.messages.roleUpdated')
     } else {
       await membersStore.create(memberForm.value)
-      memberSnackbarText.value = 'Участник добавлен'
+      memberSnackbarText.value = t('settings.members.messages.memberAdded')
     }
     memberSnackbarColor.value = 'success'
     memberSnackbar.value = true
     memberDialog.value = false
   } catch (e) { console.error(e);
-    memberSnackbarText.value = membersStore.error || 'Ошибка'
+    memberSnackbarText.value = membersStore.error || t('common.messages.error')
     memberSnackbarColor.value = 'error'
     memberSnackbar.value = true
   } finally {
@@ -352,11 +360,11 @@ function confirmDeleteMember(member) {
 async function handleDeleteMember() {
   try {
     await membersStore.destroy(deletingMember.value.id)
-    memberSnackbarText.value = 'Участник удалён'
+    memberSnackbarText.value = t('settings.members.messages.memberDeleted')
     memberSnackbarColor.value = 'success'
     memberSnackbar.value = true
   } catch (e) { console.error(e);
-    memberSnackbarText.value = membersStore.error || 'Ошибка'
+    memberSnackbarText.value = membersStore.error || t('common.messages.error')
     memberSnackbarColor.value = 'error'
     memberSnackbar.value = true
   } finally {
@@ -366,13 +374,13 @@ async function handleDeleteMember() {
 }
 
 // -- Roles tab --
-const roleHeaders = [
-  { title: 'Название', key: 'name' },
-  { title: 'Код', key: 'code' },
-  { title: 'Системная', key: 'is_system' },
-  { title: 'Участников', key: 'members_count' },
+const roleHeaders = computed(() => [
+  { title: t('settings.roles.columns.name'), key: 'name' },
+  { title: t('settings.roles.columns.code'), key: 'code' },
+  { title: t('settings.roles.columns.isSystem'), key: 'is_system' },
+  { title: t('settings.roles.columns.membersCount'), key: 'members_count' },
   { title: '', key: 'actions', sortable: false, align: 'end' },
-]
+])
 
 const roleDialog = ref(false)
 const editingRole = ref(null)
@@ -401,16 +409,16 @@ async function handleRoleSubmit() {
   try {
     if (editingRole.value) {
       await rolesStore.update(editingRole.value.id, roleForm.value)
-      roleSnackbarText.value = 'Роль обновлена'
+      roleSnackbarText.value = t('settings.roles.messages.updated')
     } else {
       await rolesStore.create(roleForm.value)
-      roleSnackbarText.value = 'Роль создана'
+      roleSnackbarText.value = t('settings.roles.messages.created')
     }
     roleSnackbarColor.value = 'success'
     roleSnackbar.value = true
     roleDialog.value = false
   } catch (e) { console.error(e);
-    roleSnackbarText.value = rolesStore.error || 'Ошибка'
+    roleSnackbarText.value = rolesStore.error || t('common.messages.error')
     roleSnackbarColor.value = 'error'
     roleSnackbar.value = true
   } finally {
@@ -426,11 +434,11 @@ function confirmDeleteRole(role) {
 async function handleDeleteRole() {
   try {
     await rolesStore.destroy(deletingRole.value.id)
-    roleSnackbarText.value = 'Роль удалена'
+    roleSnackbarText.value = t('settings.roles.messages.deleted')
     roleSnackbarColor.value = 'success'
     roleSnackbar.value = true
   } catch (e) { console.error(e);
-    roleSnackbarText.value = rolesStore.error || 'Ошибка'
+    roleSnackbarText.value = rolesStore.error || t('common.messages.error')
     roleSnackbarColor.value = 'error'
     roleSnackbar.value = true
   } finally {

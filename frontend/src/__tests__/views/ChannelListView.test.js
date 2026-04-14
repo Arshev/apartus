@@ -53,10 +53,10 @@ describe('ChannelListView', () => {
     expect(store.syncChannel).toHaveBeenCalledWith(1)
   })
 
-  it('platformLabels covers all enums', () => {
+  it('platformLabel covers all enums', () => {
     const wrapper = mountWithVuetify(ChannelListView)
-    expect(wrapper.vm.platformLabels).toHaveProperty('booking_com')
-    expect(wrapper.vm.platformLabels).toHaveProperty('airbnb')
-    expect(wrapper.vm.platformLabels).toHaveProperty('ostrovok')
+    expect(wrapper.vm.platformLabel('booking_com')).toBe('Booking.com')
+    expect(wrapper.vm.platformLabel('airbnb')).toBe('Airbnb')
+    expect(wrapper.vm.platformLabel('ostrovok')).toBe('Островок')
   })
 })

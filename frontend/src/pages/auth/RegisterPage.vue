@@ -3,7 +3,7 @@
     <v-row align="center" justify="center">
       <v-col cols="12" sm="8" md="5">
         <v-card elevation="4">
-          <v-card-title class="text-h5 text-center pa-6">Регистрация</v-card-title>
+          <v-card-title class="text-h5 text-center pa-6">{{ $t('auth.register.title') }}</v-card-title>
           <v-card-text>
             <v-alert v-if="authStore.error" type="error" class="mb-4" closable @click:close="authStore.error = null">
               {{ Array.isArray(authStore.error) ? authStore.error.join(', ') : authStore.error }}
@@ -11,7 +11,7 @@
             <v-form v-model="formValid" @submit.prevent="handleRegister">
               <v-text-field
                 v-model="form.organization_name"
-                label="Название организации"
+                :label="$t('auth.register.orgNameLabel')"
                 :rules="[rules.required]"
                 prepend-inner-icon="mdi-domain"
                 variant="outlined"
@@ -21,7 +21,7 @@
                 <v-col cols="6">
                   <v-text-field
                     v-model="form.first_name"
-                    label="Имя"
+                    :label="$t('auth.register.firstNameLabel')"
                     :rules="[rules.required]"
                     variant="outlined"
                   />
@@ -29,7 +29,7 @@
                 <v-col cols="6">
                   <v-text-field
                     v-model="form.last_name"
-                    label="Фамилия"
+                    :label="$t('auth.register.lastNameLabel')"
                     :rules="[rules.required]"
                     variant="outlined"
                   />
@@ -37,7 +37,7 @@
               </v-row>
               <v-text-field
                 v-model="form.email"
-                label="Email"
+                :label="$t('auth.register.emailLabel')"
                 type="email"
                 :rules="[rules.required, rules.email]"
                 prepend-inner-icon="mdi-email"
@@ -46,7 +46,7 @@
               />
               <v-text-field
                 v-model="form.password"
-                label="Пароль"
+                :label="$t('auth.register.passwordLabel')"
                 :type="showPassword ? 'text' : 'password'"
                 :rules="[rules.required, rules.minLength]"
                 prepend-inner-icon="mdi-lock"
@@ -57,7 +57,7 @@
               />
               <v-text-field
                 v-model="form.password_confirmation"
-                label="Подтверждение пароля"
+                :label="$t('auth.register.passwordConfirmLabel')"
                 :type="showPassword ? 'text' : 'password'"
                 :rules="[rules.required, rules.passwordMatch]"
                 prepend-inner-icon="mdi-lock-check"
@@ -71,13 +71,13 @@
                 size="large"
                 :loading="authStore.loading"
               >
-                Создать аккаунт
+                {{ $t('auth.register.submitButton') }}
               </v-btn>
             </v-form>
           </v-card-text>
           <v-card-actions class="justify-center pb-4">
-            <span class="text-body-2">Уже есть аккаунт?</span>
-            <v-btn variant="text" color="primary" :to="{ name: 'login' }">Войти</v-btn>
+            <span class="text-body-2">{{ $t('auth.register.hasAccount') }}</span>
+            <v-btn variant="text" color="primary" :to="{ name: 'login' }">{{ $t('auth.register.loginLink') }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -88,7 +88,10 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../../stores/auth'
+
+const { t } = useI18n()
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -105,10 +108,10 @@ const form = reactive({
 })
 
 const rules = {
-  required: (v) => !!v || 'Обязательное поле',
-  email: (v) => /.+@.+\..+/.test(v) || 'Некорректный email',
-  minLength: (v) => (v && v.length >= 8) || 'Минимум 8 символов',
-  passwordMatch: (v) => v === form.password || 'Пароли не совпадают',
+  required: (v) => !!v || t('common.validation.required'),
+  email: (v) => /.+@.+\..+/.test(v) || t('common.validation.invalidEmail'),
+  minLength: (v) => (v && v.length >= 8) || t('common.validation.minLength8'),
+  passwordMatch: (v) => v === form.password || t('common.validation.passwordsMismatch'),
 }
 
 async function handleRegister() {

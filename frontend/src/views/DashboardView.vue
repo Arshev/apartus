@@ -1,6 +1,6 @@
 <template>
   <v-container fluid class="pa-6">
-    <h1 class="text-h5 font-weight-bold mb-1">Здравствуйте, {{ authStore.user?.full_name }}</h1>
+    <h1 class="text-h5 font-weight-bold mb-1">{{ $t('dashboard.greeting', { name: authStore.user?.full_name }) }}</h1>
     <p class="text-body-2 text-medium-emphasis mb-6">{{ authStore.organization?.name }}</p>
 
     <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
@@ -17,7 +17,7 @@
             <v-card-text class="pa-4">
               <div class="d-flex align-center mb-2">
                 <v-icon size="20" class="mr-2">mdi-door-open</v-icon>
-                <span class="text-caption font-weight-medium text-uppercase">Юнитов</span>
+                <span class="text-caption font-weight-medium text-uppercase">{{ $t('dashboard.kpi.units') }}</span>
               </div>
               <div class="text-h4 font-weight-bold">{{ data.total_units }}</div>
             </v-card-text>
@@ -28,7 +28,7 @@
             <v-card-text class="pa-4">
               <div class="d-flex align-center mb-2">
                 <v-icon size="20" class="mr-2">mdi-chart-arc</v-icon>
-                <span class="text-caption font-weight-medium text-uppercase">Загрузка</span>
+                <span class="text-caption font-weight-medium text-uppercase">{{ $t('dashboard.kpi.occupancy') }}</span>
               </div>
               <div class="text-h4 font-weight-bold">{{ (data.occupancy_rate * 100).toFixed(0) }}%</div>
               <v-progress-linear
@@ -46,7 +46,7 @@
             <v-card-text class="pa-4">
               <div class="d-flex align-center mb-2">
                 <v-icon size="20" class="mr-2">mdi-cash-plus</v-icon>
-                <span class="text-caption font-weight-medium text-uppercase">Выручка</span>
+                <span class="text-caption font-weight-medium text-uppercase">{{ $t('dashboard.kpi.revenue') }}</span>
               </div>
               <div class="text-h4 font-weight-bold">{{ formatPrice(data.revenue_this_month) }}</div>
             </v-card-text>
@@ -57,7 +57,7 @@
             <v-card-text class="pa-4">
               <div class="d-flex align-center mb-2">
                 <v-icon size="20" class="mr-2">mdi-calendar-check</v-icon>
-                <span class="text-caption font-weight-medium text-uppercase">Брони</span>
+                <span class="text-caption font-weight-medium text-uppercase">{{ $t('dashboard.kpi.reservations') }}</span>
               </div>
               <div class="text-h4 font-weight-bold">{{ totalReservations }}</div>
             </v-card-text>
@@ -71,7 +71,7 @@
           <v-card color="status-confirmed" variant="flat">
             <v-card-text class="text-center pa-3">
               <div class="text-h5 font-weight-bold">{{ data.reservations_by_status.confirmed }}</div>
-              <div class="text-caption">Подтверждено</div>
+              <div class="text-caption">{{ $t('dashboard.statuses.confirmed') }}</div>
             </v-card-text>
           </v-card>
         </v-col>
@@ -79,7 +79,7 @@
           <v-card color="status-checked-in" variant="flat">
             <v-card-text class="text-center pa-3">
               <div class="text-h5 font-weight-bold">{{ data.reservations_by_status.checked_in }}</div>
-              <div class="text-caption">Заселено</div>
+              <div class="text-caption">{{ $t('dashboard.statuses.checkedIn') }}</div>
             </v-card-text>
           </v-card>
         </v-col>
@@ -87,7 +87,7 @@
           <v-card color="status-checked-out" variant="flat">
             <v-card-text class="text-center pa-3">
               <div class="text-h5 font-weight-bold">{{ data.reservations_by_status.checked_out }}</div>
-              <div class="text-caption">Выселено</div>
+              <div class="text-caption">{{ $t('dashboard.statuses.checkedOut') }}</div>
             </v-card-text>
           </v-card>
         </v-col>
@@ -95,7 +95,7 @@
           <v-card color="status-cancelled" variant="flat">
             <v-card-text class="text-center pa-3">
               <div class="text-h5 font-weight-bold">{{ data.reservations_by_status.cancelled }}</div>
-              <div class="text-caption">Отменено</div>
+              <div class="text-caption">{{ $t('dashboard.statuses.cancelled') }}</div>
             </v-card-text>
           </v-card>
         </v-col>
@@ -107,7 +107,7 @@
           <v-card variant="outlined">
             <v-card-title class="d-flex align-center text-body-1 font-weight-bold pa-4 pb-2">
               <v-icon color="primary" size="20" class="mr-2">mdi-login</v-icon>
-              Заезды (7 дней)
+              {{ $t('dashboard.checkIns') }}
             </v-card-title>
             <v-divider />
             <v-list v-if="data.upcoming_check_ins.length" density="compact" class="pa-0">
@@ -119,20 +119,20 @@
                 <template v-slot:prepend>
                   <v-icon color="status-confirmed" size="18">mdi-circle</v-icon>
                 </template>
-                <v-list-item-title class="text-body-2">{{ r.guest_name || 'Блокировка' }} — {{ r.unit_name }}</v-list-item-title>
+                <v-list-item-title class="text-body-2">{{ r.guest_name || $t('common.blocking') }} — {{ r.unit_name }}</v-list-item-title>
                 <template v-slot:append>
                   <span class="text-caption text-medium-emphasis">{{ r.check_in }}</span>
                 </template>
               </v-list-item>
             </v-list>
-            <v-card-text v-else class="text-medium-emphasis text-center">Нет предстоящих заездов</v-card-text>
+            <v-card-text v-else class="text-medium-emphasis text-center">{{ $t('dashboard.noCheckIns') }}</v-card-text>
           </v-card>
         </v-col>
         <v-col cols="12" md="6">
           <v-card variant="outlined">
             <v-card-title class="d-flex align-center text-body-1 font-weight-bold pa-4 pb-2">
               <v-icon color="secondary" size="20" class="mr-2">mdi-logout</v-icon>
-              Выезды (7 дней)
+              {{ $t('dashboard.checkOuts') }}
             </v-card-title>
             <v-divider />
             <v-list v-if="data.upcoming_check_outs.length" density="compact" class="pa-0">
@@ -144,13 +144,13 @@
                 <template v-slot:prepend>
                   <v-icon color="status-checked-out" size="18">mdi-circle</v-icon>
                 </template>
-                <v-list-item-title class="text-body-2">{{ r.guest_name || 'Блокировка' }} — {{ r.unit_name }}</v-list-item-title>
+                <v-list-item-title class="text-body-2">{{ r.guest_name || $t('common.blocking') }} — {{ r.unit_name }}</v-list-item-title>
                 <template v-slot:append>
                   <span class="text-caption text-medium-emphasis">{{ r.check_out }}</span>
                 </template>
               </v-list-item>
             </v-list>
-            <v-card-text v-else class="text-medium-emphasis text-center">Нет предстоящих выездов</v-card-text>
+            <v-card-text v-else class="text-medium-emphasis text-center">{{ $t('dashboard.noCheckOuts') }}</v-card-text>
           </v-card>
         </v-col>
       </v-row>
@@ -160,9 +160,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import * as dashboardApi from '../api/dashboard'
 import { formatMoney } from '../utils/currency'
+
+const { t } = useI18n()
 
 const authStore = useAuthStore()
 const data = ref(null)
@@ -186,7 +189,7 @@ async function loadDashboard() {
   try {
     data.value = await dashboardApi.get()
   } catch (e) { console.error(e);
-    error.value = 'Не удалось загрузить данные'
+    error.value = t('dashboard.messages.loadError')
   } finally {
     loading.value = false
   }

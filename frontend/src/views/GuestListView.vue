@@ -1,15 +1,15 @@
 <template>
   <v-container>
     <div class="d-flex align-center mb-4">
-      <h1 class="text-h4">Гости</h1>
+      <h1 class="text-h4">{{ $t('guests.title') }}</h1>
       <v-spacer />
-      <v-btn color="primary" prepend-icon="mdi-plus" :to="'/guests/new'">Добавить гостя</v-btn>
+      <v-btn color="primary" prepend-icon="mdi-plus" :to="'/guests/new'">{{ $t('guests.addButton') }}</v-btn>
     </div>
 
     <v-alert v-if="store.error" type="error" class="mb-4" closable @click:close="store.error = null">
       {{ Array.isArray(store.error) ? store.error.join(', ') : store.error }}
       <template v-slot:append>
-        <v-btn variant="text" size="small" @click="store.fetchAll()">Повторить</v-btn>
+        <v-btn variant="text" size="small" @click="store.fetchAll()">{{ $t('common.retry') }}</v-btn>
       </template>
     </v-alert>
 
@@ -33,24 +33,24 @@
     <v-empty-state
       v-else-if="!store.loading && !store.error"
       icon="mdi-account-group-outline"
-      title="Нет гостей"
-      text="Добавьте первого гостя."
+      :title="$t('guests.emptyState.title')"
+      :text="$t('guests.emptyState.text')"
     >
       <template v-slot:actions>
-        <v-btn color="primary" prepend-icon="mdi-plus" :to="'/guests/new'">Добавить гостя</v-btn>
+        <v-btn color="primary" prepend-icon="mdi-plus" :to="'/guests/new'">{{ $t('guests.addButton') }}</v-btn>
       </template>
     </v-empty-state>
 
     <v-dialog v-model="deleteDialog" max-width="400">
       <v-card>
-        <v-card-title>Удалить гостя?</v-card-title>
+        <v-card-title>{{ $t('guests.dialog.deleteTitle') }}</v-card-title>
         <v-card-text>
-          Гость «{{ deletingGuest?.first_name }} {{ deletingGuest?.last_name }}» будет удалён.
+          {{ $t('guests.dialog.deleteText', { firstName: deletingGuest?.first_name, lastName: deletingGuest?.last_name }) }}
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn @click="deleteDialog = false">Отмена</v-btn>
-          <v-btn color="error" @click="handleDelete">Удалить</v-btn>
+          <v-btn @click="deleteDialog = false">{{ $t('common.cancel') }}</v-btn>
+          <v-btn color="error" @click="handleDelete">{{ $t('common.delete') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -62,17 +62,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useGuestsStore } from '../stores/guests'
 
+const { t } = useI18n()
 const store = useGuestsStore()
 
-const headers = [
-  { title: 'Имя', key: 'full_name' },
-  { title: 'Email', key: 'email' },
-  { title: 'Телефон', key: 'phone' },
+const headers = computed(() => [
+  { title: t('guests.columns.name'), key: 'full_name' },
+  { title: t('guests.columns.email'), key: 'email' },
+  { title: t('guests.columns.phone'), key: 'phone' },
   { title: '', key: 'actions', sortable: false, align: 'end' },
-]
+])
 
 const deleteDialog = ref(false)
 const deletingGuest = ref(null)
@@ -87,10 +89,10 @@ function confirmDelete(guest) {
 async function handleDelete() {
   try {
     await store.destroy(deletingGuest.value.id)
-    snackbarText.value = 'Гость удалён'
+    snackbarText.value = t('guests.messages.deleted')
     snackbar.value = true
   } catch (e) { console.error(e);
-    snackbarText.value = store.error || 'Не удалось удалить'
+    snackbarText.value = store.error || t('common.messages.deleteError')
     snackbar.value = true
   } finally {
     deleteDialog.value = false

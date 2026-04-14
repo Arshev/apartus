@@ -1,10 +1,10 @@
 <template>
   <v-container>
     <div class="d-flex align-center mb-4">
-      <h1 class="text-h4">Удобства</h1>
+      <h1 class="text-h4">{{ $t('amenities.title') }}</h1>
       <v-spacer />
       <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate">
-        Добавить
+        {{ $t('common.add') }}
       </v-btn>
     </div>
 
@@ -29,26 +29,26 @@
     <v-empty-state
       v-else-if="!store.loading && !store.error"
       icon="mdi-star-circle-outline"
-      title="Нет удобств"
-      text="Создайте первое удобство для каталога организации."
+      :title="$t('amenities.emptyState.title')"
+      :text="$t('amenities.emptyState.text')"
     >
       <template v-slot:actions>
-        <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate">Добавить</v-btn>
+        <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate">{{ $t('common.add') }}</v-btn>
       </template>
     </v-empty-state>
 
     <!-- Create/Edit dialog -->
     <v-dialog v-model="formDialog" max-width="400">
       <v-card>
-        <v-card-title>{{ editingAmenity ? 'Редактировать удобство' : 'Новое удобство' }}</v-card-title>
+        <v-card-title>{{ editingAmenity ? $t('amenities.editTitle') : $t('amenities.createTitle') }}</v-card-title>
         <v-card-text>
-          <v-text-field v-model="formName" label="Название" :rules="[rules.required]" autofocus />
+          <v-text-field v-model="formName" :label="$t('amenities.form.name')" :rules="[rules.required]" autofocus />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn @click="formDialog = false">Отмена</v-btn>
+          <v-btn @click="formDialog = false">{{ $t('common.cancel') }}</v-btn>
           <v-btn color="primary" :loading="formSubmitting" @click="handleFormSubmit">
-            {{ editingAmenity ? 'Сохранить' : 'Создать' }}
+            {{ editingAmenity ? $t('common.save') : $t('common.create') }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -57,14 +57,14 @@
     <!-- Delete dialog -->
     <v-dialog v-model="deleteDialog" max-width="400">
       <v-card>
-        <v-card-title>Удалить удобство?</v-card-title>
+        <v-card-title>{{ $t('amenities.dialog.deleteTitle') }}</v-card-title>
         <v-card-text>
-          Удобство «{{ deletingAmenity?.name }}» будет удалено.
+          {{ $t('amenities.dialog.deleteText', { name: deletingAmenity?.name }) }}
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn @click="deleteDialog = false">Отмена</v-btn>
-          <v-btn color="error" @click="handleDelete">Удалить</v-btn>
+          <v-btn @click="deleteDialog = false">{{ $t('common.cancel') }}</v-btn>
+          <v-btn color="error" @click="handleDelete">{{ $t('common.delete') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -76,17 +76,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAmenitiesStore } from '../stores/amenities'
 
+const { t } = useI18n()
 const store = useAmenitiesStore()
 
-const headers = [
-  { title: 'Название', key: 'name' },
+const headers = computed(() => [
+  { title: t('amenities.columns.name'), key: 'name' },
   { title: '', key: 'actions', sortable: false, align: 'end' },
-]
+])
 
-const rules = { required: (v) => !!v || 'Обязательное поле' }
+const rules = { required: (v) => !!v || t('common.validation.required') }
 
 const formDialog = ref(false)
 const editingAmenity = ref(null)
@@ -118,16 +120,16 @@ async function handleFormSubmit() {
   try {
     if (editingAmenity.value) {
       await store.update(editingAmenity.value.id, { name: formName.value.trim() })
-      snackbarText.value = 'Удобство обновлено'
+      snackbarText.value = t('amenities.messages.updated')
     } else {
       await store.create({ name: formName.value.trim() })
-      snackbarText.value = 'Удобство создано'
+      snackbarText.value = t('amenities.messages.created')
     }
     snackbarColor.value = 'success'
     snackbar.value = true
     formDialog.value = false
   } catch (e) { console.error(e);
-    snackbarText.value = store.error || 'Ошибка'
+    snackbarText.value = store.error || t('common.messages.error')
     snackbarColor.value = 'error'
     snackbar.value = true
   } finally {
@@ -143,11 +145,11 @@ function confirmDelete(amenity) {
 async function handleDelete() {
   try {
     await store.destroy(deletingAmenity.value.id)
-    snackbarText.value = 'Удобство удалено'
+    snackbarText.value = t('amenities.messages.deleted')
     snackbarColor.value = 'success'
     snackbar.value = true
   } catch (e) { console.error(e);
-    snackbarText.value = store.error || 'Не удалось удалить'
+    snackbarText.value = store.error || t('common.messages.deleteError')
     snackbarColor.value = 'error'
     snackbar.value = true
   } finally {
