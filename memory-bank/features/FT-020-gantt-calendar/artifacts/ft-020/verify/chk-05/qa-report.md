@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-15
 **Environment:** local dev (yarn dev @ :5173 + rails s @ :3000), Chromium headless via Playwright MCP
-**Account:** demo@apartus.local (seed organization "Demo Hostel Network", RUB currency)
+**Account:** `demo@apartus.local` (seed organization "Demo Hostel Network", RUB currency)
 
 ## Scenarios verified
 
