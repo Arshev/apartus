@@ -194,7 +194,7 @@ Trade-off 3: **route replacement vs параллель.** Заменяем `Cale
 - `EC-03` Все существующие frontend тесты продолжают проходить. Новые тесты для Gantt добавлены.
 - `EC-04` Coverage ratchet не понижен.
 - `EC-05` 0 markdownlint errors, CI green на всех jobs (Lint/Backend/Frontend/Smoke).
-- `EC-06` Playwright e2e: создать 3 overlapping reservations в одном юните через seed → все три DOM-элемента `.gantt-item` рендерятся с разными `top`-offset (assertion в `CHK-07`).
+- `EC-06` Lane-stacking overlap handling verified: (a) unit test `CHK-02` (`assignLanes` matrix with 1/2/3 overlapping items → distinct lane indices); (b) component test — `GanttTimelineRow` renders 3 overlapping bookings in lanes 0/1/2. Direct e2e assertion отвергнут: backend `Reservation#no_overlapping_reservations` блокирует создание overlapping reservations через public API для active statuses — domain-level overlap не достижим в проде, lane-stacking это defensive code для edge cases (race conditions, legacy data). E2e (`CHK-07`) проверяет render + today marker + jump-to-date на существующем seed.
 
 ### Acceptance Scenarios
 
@@ -202,7 +202,7 @@ Trade-off 3: **route replacement vs параллель.** Заменяем `Cale
 - `SC-02` **Tooltip.** User наводит mouse на bar → через 200ms появляется tooltip с guest name, check-in/out, price (формат через org currency), status. Mouse leave → tooltip скрывается.
 - `SC-03` **Context menu happy path.** Right-click на bar со статусом `confirmed` → меню с "Редактировать", "Check-in", "Отменить". Click "Check-in" → PATCH `/reservations/:id/check_in` → статус меняется на `checked_in`, bar перекрашивается.
 - `SC-04` **Range change.** User выбирает preset "30d" → refetch с новым range → рендер обновляется. Выбор сохраняется в `localStorage`.
-- `SC-05` **Overlap handling.** Юнит имеет 3 бронирования с пересекающимися датами → все три видимы в 3 lanes, row-height адаптируется.
+- `SC-05` **Overlap handling (defensive).** Если юнит каким-то образом содержит 3 бронирования с пересекающимися датами (legacy data, race condition), все три видимы в 3 lanes, row-height адаптируется. Verified at unit/component level (`CHK-02`); public API prevents creating overlap for active statuses, so e2e не покрывает.
 - `SC-06` **Today + jump.** Click "Сегодня" → viewport scrollает к текущей дате. Open date-picker, выбрать произвольную дату → viewport центрируется на этой дате.
 - `SC-07` **Refresh on focus.** User создаёт reservation в другом таб'е → переключает обратно в календарь → `visibilitychange` triggers refetch → новое бронирование появляется.
 - `SC-08` **Manual refresh.** Click refresh icon → refetch, spinner, обновлённые данные.
@@ -223,9 +223,9 @@ Trade-off 3: **route replacement vs параллель.** Заменяем `Cale
 
 | Requirement ID | Design refs | Acceptance refs | Checks | Evidence IDs |
 |---|---|---|---|---|
-| `REQ-01` | `CTR-01`, `CTR-02` | `SC-01`, `SC-05` | `CHK-02`, `CHK-07` | `EVID-02`, `EVID-07` |
+| `REQ-01` | `CTR-01`, `CTR-02` | `SC-01` | `CHK-02`, `CHK-07` | `EVID-02`, `EVID-07` |
 | `REQ-02` | | `SC-01` | `CHK-02` | `EVID-02` |
-| `REQ-03` | | `SC-05` | `CHK-02`, `CHK-07` | `EVID-02`, `EVID-07` |
+| `REQ-03` | | `SC-05` | `CHK-02` | `EVID-02` |
 | `REQ-04` | `CTR-01`, `FM-07`, `NEG-08` | `SC-02` | `CHK-02` | `EVID-02` |
 | `REQ-05` | `CTR-04`, `FM-06` | `SC-03`, `NEG-05` | `CHK-02` | `EVID-02` |
 | `REQ-06` | | `SC-01`, `SC-06` | `CHK-07` | `EVID-07` |
@@ -249,7 +249,7 @@ Trade-off 3: **route replacement vs параллель.** Заменяем `Cale
 | `CHK-04` | `REQ-13` | `grep -rn '[А-Яа-яЁё]' frontend/src/views/calendar/ \| grep -v 'locales\|__tests__' \| grep -vE '^\s*//'` | 0 hardcoded Cyrillic matches | `artifacts/ft-020/verify/chk-04/` |
 | `CHK-05` | `REQ-11,12` + `NEG-09` | Manual QA: SC-01 (today marker visible), NEG-09 (dark mode toggle — все цвета корректны) | Скриншоты light + dark подтверждают визуальную консистентность | `artifacts/ft-020/verify/chk-05/` |
 | `CHK-06` | `EC-05` | `npx markdownlint-cli2 "**/*.md"` + CI green | 0 errors + 5/5 CI jobs SUCCESS | `artifacts/ft-020/verify/chk-06/` |
-| `CHK-07` | `EC-06`, `REQ-01,03,06,07` + `SC-05,06` | `cd frontend && yarn test:e2e e2e/calendar-overlap.spec.js` | Playwright headless: seed 3 overlapping reservations, navigate `/calendar`, assert 3× `.gantt-item` с разными `top` offset; assert today-marker DOM element visible; assert jump-to-date работает (date input → viewport scroll) | `artifacts/ft-020/verify/chk-07/` |
+| `CHK-07` | `REQ-01,06,07` + `SC-06` | `cd frontend && yarn test:e2e e2e/calendar-overlap.spec.js` | Playwright headless: navigate `/calendar` на seed data, assert ≥1 `.gantt-item` отрисовывается, today-marker DOM element visible, jump-to-date меняет viewport scroll (date-picker → click day → scrollLeft changes) | `artifacts/ft-020/verify/chk-07/` |
 
 ### Test matrix
 
