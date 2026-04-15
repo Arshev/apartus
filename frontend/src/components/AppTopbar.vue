@@ -44,16 +44,28 @@ const theme = useTheme()
 
 const isDark = computed(() => theme.global.current.value.dark)
 
+const THEME_STORAGE_KEY = 'apartus-theme'
+const VALID_THEMES = ['apartusLight', 'apartusDark']
+
 function toggleTheme() {
   const next = isDark.value ? 'apartusLight' : 'apartusDark'
   theme.global.name.value = next
-  localStorage.setItem('apartus-theme', next)
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, next)
+  } catch {
+    // Persistence is best-effort (privacy mode / sandboxed iframes throw).
+  }
 }
 
-// Restore saved theme preference
-const saved = localStorage.getItem('apartus-theme')
-if (saved && (saved === 'apartusLight' || saved === 'apartusDark')) {
-  theme.global.name.value = saved
+// Restore saved theme preference. Reads happen at component setup on every
+// mount, so localStorage failures here must not crash the UI.
+try {
+  const saved = localStorage.getItem(THEME_STORAGE_KEY)
+  if (saved && VALID_THEMES.includes(saved)) {
+    theme.global.name.value = saved
+  }
+} catch {
+  // Fall back to default theme.
 }
 
 async function handleLogout() {

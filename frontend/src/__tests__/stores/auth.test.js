@@ -93,6 +93,16 @@ describe('useAuthStore', () => {
       expect(store.user).toBeNull()
       expect(apiClient.removeAuthTokens).toHaveBeenCalled()
     })
+
+    // FT-019: locale must not leak across accounts on shared devices.
+    it('clears persisted locale on signOut', async () => {
+      authApi.signOut.mockResolvedValue({})
+      localStorage.setItem('locale', 'en')
+      const store = useAuthStore()
+      store.user = USER
+      await store.signOut()
+      expect(localStorage.getItem('locale')).toBeNull()
+    })
   })
 
   describe('switchOrganization', () => {

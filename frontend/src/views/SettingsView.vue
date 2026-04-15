@@ -461,7 +461,8 @@ onMounted(() => {
 })
 
 defineExpose({
-  tab, orgForm, orgSaving, orgError, orgSnackbar, handleOrgSave, loadOrg,
+  tab, orgForm, orgSaving, orgError, orgSnackbar, orgSettings, handleOrgSave, loadOrg,
+  telegramForm, saveTelegram,
   memberHeaders, roleOptions, roleLabel,
   memberDialog, editingMember, memberForm, memberSubmitting,
   deleteMemberDialog, deletingMember, memberSnackbar, memberSnackbarText, memberSnackbarColor,

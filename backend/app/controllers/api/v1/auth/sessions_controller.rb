@@ -72,9 +72,13 @@ module Api
             id: org.id,
             name: org.name,
             slug: org.slug,
-            # Expose only locale — other keys in `settings` (e.g. telegram tokens)
-            # are sensitive and must not leak through the auth/me boot payload.
-            settings: { locale: org.settings&.dig("locale") }
+            # Minimize the boot payload — only `locale` is needed to paint the
+            # initial UI in the right language. Full settings (including
+            # telegram tokens) remain available via GET /organization for
+            # authorized members, but we don't want them on every /auth/me.
+            # `is_a?(Hash)` guards against legacy rows where settings was
+            # stored as a non-Hash value.
+            settings: { locale: org.settings.is_a?(Hash) ? org.settings["locale"] : nil }
           }
         end
 

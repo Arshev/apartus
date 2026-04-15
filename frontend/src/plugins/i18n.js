@@ -7,14 +7,14 @@ export const LOCALE_STORAGE_KEY = 'locale'
 const SUPPORTED_LOCALES = ['ru', 'en']
 
 // Read persisted locale before first render so reloads don't flash the default
-// locale while /auth/me is in flight. auth.js keeps this key in sync with
-// organization.settings.locale after login.
+// locale while /auth/me is in flight. auth.js re-syncs this key inside
+// fetchCurrentUser() once the boot payload arrives.
 function initialLocale() {
   try {
     const stored = localStorage.getItem(LOCALE_STORAGE_KEY)
     if (stored && SUPPORTED_LOCALES.includes(stored)) return stored
   } catch {
-    // localStorage may be unavailable (SSR, privacy mode) — fall back to default.
+    // localStorage throws in privacy mode or sandboxed iframes — fall back to default.
   }
   return 'ru'
 }
