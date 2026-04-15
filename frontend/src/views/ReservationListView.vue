@@ -1,9 +1,9 @@
 <template>
   <v-container>
-    <div class="d-flex align-center mb-4">
-      <h1 class="text-h4">Бронирования</h1>
+    <div class="d-flex align-center mb-6">
+      <h1 class="text-h5 font-weight-bold">{{ $t('reservations.title') }}</h1>
       <v-spacer />
-      <v-btn color="primary" prepend-icon="mdi-plus" :to="'/reservations/new'">Новое бронирование</v-btn>
+      <v-btn color="primary" prepend-icon="mdi-plus" :to="'/reservations/new'">{{ $t('reservations.addButton') }}</v-btn>
     </div>
 
     <v-alert v-if="store.error" type="error" class="mb-4" closable @click:close="store.error = null">
@@ -19,7 +19,7 @@
       hover
     >
       <template v-slot:item.status="{ item }">
-        <v-chip :color="statusColor(item.status)" size="small" variant="elevated">
+        <v-chip :color="statusColor(item.status)" size="small" variant="flat" label>
           {{ statusLabel(item.status) }}
         </v-chip>
       </template>
@@ -27,33 +27,33 @@
         {{ formatPrice(item.total_price_cents) }}
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-btn v-if="item.status === 'confirmed'" size="x-small" color="green" variant="text" @click="doCheckIn(item)">Check-in</v-btn>
-        <v-btn v-if="item.status === 'checked_in'" size="x-small" color="grey" variant="text" @click="doCheckOut(item)">Check-out</v-btn>
-        <v-btn v-if="item.status === 'confirmed' || item.status === 'checked_in'" size="x-small" color="error" variant="text" @click="doCancel(item)">Отмена</v-btn>
+        <v-btn v-if="item.status === 'confirmed'" size="x-small" color="primary" variant="tonal" class="mr-1" @click="doCheckIn(item)">Check-in</v-btn>
+        <v-btn v-if="item.status === 'checked_in'" size="x-small" color="secondary" variant="tonal" class="mr-1" @click="doCheckOut(item)">Check-out</v-btn>
+        <v-btn v-if="item.status === 'confirmed' || item.status === 'checked_in'" size="x-small" color="error" variant="text" class="mr-1" @click="doCancel(item)">{{ $t('common.cancel') }}</v-btn>
         <v-btn icon="mdi-pencil" variant="text" size="small" :to="`/reservations/${item.id}/edit`" />
-        <v-btn icon="mdi-delete" variant="text" size="small" color="error" @click="confirmDelete(item)" />
+        <v-btn icon="mdi-delete" variant="text" size="small" @click="confirmDelete(item)" />
       </template>
     </v-data-table>
 
     <v-empty-state
       v-else-if="!store.loading && !store.error"
       icon="mdi-calendar-blank-outline"
-      title="Нет бронирований"
-      text="Создайте первое бронирование."
+      :title="$t('reservations.emptyState.title')"
+      :text="$t('reservations.emptyState.text')"
     >
       <template v-slot:actions>
-        <v-btn color="primary" prepend-icon="mdi-plus" :to="'/reservations/new'">Новое бронирование</v-btn>
+        <v-btn color="primary" prepend-icon="mdi-plus" :to="'/reservations/new'">{{ $t('reservations.addButton') }}</v-btn>
       </template>
     </v-empty-state>
 
     <v-dialog v-model="deleteDialog" max-width="400">
       <v-card>
-        <v-card-title>Удалить бронирование?</v-card-title>
-        <v-card-text>Бронирование будет удалено.</v-card-text>
+        <v-card-title>{{ $t('reservations.dialog.deleteTitle') }}</v-card-title>
+        <v-card-text>{{ $t('reservations.dialog.deleteText') }}</v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn @click="deleteDialog = false">Отмена</v-btn>
-          <v-btn color="error" @click="handleDelete">Удалить</v-btn>
+          <v-btn @click="deleteDialog = false">{{ $t('common.cancel') }}</v-btn>
+          <v-btn color="error" @click="handleDelete">{{ $t('common.delete') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -65,28 +65,31 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useReservationsStore } from '../stores/reservations'
 import { useAuthStore } from '../stores/auth'
 import { formatMoney } from '../utils/currency'
 
+const { t } = useI18n()
 const store = useReservationsStore()
 const authStore = useAuthStore()
-const headers = [
-  { title: 'Юнит', key: 'unit_name' },
-  { title: 'Гость', key: 'guest_name' },
-  { title: 'Заезд', key: 'check_in' },
-  { title: 'Выезд', key: 'check_out' },
-  { title: 'Статус', key: 'status' },
-  { title: 'Цена', key: 'total_price_cents' },
-  { title: '', key: 'actions', sortable: false, align: 'end' },
-]
 
-const statusColors = { confirmed: 'blue', checked_in: 'green', checked_out: 'grey', cancelled: 'red' }
-const statusLabels = { confirmed: 'Подтверждено', checked_in: 'Заселён', checked_out: 'Выселен', cancelled: 'Отменено' }
+const headers = computed(() => [
+  { title: t('reservations.columns.unit'), key: 'unit_name' },
+  { title: t('reservations.columns.guest'), key: 'guest_name' },
+  { title: t('reservations.columns.checkIn'), key: 'check_in' },
+  { title: t('reservations.columns.checkOut'), key: 'check_out' },
+  { title: t('reservations.columns.status'), key: 'status' },
+  { title: t('reservations.columns.price'), key: 'total_price_cents' },
+  { title: '', key: 'actions', sortable: false, align: 'end' },
+])
+
+const statusColors = { confirmed: 'status-confirmed', checked_in: 'status-checked-in', checked_out: 'status-checked-out', cancelled: 'status-cancelled' }
+const statusKeyMap = { confirmed: 'confirmed', checked_in: 'checkedIn', checked_out: 'checkedOut', cancelled: 'cancelled' }
 
 function statusColor(s) { return statusColors[s] || 'grey' }
-function statusLabel(s) { return statusLabels[s] || s }
+function statusLabel(s) { return t(`reservations.statuses.${statusKeyMap[s] || s}`) }
 function formatPrice(cents) { return cents > 0 ? formatMoney(cents, authStore.organization?.currency || 'RUB') : '—' }
 
 const deleteDialog = ref(false)
@@ -106,24 +109,24 @@ function confirmDelete(item) { deletingItem.value = item; deleteDialog.value = t
 async function handleDelete() {
   try {
     await store.destroy(deletingItem.value.id)
-    showSnack('Бронирование удалено')
-  } catch (e) { console.error(e); showSnack(store.error || 'Ошибка', 'error') }
+    showSnack(t('reservations.messages.deleted'))
+  } catch (e) { console.error(e); showSnack(store.error || t('common.messages.error'), 'error') }
   finally { deleteDialog.value = false; deletingItem.value = null }
 }
 
 async function doCheckIn(item) {
-  try { await store.checkIn(item.id); showSnack('Check-in выполнен') }
-  catch { showSnack(store.error || 'Ошибка', 'error') }
+  try { await store.checkIn(item.id); showSnack(t('reservations.messages.checkInDone')) }
+  catch { showSnack(store.error || t('common.messages.error'), 'error') }
 }
 
 async function doCheckOut(item) {
-  try { await store.checkOut(item.id); showSnack('Check-out выполнен') }
-  catch { showSnack(store.error || 'Ошибка', 'error') }
+  try { await store.checkOut(item.id); showSnack(t('reservations.messages.checkOutDone')) }
+  catch { showSnack(store.error || t('common.messages.error'), 'error') }
 }
 
 async function doCancel(item) {
-  try { await store.cancelReservation(item.id); showSnack('Бронирование отменено') }
-  catch { showSnack(store.error || 'Ошибка', 'error') }
+  try { await store.cancelReservation(item.id); showSnack(t('reservations.messages.cancelled')) }
+  catch { showSnack(store.error || t('common.messages.error'), 'error') }
 }
 
 onMounted(() => store.fetchAll())

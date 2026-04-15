@@ -1,23 +1,23 @@
 <template>
   <v-container>
-    <h1 class="text-h4 mb-4">{{ isEdit ? 'Редактировать гостя' : 'Новый гость' }}</h1>
+    <h1 class="text-h4 mb-4">{{ isEdit ? $t('guests.editTitle') : $t('guests.createTitle') }}</h1>
 
     <v-alert v-if="formError" type="error" class="mb-4" closable @click:close="formError = null">
       {{ Array.isArray(formError) ? formError.join(', ') : formError }}
     </v-alert>
 
     <v-form ref="formRef" @submit.prevent="handleSubmit" :disabled="submitting">
-      <v-text-field v-model="form.first_name" label="Имя" :rules="[rules.required]" class="mb-2" />
-      <v-text-field v-model="form.last_name" label="Фамилия" :rules="[rules.required]" class="mb-2" />
-      <v-text-field v-model="form.email" label="Email" type="email" class="mb-2" />
-      <v-text-field v-model="form.phone" label="Телефон" class="mb-2" />
-      <v-textarea v-model="form.notes" label="Заметки" rows="3" class="mb-4" />
+      <v-text-field v-model="form.first_name" :label="$t('guests.form.firstName')" :rules="[rules.required]" class="mb-2" />
+      <v-text-field v-model="form.last_name" :label="$t('guests.form.lastName')" :rules="[rules.required]" class="mb-2" />
+      <v-text-field v-model="form.email" :label="$t('guests.form.email')" type="email" class="mb-2" />
+      <v-text-field v-model="form.phone" :label="$t('guests.form.phone')" class="mb-2" />
+      <v-textarea v-model="form.notes" :label="$t('guests.form.notes')" rows="3" class="mb-4" />
 
       <div class="d-flex ga-2">
         <v-btn type="submit" color="primary" :loading="submitting">
-          {{ isEdit ? 'Сохранить' : 'Создать' }}
+          {{ isEdit ? $t('common.save') : $t('common.create') }}
         </v-btn>
-        <v-btn variant="text" :to="'/guests'">Отмена</v-btn>
+        <v-btn variant="text" :to="'/guests'">{{ $t('common.cancel') }}</v-btn>
       </div>
     </v-form>
 
@@ -29,10 +29,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useGuestsStore } from '../stores/guests'
 import * as guestsApi from '../api/guests'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const store = useGuestsStore()
@@ -53,7 +55,7 @@ const form = ref({
 })
 
 const rules = {
-  required: (v) => !!v || 'Обязательное поле',
+  required: (v) => !!v || t('common.validation.required'),
 }
 
 async function loadGuest() {
@@ -68,7 +70,7 @@ async function loadGuest() {
       notes: guest.notes || '',
     }
   } catch (e) { console.error(e);
-    formError.value = 'Не удалось загрузить гостя'
+    formError.value = t('guests.messages.loadError')
   }
 }
 
@@ -81,15 +83,15 @@ async function handleSubmit() {
   try {
     if (isEdit.value) {
       await store.update(Number(route.params.id), form.value)
-      snackbarText.value = 'Гость обновлён'
+      snackbarText.value = t('guests.messages.updated')
     } else {
       await store.create(form.value)
-      snackbarText.value = 'Гость создан'
+      snackbarText.value = t('guests.messages.created')
     }
     snackbar.value = true
     router.push('/guests')
   } catch (e) {
-    formError.value = e.response?.data?.error || store.error || 'Ошибка сохранения'
+    formError.value = e.response?.data?.error || store.error || t('common.messages.saveError')
   } finally {
     submitting.value = false
   }

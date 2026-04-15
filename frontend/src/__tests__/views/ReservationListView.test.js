@@ -33,8 +33,8 @@ describe('ReservationListView', () => {
 
   it('statusColor / statusLabel / formatPrice', () => {
     const wrapper = mountWithVuetify(ReservationListView)
-    expect(wrapper.vm.statusColor('confirmed')).toBe('blue')
-    expect(wrapper.vm.statusColor('checked_in')).toBe('green')
+    expect(wrapper.vm.statusColor('confirmed')).toBe('status-confirmed')
+    expect(wrapper.vm.statusColor('checked_in')).toBe('status-checked-in')
     expect(wrapper.vm.statusLabel('cancelled')).toBe('Отменено')
     expect(wrapper.vm.formatPrice(15000)).toContain('150')
     expect(wrapper.vm.formatPrice(0)).toBe('—')

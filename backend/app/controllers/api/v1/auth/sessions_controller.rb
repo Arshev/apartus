@@ -71,7 +71,14 @@ module Api
           {
             id: org.id,
             name: org.name,
-            slug: org.slug
+            slug: org.slug,
+            # Minimize the boot payload — only `locale` is needed to paint the
+            # initial UI in the right language. Full settings (including
+            # telegram tokens) remain available via GET /organization for
+            # authorized members, but we don't want them on every /auth/me.
+            # `is_a?(Hash)` guards against legacy rows where settings was
+            # stored as a non-Hash value.
+            settings: { locale: org.settings.is_a?(Hash) ? org.settings["locale"] : nil }
           }
         end
 

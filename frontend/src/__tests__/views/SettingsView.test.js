@@ -10,8 +10,11 @@ vi.mock('../../api/client', () => ({
   default: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
 }))
 vi.mock('../../api/organizations', () => ({
-  list: vi.fn(), get: vi.fn().mockResolvedValue({ id: 1, name: 'Org', slug: 'org', currency: 'RUB' }),
-  update: vi.fn().mockResolvedValue({ id: 1, name: 'Updated', currency: 'RUB' }),
+  list: vi.fn(),
+  get: vi.fn().mockResolvedValue({ id: 1, name: 'Org', slug: 'org', currency: 'RUB' }),
+  update: vi.fn().mockImplementation((payload) => Promise.resolve({
+    id: 1, name: 'Updated', currency: 'RUB', settings: payload.settings || {},
+  })),
 }))
 vi.mock('../../api/members', () => ({
   list: vi.fn().mockResolvedValue([]),
@@ -29,12 +32,20 @@ vi.mock('../../api/roles', () => ({
 import { mountWithVuetify } from '../helpers/mountWithVuetify'
 import SettingsView from '../../views/SettingsView.vue'
 import { useAuthStore } from '../../stores/auth'
+import i18n from '../../plugins/i18n'
 import * as orgApi from '../../api/organizations'
 import * as membersApi from '../../api/members'
 import * as rolesApi from '../../api/roles'
 
 describe('SettingsView', () => {
-  beforeEach(() => { vi.clearAllMocks() })
+  beforeEach(() => {
+    vi.clearAllMocks()
+    // i18n.global.locale is shared across tests; reset so locale-mutating
+    // cases (handleOrgSave with orgForm.locale = 'en') don't leak into
+    // subsequent assertions on Russian role labels.
+    i18n.global.locale.value = 'ru'
+    localStorage.clear()
+  })
 
   function setup() {
     const wrapper = mountWithVuetify(SettingsView)
@@ -61,7 +72,7 @@ describe('SettingsView', () => {
 
     wrapper.vm.orgForm.name = 'New Name'
     await wrapper.vm.handleOrgSave()
-    expect(orgApi.update).toHaveBeenCalledWith({ name: 'New Name', currency: 'RUB' })
+    expect(orgApi.update).toHaveBeenCalledWith({ name: 'New Name', currency: 'RUB', settings: { locale: 'ru' } })
     expect(wrapper.vm.orgSnackbar).toBe(true)
   })
 
@@ -72,6 +83,50 @@ describe('SettingsView', () => {
     await wrapper.vm.$nextTick()
     await wrapper.vm.handleOrgSave()
     expect(wrapper.vm.orgError).toBeTruthy()
+  })
+
+  // Regression guard for the P1 merge bug: saving language must NOT drop
+  // existing telegram settings from organization.settings (backend replaces
+  // the JSONB column wholesale, so the client has to round-trip every key).
+  it('handleOrgSave preserves existing telegram settings when saving locale', async () => {
+    orgApi.get.mockResolvedValueOnce({
+      id: 1, name: 'Org', slug: 'org', currency: 'RUB',
+      settings: { telegram_bot_token: 'T', telegram_chat_id: 'C', locale: 'ru' },
+    })
+    const wrapper = setup()
+    await wrapper.vm.$nextTick()
+    await wrapper.vm.loadOrg()
+    wrapper.vm.orgForm.locale = 'en'
+    await wrapper.vm.handleOrgSave()
+
+    const payload = orgApi.update.mock.calls.at(-1)[0]
+    expect(payload.settings).toEqual({
+      telegram_bot_token: 'T',
+      telegram_chat_id: 'C',
+      locale: 'en',
+    })
+  })
+
+  // Symmetric regression guard: saving telegram credentials must NOT drop
+  // locale from organization.settings.
+  it('saveTelegram preserves existing locale when saving telegram credentials', async () => {
+    orgApi.get.mockResolvedValueOnce({
+      id: 1, name: 'Org', slug: 'org', currency: 'RUB',
+      settings: { locale: 'en' },
+    })
+    const wrapper = setup()
+    await wrapper.vm.$nextTick()
+    await wrapper.vm.loadOrg()
+    wrapper.vm.telegramForm.bot_token = 'T2'
+    wrapper.vm.telegramForm.chat_id = 'C2'
+    await wrapper.vm.saveTelegram()
+
+    const payload = orgApi.update.mock.calls.at(-1)[0]
+    expect(payload.settings).toEqual({
+      locale: 'en',
+      telegram_bot_token: 'T2',
+      telegram_chat_id: 'C2',
+    })
   })
 
   // -- Members --

@@ -2,8 +2,8 @@
   <v-container>
     <v-empty-state
       icon="mdi-tools"
-      title="Скоро"
-      :text="`Раздел «${title}» появится в одной из следующих фич HW-2.`"
+      :title="$t('placeholder.title')"
+      :text="$t('placeholder.text', { title })"
     />
   </v-container>
 </template>

@@ -3,7 +3,7 @@
     <v-row align="center" justify="center">
       <v-col cols="12" sm="8" md="5">
         <v-card elevation="4">
-          <v-card-title class="text-h5 text-center pa-6">Выберите организацию</v-card-title>
+          <v-card-title class="text-h5 text-center pa-6">{{ $t('auth.selectOrganization.title') }}</v-card-title>
           <v-card-text>
             <v-list>
               <v-list-item

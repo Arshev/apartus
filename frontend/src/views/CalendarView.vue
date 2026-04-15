@@ -1,10 +1,10 @@
 <template>
   <v-container fluid>
     <div class="d-flex align-center mb-4">
-      <h1 class="text-h4">Календарь</h1>
+      <h1 class="text-h4">{{ $t('calendar.title') }}</h1>
       <v-spacer />
       <v-btn icon="mdi-chevron-left" variant="text" @click="shiftDays(-7)" />
-      <v-btn variant="text" @click="goToday">Сегодня</v-btn>
+      <v-btn variant="text" @click="goToday">{{ $t('common.today') }}</v-btn>
       <v-btn icon="mdi-chevron-right" variant="text" @click="shiftDays(7)" />
     </div>
 
@@ -13,7 +13,7 @@
 
     <div v-if="unitRows.length" class="calendar-grid" :style="gridStyle">
       <!-- Header row: unit label + date cells -->
-      <div class="calendar-header-cell sticky-col">Юнит</div>
+      <div class="calendar-header-cell sticky-col">{{ $t('calendar.unitColumn') }}</div>
       <div v-for="d in dateRange" :key="d" class="calendar-header-cell text-caption text-center">
         {{ formatDateShort(d) }}
       </div>
@@ -34,7 +34,7 @@
             :key="r.id"
             class="calendar-bar"
             :class="`bar-${r.status}`"
-            :title="`${r.guest_name || 'Блокировка'} (${r.check_in} — ${r.check_out})`"
+            :title="`${r.guest_name || $t('common.blocking')} (${r.check_in} — ${r.check_out})`"
             @click.stop="$router.push(`/reservations/${r.id}/edit`)"
           >
             <span v-if="d === r.check_in" class="bar-label text-caption">{{ r.guest_name || '🔒' }}</span>
@@ -43,16 +43,18 @@
       </template>
     </div>
 
-    <v-empty-state v-else-if="!loading" icon="mdi-calendar-blank" title="Нет юнитов" text="Добавьте объекты и юниты для отображения календаря." />
+    <v-empty-state v-else-if="!loading" icon="mdi-calendar-blank" :title="$t('calendar.emptyState.title')" :text="$t('calendar.emptyState.text')" />
   </v-container>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import * as reservationsApi from '../api/reservations'
 import * as allUnitsApi from '../api/allUnits'
 
+const { t } = useI18n()
 const router = useRouter()
 
 const startDate = ref(todayStr())
@@ -127,7 +129,7 @@ async function loadData() {
     unitRows.value = unitsList.map((u) => ({ unit: u, propertyName: u.property_name }))
   } catch (e) {
     console.error('Calendar loadData failed:', e)
-    error.value = 'Не удалось загрузить данные календаря'
+    error.value = t('calendar.messages.loadError')
   } finally {
     loading.value = false
   }
@@ -141,21 +143,22 @@ defineExpose({ startDate, dateRange, unitRows, reservations, loading, shiftDays,
 
 <style scoped>
 .calendar-grid {
-  border: 1px solid #e0e0e0;
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   overflow-x: auto;
+  border-radius: 8px;
 }
 .calendar-header-cell {
   padding: 6px 4px;
-  background: #f5f5f5;
-  border-bottom: 1px solid #e0e0e0;
-  border-right: 1px solid #e0e0e0;
+  background: rgb(var(--v-theme-surface-light));
+  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   font-weight: 500;
 }
 .calendar-unit-cell {
   padding: 8px 6px;
-  border-bottom: 1px solid #e0e0e0;
-  border-right: 1px solid #e0e0e0;
-  background: #fafafa;
+  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  background: rgb(var(--v-theme-surface));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -167,31 +170,33 @@ defineExpose({ startDate, dateRange, unitRows, reservations, loading, shiftDays,
 }
 .calendar-day-cell {
   min-height: 36px;
-  border-bottom: 1px solid #e0e0e0;
-  border-right: 1px solid #f0f0f0;
+  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-right: 1px solid rgba(var(--v-border-color), calc(var(--v-border-opacity) * 0.5));
   cursor: pointer;
   position: relative;
 }
 .calendar-day-cell:hover {
-  background: #e3f2fd;
+  background: rgba(var(--v-theme-primary), 0.08);
 }
 .calendar-bar {
   height: 24px;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   position: relative;
   margin: 2px 0;
 }
-.bar-confirmed { background: #42a5f5; }
-.bar-checked_in { background: #66bb6a; }
-.bar-checked_out { background: #bdbdbd; }
+.bar-confirmed { background: rgb(var(--v-theme-status-confirmed)); }
+.bar-checked_in { background: rgb(var(--v-theme-status-checked-in)); }
+.bar-checked_out { background: rgb(var(--v-theme-status-checked-out)); }
 .bar-label {
   color: white;
-  padding: 0 4px;
+  padding: 0 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
   line-height: 24px;
+  font-size: 12px;
+  font-weight: 500;
 }
 </style>

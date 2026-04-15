@@ -2,17 +2,17 @@
   <v-container>
     <div class="d-flex align-center mb-2">
       <v-btn variant="text" icon="mdi-arrow-left" :to="'/properties'" />
-      <h1 class="text-h4 ml-2">Помещения{{ propertyName ? ` — ${propertyName}` : '' }}</h1>
+      <h1 class="text-h4 ml-2">{{ $t('units.title') }}{{ propertyName ? ` — ${propertyName}` : '' }}</h1>
       <v-spacer />
       <v-btn color="primary" prepend-icon="mdi-plus" :to="`/properties/${propertyId}/units/new`">
-        Добавить
+        {{ $t('common.add') }}
       </v-btn>
     </div>
 
     <v-alert v-if="store.error" type="error" class="mb-4" closable @click:close="store.error = null">
       {{ Array.isArray(store.error) ? store.error.join(', ') : store.error }}
       <template v-slot:append>
-        <v-btn variant="text" size="small" @click="store.fetchAll(propertyId)">Повторить</v-btn>
+        <v-btn variant="text" size="small" @click="store.fetchAll(propertyId)">{{ $t('common.retry') }}</v-btn>
       </template>
     </v-alert>
 
@@ -39,26 +39,26 @@
     <v-empty-state
       v-else-if="!store.loading && !store.error"
       icon="mdi-door-open"
-      title="Нет помещений"
-      text="Добавьте первое помещение в этот объект."
+      :title="$t('units.emptyState.title')"
+      :text="$t('units.emptyState.text')"
     >
       <template v-slot:actions>
         <v-btn color="primary" prepend-icon="mdi-plus" :to="`/properties/${propertyId}/units/new`">
-          Добавить
+          {{ $t('common.add') }}
         </v-btn>
       </template>
     </v-empty-state>
 
     <v-dialog v-model="deleteDialog" max-width="400">
       <v-card>
-        <v-card-title>Удалить помещение?</v-card-title>
+        <v-card-title>{{ $t('units.dialog.deleteTitle') }}</v-card-title>
         <v-card-text>
-          Помещение «{{ deletingUnit?.name }}» будет удалено.
+          {{ $t('units.dialog.deleteText', { name: deletingUnit?.name }) }}
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn @click="deleteDialog = false">Отмена</v-btn>
-          <v-btn color="error" @click="handleDelete">Удалить</v-btn>
+          <v-btn @click="deleteDialog = false">{{ $t('common.cancel') }}</v-btn>
+          <v-btn color="error" @click="handleDelete">{{ $t('common.delete') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -71,10 +71,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useUnitsStore } from '../stores/units'
 import { usePropertiesStore } from '../stores/properties'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const store = useUnitsStore()
@@ -87,16 +89,26 @@ const propertyName = computed(() => {
   return p?.name || null
 })
 
-const headers = [
-  { title: 'Название', key: 'name' },
-  { title: 'Тип', key: 'unit_type' },
-  { title: 'Вместимость', key: 'capacity' },
-  { title: 'Статус', key: 'status' },
+const headers = computed(() => [
+  { title: t('units.columns.name'), key: 'name' },
+  { title: t('units.columns.type'), key: 'unit_type' },
+  { title: t('units.columns.capacity'), key: 'capacity' },
+  { title: t('units.columns.status'), key: 'status' },
   { title: '', key: 'actions', sortable: false, align: 'end' },
-]
+])
 
-const typeLabels = { room: 'Комната', apartment: 'Квартира', bed: 'Место', studio: 'Студия' }
-const statusLabels = { available: 'Доступен', maintenance: 'Обслуживание', blocked: 'Заблокирован' }
+const typeLabels = computed(() => ({
+  room: t('units.types.room'),
+  apartment: t('units.types.apartment'),
+  bed: t('units.types.bed'),
+  studio: t('units.types.studio'),
+}))
+
+const statusLabels = computed(() => ({
+  available: t('units.statuses.available'),
+  maintenance: t('units.statuses.maintenance'),
+  blocked: t('units.statuses.blocked'),
+}))
 
 const deleteDialog = ref(false)
 const deletingUnit = ref(null)
@@ -111,10 +123,10 @@ function confirmDelete(unit) {
 async function handleDelete() {
   try {
     await store.destroy(deletingUnit.value.id)
-    snackbarText.value = 'Помещение удалено'
+    snackbarText.value = t('units.messages.deleted')
     snackbar.value = true
   } catch (e) { console.error(e);
-    snackbarText.value = store.error || 'Не удалось удалить'
+    snackbarText.value = store.error || t('common.messages.deleteError')
     snackbar.value = true
   } finally {
     deleteDialog.value = false

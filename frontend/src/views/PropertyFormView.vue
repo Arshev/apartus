@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <h1 class="text-h4 mb-4">{{ isEdit ? 'Редактировать объект' : 'Новый объект' }}</h1>
+    <h1 class="text-h4 mb-4">{{ isEdit ? $t('properties.editTitle') : $t('properties.createTitle') }}</h1>
 
     <v-alert v-if="formError" type="error" class="mb-4" closable @click:close="formError = null">
       {{ Array.isArray(formError) ? formError.join(', ') : formError }}
@@ -9,19 +9,19 @@
     <v-form ref="formRef" @submit.prevent="handleSubmit" :disabled="submitting">
       <v-text-field
         v-model="form.name"
-        label="Название"
+        :label="$t('properties.form.name')"
         :rules="[rules.required]"
         class="mb-2"
       />
       <v-text-field
         v-model="form.address"
-        label="Адрес"
+        :label="$t('properties.form.address')"
         :rules="[rules.required]"
         class="mb-2"
       />
       <v-select
         v-model="form.property_type"
-        label="Тип объекта"
+        :label="$t('properties.form.propertyType')"
         :items="propertyTypes"
         item-title="label"
         item-value="value"
@@ -30,30 +30,30 @@
       />
       <v-textarea
         v-model="form.description"
-        label="Описание"
+        :label="$t('properties.form.description')"
         :rules="[rules.maxLength5000]"
         rows="3"
         class="mb-2"
       />
       <v-select
         v-model="form.branch_id"
-        label="Филиал"
+        :label="$t('properties.form.branch')"
         :items="branches"
         item-title="name"
         item-value="id"
         clearable
         :loading="branchesLoading"
         :disabled="branchesError !== null"
-        :hint="branchesError ? 'Не удалось загрузить филиалы' : ''"
+        :hint="branchesError ? $t('properties.form.branchLoadError') : ''"
         persistent-hint
         class="mb-4"
       />
 
       <div class="d-flex ga-2">
         <v-btn type="submit" color="primary" :loading="submitting">
-          {{ isEdit ? 'Сохранить' : 'Создать' }}
+          {{ isEdit ? $t('common.save') : $t('common.create') }}
         </v-btn>
-        <v-btn variant="text" :to="'/properties'">Отмена</v-btn>
+        <v-btn variant="text" :to="'/properties'">{{ $t('common.cancel') }}</v-btn>
       </div>
     </v-form>
 
@@ -65,11 +65,13 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { usePropertiesStore } from '../stores/properties'
 import * as propertiesApi from '../api/properties'
 import * as branchesApi from '../api/branches'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const store = usePropertiesStore()
@@ -93,16 +95,16 @@ const branches = ref([])
 const branchesLoading = ref(false)
 const branchesError = ref(null)
 
-const propertyTypes = [
-  { label: 'Квартира', value: 'apartment' },
-  { label: 'Отель', value: 'hotel' },
-  { label: 'Дом', value: 'house' },
-  { label: 'Хостел', value: 'hostel' },
-]
+const propertyTypes = computed(() => [
+  { label: t('properties.types.apartment'), value: 'apartment' },
+  { label: t('properties.types.hotel'), value: 'hotel' },
+  { label: t('properties.types.house'), value: 'house' },
+  { label: t('properties.types.hostel'), value: 'hostel' },
+])
 
 const rules = {
-  required: (v) => !!v || 'Обязательное поле',
-  maxLength5000: (v) => !v || v.length <= 5000 || 'Максимум 5000 символов',
+  required: (v) => !!v || t('common.validation.required'),
+  maxLength5000: (v) => !v || v.length <= 5000 || t('common.validation.maxLength5000'),
 }
 
 async function loadBranches() {
@@ -111,7 +113,7 @@ async function loadBranches() {
   try {
     branches.value = await branchesApi.list()
   } catch (e) { console.error(e);
-    branchesError.value = 'Не удалось загрузить филиалы'
+    branchesError.value = t('properties.form.branchLoadError')
     branches.value = []
   } finally {
     branchesLoading.value = false
@@ -130,7 +132,7 @@ async function loadProperty() {
       branch_id: property.branch_id,
     }
   } catch (e) { console.error(e);
-    formError.value = 'Не удалось загрузить объект'
+    formError.value = t('properties.messages.loadError')
   }
 }
 
@@ -143,15 +145,15 @@ async function handleSubmit() {
   try {
     if (isEdit.value) {
       await store.update(Number(route.params.id), form.value)
-      snackbarText.value = 'Объект обновлён'
+      snackbarText.value = t('properties.messages.updated')
     } else {
       await store.create(form.value)
-      snackbarText.value = 'Объект создан'
+      snackbarText.value = t('properties.messages.created')
     }
     snackbar.value = true
     router.push('/properties')
   } catch (e) {
-    formError.value = e.response?.data?.error || store.error || 'Ошибка сохранения'
+    formError.value = e.response?.data?.error || store.error || t('common.messages.saveError')
   } finally {
     submitting.value = false
   }

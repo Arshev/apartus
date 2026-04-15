@@ -41,9 +41,13 @@ describe('ExpenseListView', () => {
     expect(wrapper.vm.form.amount_rub).toBe(50)
   })
 
-  it('categoryLabels covers all enums', () => {
+  it('categoryLabel covers all enums', () => {
     const wrapper = mountWithVuetify(ExpenseListView)
-    expect(Object.keys(wrapper.vm.categoryLabels)).toEqual(['maintenance', 'utilities', 'cleaning', 'supplies', 'other'])
+    expect(wrapper.vm.categoryLabel('maintenance')).toBe('Обслуживание')
+    expect(wrapper.vm.categoryLabel('utilities')).toBe('Коммунальные')
+    expect(wrapper.vm.categoryLabel('cleaning')).toBe('Уборка')
+    expect(wrapper.vm.categoryLabel('supplies')).toBe('Расходники')
+    expect(wrapper.vm.categoryLabel('other')).toBe('Прочее')
   })
 
   it('confirmDelete + handleDelete', async () => {

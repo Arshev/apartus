@@ -1,0 +1,632 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "add": "Add",
+    "create": "Create",
+    "edit": "Edit",
+    "retry": "Retry",
+    "today": "Today",
+    "ok": "OK",
+    "yes": "Yes",
+    "no": "No",
+    "search": "Search",
+    "free": "Free",
+    "blocking": "Blocked",
+    "noData": "No data",
+    "columns": {
+      "name": "Name",
+      "address": "Address",
+      "type": "Type",
+      "status": "Status",
+      "actions": "",
+      "email": "Email",
+      "phone": "Phone",
+      "date": "Date",
+      "description": "Description"
+    },
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "description": "Description",
+      "notes": "Notes"
+    },
+    "validation": {
+      "required": "Required field",
+      "invalidEmail": "Invalid email",
+      "minOne": "Minimum 1",
+      "maxLength5000": "Maximum 5000 characters",
+      "capacityRange": "From 1 to 100",
+      "minLength8": "Minimum 8 characters",
+      "passwordsMismatch": "Passwords do not match"
+    },
+    "messages": {
+      "saved": "Saved",
+      "created": "Created",
+      "updated": "Updated",
+      "deleted": "Deleted",
+      "error": "Error",
+      "saveError": "Save error",
+      "loadError": "Failed to load data",
+      "deleteError": "Failed to delete"
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "reservations": "Reservations",
+    "calendar": "Calendar",
+    "guests": "Guests",
+    "properties": "Properties",
+    "owners": "Owners",
+    "channels": "Channels",
+    "tasks": "Tasks",
+    "expenses": "Expenses",
+    "reports": "Reports",
+    "amenities": "Amenities",
+    "branches": "Branches",
+    "settings": "Settings",
+    "organization": "Organization",
+    "selectOrganization": "Select organization"
+  },
+  "topbar": {
+    "logout": "Log out"
+  },
+  "dashboard": {
+    "greeting": "Hello, {name}",
+    "kpi": {
+      "units": "Units",
+      "occupancy": "Occupancy",
+      "revenue": "Revenue",
+      "reservations": "Reservations"
+    },
+    "statuses": {
+      "confirmed": "Confirmed",
+      "checkedIn": "Checked in",
+      "checkedOut": "Checked out",
+      "cancelled": "Cancelled"
+    },
+    "checkIns": "Check-ins (7 days)",
+    "checkOuts": "Check-outs (7 days)",
+    "noCheckIns": "No upcoming check-ins",
+    "noCheckOuts": "No upcoming check-outs",
+    "messages": {
+      "loadError": "Failed to load data"
+    }
+  },
+  "calendar": {
+    "title": "Calendar",
+    "unitColumn": "Unit",
+    "emptyState": {
+      "title": "No units",
+      "text": "Add properties and units to display the calendar."
+    },
+    "messages": {
+      "loadError": "Failed to load calendar data"
+    }
+  },
+  "properties": {
+    "title": "Properties",
+    "addButton": "Add property",
+    "editTitle": "Edit property",
+    "createTitle": "New property",
+    "columns": {
+      "name": "Name",
+      "address": "Address",
+      "type": "Type"
+    },
+    "types": {
+      "apartment": "Apartment",
+      "hotel": "Hotel",
+      "house": "House",
+      "hostel": "Hostel"
+    },
+    "form": {
+      "name": "Name",
+      "address": "Address",
+      "propertyType": "Property type",
+      "description": "Description",
+      "branch": "Branch",
+      "branchLoadError": "Failed to load branches"
+    },
+    "unitsButton": "Units",
+    "emptyState": {
+      "title": "No properties",
+      "text": "Add your first property."
+    },
+    "dialog": {
+      "deleteTitle": "Delete property?",
+      "deleteText": "Property \"{name}\" will be deleted. This action cannot be undone."
+    },
+    "messages": {
+      "deleted": "Property deleted",
+      "deleteError": "Failed to delete property",
+      "created": "Property created",
+      "updated": "Property updated",
+      "loadError": "Failed to load property"
+    }
+  },
+  "units": {
+    "title": "Units",
+    "editTitle": "Edit unit",
+    "createTitle": "New unit",
+    "columns": {
+      "name": "Name",
+      "type": "Type",
+      "capacity": "Capacity",
+      "status": "Status"
+    },
+    "types": {
+      "room": "Room",
+      "apartment": "Apartment",
+      "bed": "Bed",
+      "studio": "Studio"
+    },
+    "statuses": {
+      "available": "Available",
+      "maintenance": "Maintenance",
+      "blocked": "Blocked"
+    },
+    "form": {
+      "name": "Name",
+      "unitType": "Unit type",
+      "capacity": "Capacity",
+      "status": "Status",
+      "pricePerNight": "Price per night",
+      "amenities": "Amenities"
+    },
+    "emptyState": {
+      "title": "No units",
+      "text": "Add the first unit to this property."
+    },
+    "dialog": {
+      "deleteTitle": "Delete unit?",
+      "deleteText": "Unit \"{name}\" will be deleted."
+    },
+    "messages": {
+      "deleted": "Unit deleted",
+      "created": "Unit created",
+      "updated": "Unit updated",
+      "loadError": "Failed to load unit",
+      "amenitiesError": "Failed to update amenities",
+      "amenitiesLoadError": "Failed to load amenities"
+    }
+  },
+  "amenities": {
+    "title": "Amenities",
+    "editTitle": "Edit amenity",
+    "createTitle": "New amenity",
+    "columns": {
+      "name": "Name"
+    },
+    "form": {
+      "name": "Name"
+    },
+    "emptyState": {
+      "title": "No amenities",
+      "text": "Create the first amenity for the organization catalog."
+    },
+    "dialog": {
+      "deleteTitle": "Delete amenity?",
+      "deleteText": "Amenity \"{name}\" will be deleted."
+    },
+    "messages": {
+      "created": "Amenity created",
+      "updated": "Amenity updated",
+      "deleted": "Amenity deleted"
+    }
+  },
+  "branches": {
+    "title": "Branches",
+    "editTitle": "Edit branch",
+    "createTitle": "New branch",
+    "addChildTitle": "Add child",
+    "form": {
+      "name": "Name",
+      "parentBranch": "Parent branch"
+    },
+    "emptyState": {
+      "title": "No branches",
+      "text": "Create the root branch of the organization."
+    },
+    "dialog": {
+      "deleteTitle": "Delete branch?",
+      "deleteText": "Branch \"{name}\" will be deleted."
+    },
+    "messages": {
+      "created": "Branch created",
+      "updated": "Branch updated",
+      "deleted": "Branch deleted"
+    }
+  },
+  "reservations": {
+    "title": "Reservations",
+    "addButton": "New reservation",
+    "editTitle": "Edit reservation",
+    "createTitle": "New reservation",
+    "columns": {
+      "unit": "Unit",
+      "guest": "Guest",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "status": "Status",
+      "price": "Price"
+    },
+    "statuses": {
+      "confirmed": "Confirmed",
+      "checkedIn": "Checked in",
+      "checkedOut": "Checked out",
+      "cancelled": "Cancelled"
+    },
+    "form": {
+      "unit": "Unit",
+      "guest": "Guest (optional)",
+      "checkInDate": "Check-in date",
+      "checkOutDate": "Check-out date",
+      "guestsCount": "Number of guests",
+      "price": "Price",
+      "notes": "Notes",
+      "priceCalcError": "Failed to calculate price automatically"
+    },
+    "emptyState": {
+      "title": "No reservations",
+      "text": "Create your first reservation."
+    },
+    "dialog": {
+      "deleteTitle": "Delete reservation?",
+      "deleteText": "The reservation will be deleted."
+    },
+    "messages": {
+      "deleted": "Reservation deleted",
+      "cancelled": "Reservation cancelled",
+      "checkInDone": "Check-in completed",
+      "checkOutDone": "Check-out completed",
+      "loadError": "Failed to load reservation",
+      "formLoadError": "Failed to load form data"
+    }
+  },
+  "guests": {
+    "title": "Guests",
+    "addButton": "Add guest",
+    "editTitle": "Edit guest",
+    "createTitle": "New guest",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone"
+    },
+    "form": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone",
+      "notes": "Notes"
+    },
+    "emptyState": {
+      "title": "No guests",
+      "text": "Add your first guest."
+    },
+    "dialog": {
+      "deleteTitle": "Delete guest?",
+      "deleteText": "Guest \"{firstName} {lastName}\" will be deleted."
+    },
+    "messages": {
+      "deleted": "Guest deleted",
+      "created": "Guest created",
+      "updated": "Guest updated",
+      "loadError": "Failed to load guest"
+    }
+  },
+  "owners": {
+    "title": "Owners",
+    "editTitle": "Edit",
+    "createTitle": "New owner",
+    "reportButton": "Report",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "commission": "Commission",
+      "propertiesCount": "Properties"
+    },
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "commissionPct": "Commission (%)",
+      "notes": "Notes"
+    },
+    "emptyState": {
+      "title": "No owners"
+    },
+    "dialog": {
+      "deleteTitle": "Delete owner?"
+    },
+    "statement": {
+      "title": "Owner statement",
+      "downloadPdf": "PDF",
+      "revenue": "Revenue",
+      "commission": "Commission",
+      "expenses": "Expenses",
+      "payout": "Payout",
+      "byProperties": "By properties",
+      "columns": {
+        "property": "Property",
+        "revenue": "Revenue",
+        "commission": "Commission",
+        "expenses": "Expenses",
+        "payout": "Payout"
+      },
+      "messages": {
+        "loadError": "Failed to load statement"
+      }
+    }
+  },
+  "channels": {
+    "title": "Sales channels",
+    "addButton": "Add channel",
+    "editTitle": "Edit channel",
+    "createTitle": "New channel",
+    "columns": {
+      "unit": "Unit",
+      "property": "Property",
+      "platform": "Platform",
+      "icalExport": "iCal Export",
+      "lastSynced": "Last synced"
+    },
+    "platforms": {
+      "bookingCom": "Booking.com",
+      "airbnb": "Airbnb",
+      "ostrovok": "Ostrovok",
+      "other": "Other"
+    },
+    "form": {
+      "unit": "Unit",
+      "platform": "Platform",
+      "icalImportUrl": "iCal Import URL (from platform)"
+    },
+    "emptyState": {
+      "title": "No channels",
+      "text": "Connect Booking.com, Airbnb or other platforms via iCal."
+    },
+    "dialog": {
+      "deleteTitle": "Delete channel?"
+    },
+    "messages": {
+      "urlCopied": "URL copied",
+      "created": "Channel created",
+      "deleted": "Channel deleted",
+      "syncStarted": "Sync started"
+    }
+  },
+  "tasks": {
+    "title": "Tasks",
+    "addButton": "New task",
+    "editTitle": "Edit task",
+    "createTitle": "New task",
+    "columns": {
+      "pending": "Pending",
+      "inProgress": "In progress",
+      "completed": "Completed"
+    },
+    "emptyColumn": "No tasks",
+    "moveToWork": "Start",
+    "complete": "Complete",
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "categories": {
+      "cleaning": "Cleaning",
+      "maintenance": "Maintenance",
+      "inspection": "Inspection",
+      "other": "Other"
+    },
+    "form": {
+      "title": "Title",
+      "priority": "Priority",
+      "category": "Category",
+      "dueDate": "Due date",
+      "description": "Description"
+    },
+    "dialog": {
+      "deleteTitle": "Delete task?"
+    }
+  },
+  "expenses": {
+    "title": "Expenses",
+    "editTitle": "Edit",
+    "createTitle": "New expense",
+    "columns": {
+      "date": "Date",
+      "category": "Category",
+      "amount": "Amount",
+      "description": "Description"
+    },
+    "categories": {
+      "maintenance": "Maintenance",
+      "utilities": "Utilities",
+      "cleaning": "Cleaning",
+      "supplies": "Supplies",
+      "other": "Other"
+    },
+    "form": {
+      "category": "Category",
+      "amount": "Amount",
+      "date": "Date",
+      "description": "Description"
+    },
+    "emptyState": {
+      "title": "No expenses"
+    },
+    "dialog": {
+      "deleteTitle": "Delete expense?"
+    }
+  },
+  "reports": {
+    "title": "Financial report",
+    "downloadPdf": "Download PDF",
+    "kpi": {
+      "revenue": "Revenue",
+      "expenses": "Expenses",
+      "netIncome": "Net income"
+    },
+    "metrics": {
+      "occupancy": "Occupancy",
+      "adr": "ADR",
+      "revpar": "RevPAR",
+      "nights": "Nights"
+    },
+    "revenueByProperty": "Revenue by property",
+    "expensesByCategory": "Expenses by category",
+    "messages": {
+      "loadError": "Failed to load report"
+    }
+  },
+  "settings": {
+    "title": "Organization settings",
+    "tabs": {
+      "general": "General",
+      "integrations": "Integrations",
+      "members": "Members",
+      "roles": "Roles"
+    },
+    "general": {
+      "orgName": "Organization name",
+      "currency": "Currency",
+      "language": "Interface language",
+      "loadError": "Failed to load settings"
+    },
+    "integrations": {
+      "telegramTitle": "Telegram notifications",
+      "botToken": "Bot Token (from {'@'}BotFather)",
+      "chatId": "Chat ID",
+      "testButton": "Test",
+      "testSuccess": "Test message sent!",
+      "testError": "Failed to send test message",
+      "saveError": "Failed to save",
+      "instructions": "1. Create a bot via {'@'}BotFather in Telegram\n2. Copy the Bot Token here\n3. Add the bot to a group or send it /start\n4. Get your Chat ID via {'@'}getmyid_bot\n5. Click \"Test\" to verify"
+    },
+    "members": {
+      "title": "Members",
+      "addTitle": "Add member",
+      "editTitle": "Edit role",
+      "columns": {
+        "member": "Member",
+        "role": "Role"
+      },
+      "form": {
+        "email": "Email",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "password": "Password",
+        "role": "Role"
+      },
+      "roles": {
+        "member": "Member",
+        "manager": "Manager",
+        "owner": "Owner"
+      },
+      "emptyState": {
+        "title": "No members"
+      },
+      "dialog": {
+        "deleteTitle": "Delete member?",
+        "deleteText": "{name} will be removed from the organization."
+      },
+      "messages": {
+        "roleUpdated": "Role updated",
+        "memberAdded": "Member added",
+        "memberDeleted": "Member deleted"
+      }
+    },
+    "roles": {
+      "title": "Roles",
+      "addTitle": "New role",
+      "editTitle": "Edit role",
+      "columns": {
+        "name": "Name",
+        "code": "Code",
+        "isSystem": "System",
+        "membersCount": "Members"
+      },
+      "form": {
+        "name": "Name",
+        "code": "Code"
+      },
+      "emptyState": {
+        "title": "No roles"
+      },
+      "dialog": {
+        "deleteTitle": "Delete role?",
+        "deleteText": "Role \"{name}\" will be deleted."
+      },
+      "messages": {
+        "created": "Role created",
+        "updated": "Role updated",
+        "deleted": "Role deleted"
+      }
+    }
+  },
+  "bookingWidget": {
+    "title": "Book — {orgName}",
+    "form": {
+      "checkIn": "Check-in date",
+      "checkOut": "Check-out date",
+      "guestName": "Your name",
+      "guestEmail": "Email",
+      "guestPhone": "Phone"
+    },
+    "searchButton": "Search",
+    "bookButton": "Book",
+    "confirmButton": "Confirm",
+    "guestsLabel": "guests",
+    "emptyState": {
+      "title": "No available units"
+    },
+    "dialog": {
+      "bookingTitle": "Booking",
+      "successTitle": "Booking confirmed!",
+      "successText": "We've sent a confirmation to your email."
+    },
+    "messages": {
+      "loadError": "Failed to load availability",
+      "bookingError": "Booking error"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Apartus",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "submitButton": "Sign in",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Register"
+    },
+    "register": {
+      "title": "Registration",
+      "orgNameLabel": "Organization name",
+      "firstNameLabel": "First name",
+      "lastNameLabel": "Last name",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "passwordConfirmLabel": "Confirm password",
+      "submitButton": "Create account",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in"
+    },
+    "selectOrganization": {
+      "title": "Select organization"
+    }
+  },
+  "placeholder": {
+    "title": "Coming soon",
+    "text": "The \"{title}\" section will appear in one of the upcoming HW-2 features."
+  },
+  "languages": {
+    "ru": "Русский",
+    "en": "English"
+  }
+}

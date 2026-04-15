@@ -13,8 +13,6 @@ audience: humans_and_agents
 
 Durable knowledge layer проекта Apartus (PMS). Источник истины для intent, rationale и contracts. Код владеет реализацией.
 
-**Быстрый вход:** [`QUICKSTART.md`](QUICKSTART.md) — one-pager с полным flow и ключевыми правилами.
-
 ## Аннотированный индекс
 
 - [`dna/README.md`](dna/README.md) — governance-ядро: SSoT, frontmatter, lifecycle. Читать, чтобы понять правила документации.

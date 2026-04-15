@@ -1,8 +1,15 @@
 <template>
-  <v-app-bar elevation="1" :extended="authStore.loading" extension-height="2">
+  <v-app-bar :extended="authStore.loading" extension-height="2" border="b">
     <v-app-bar-nav-icon @click="$emit('toggleDrawer')" />
-    <v-app-bar-title>Apartus</v-app-bar-title>
+    <v-app-bar-title><span class="text-primary font-weight-bold">Apartus</span></v-app-bar-title>
     <v-spacer />
+
+    <v-btn
+      :icon="isDark ? 'mdi-weather-sunny' : 'mdi-weather-night'"
+      variant="text"
+      @click="toggleTheme"
+    />
+
     <template v-if="authStore.isAuthenticated">
       <v-menu>
         <template v-slot:activator="{ props }">
@@ -13,7 +20,7 @@
           </v-btn>
         </template>
         <v-list>
-          <v-list-item @click="handleLogout" prepend-icon="mdi-logout" title="Выйти" />
+          <v-list-item @click="handleLogout" prepend-icon="mdi-logout" :title="$t('topbar.logout')" />
         </v-list>
       </v-menu>
     </template>
@@ -24,18 +31,47 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useTheme } from 'vuetify'
 import { useAuthStore } from '../stores/auth'
 
 defineEmits(['toggleDrawer'])
 
 const router = useRouter()
 const authStore = useAuthStore()
+const theme = useTheme()
+
+const isDark = computed(() => theme.global.current.value.dark)
+
+const THEME_STORAGE_KEY = 'apartus-theme'
+const VALID_THEMES = ['apartusLight', 'apartusDark']
+
+function toggleTheme() {
+  const next = isDark.value ? 'apartusLight' : 'apartusDark'
+  theme.global.name.value = next
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, next)
+  } catch {
+    // Persistence is best-effort (privacy mode / sandboxed iframes throw).
+  }
+}
+
+// Restore saved theme preference. Reads happen at component setup on every
+// mount, so localStorage failures here must not crash the UI.
+try {
+  const saved = localStorage.getItem(THEME_STORAGE_KEY)
+  if (saved && VALID_THEMES.includes(saved)) {
+    theme.global.name.value = saved
+  }
+} catch {
+  // Fall back to default theme.
+}
 
 async function handleLogout() {
   await authStore.signOut()
   router.push({ name: 'login' })
 }
 
-defineExpose({ handleLogout })
+defineExpose({ handleLogout, toggleTheme, isDark })
 </script>

@@ -22,10 +22,10 @@ describe('TaskBoardView', () => {
 
   it('priorityColor maps correctly', () => {
     const wrapper = mountWithVuetify(TaskBoardView)
-    expect(wrapper.vm.priorityColor('urgent')).toBe('red')
-    expect(wrapper.vm.priorityColor('high')).toBe('orange')
-    expect(wrapper.vm.priorityColor('medium')).toBe('blue')
-    expect(wrapper.vm.priorityColor('low')).toBe('grey')
+    expect(wrapper.vm.priorityColor('urgent')).toBe('priority-urgent')
+    expect(wrapper.vm.priorityColor('high')).toBe('priority-high')
+    expect(wrapper.vm.priorityColor('medium')).toBe('priority-medium')
+    expect(wrapper.vm.priorityColor('low')).toBe('priority-low')
   })
 
   it('openCreate resets form', () => {

@@ -1,6 +1,10 @@
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { createRouter, createMemoryHistory } from 'vue-router'
+import { createVuetify } from 'vuetify'
+import i18n from '../../plugins/i18n'
+
+const vuetify = createVuetify()
 
 // Per-suite mount helper. Не глобальный мок — каждый suite создаёт свой instance
 // (`testing-policy.md` запрещает глобальные моки router/Pinia).
@@ -128,7 +132,7 @@ export async function mountWithVuetifyAsync(component, options = {}) {
     props,
     slots,
     global: {
-      plugins: [pinia, router],
+      plugins: [vuetify, pinia, router, i18n],
       stubs: { ...VUETIFY_STUBS, ...(globalOpts.stubs || {}) },
       ...globalOpts,
     },
@@ -156,7 +160,7 @@ function _buildMount(component, options = {}) {
     props,
     slots,
     global: {
-      plugins: [pinia, router],
+      plugins: [vuetify, pinia, router, i18n],
       stubs: { ...VUETIFY_STUBS, ...(globalOpts.stubs || {}) },
       ...globalOpts,
     },

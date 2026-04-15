@@ -2,7 +2,7 @@
   <v-container>
     <div class="d-flex align-center mb-4">
       <v-btn variant="text" icon="mdi-arrow-left" :to="`/properties/${propertyId}/units`" />
-      <h1 class="text-h4 ml-2">{{ isEdit ? 'Редактировать помещение' : 'Новое помещение' }}</h1>
+      <h1 class="text-h4 ml-2">{{ isEdit ? $t('units.editTitle') : $t('units.createTitle') }}</h1>
     </div>
 
     <v-alert v-if="formError" type="error" class="mb-4" closable @click:close="formError = null">
@@ -12,13 +12,13 @@
     <v-form ref="formRef" @submit.prevent="handleSubmit" :disabled="submitting">
       <v-text-field
         v-model="form.name"
-        label="Название"
+        :label="$t('units.form.name')"
         :rules="[rules.required]"
         class="mb-2"
       />
       <v-select
         v-model="form.unit_type"
-        label="Тип помещения"
+        :label="$t('units.form.unitType')"
         :items="unitTypes"
         item-title="label"
         item-value="value"
@@ -27,14 +27,14 @@
       />
       <v-text-field
         v-model.number="form.capacity"
-        label="Вместимость"
+        :label="$t('units.form.capacity')"
         type="number"
         :rules="[rules.required, rules.capacityRange]"
         class="mb-2"
       />
       <v-select
         v-model="form.status"
-        label="Статус"
+        :label="$t('units.form.status')"
         :items="statuses"
         item-title="label"
         item-value="value"
@@ -43,14 +43,14 @@
       />
       <v-text-field
         v-model.number="form.base_price_rub"
-        label="Цена за ночь"
+        :label="$t('units.form.pricePerNight')"
         type="number"
         step="0.01"
         class="mb-2"
       />
 
       <div v-if="isEdit" class="mb-4">
-        <label class="text-subtitle-2 text-medium-emphasis mb-1 d-block">Удобства</label>
+        <label class="text-subtitle-2 text-medium-emphasis mb-1 d-block">{{ $t('units.form.amenities') }}</label>
         <v-chip-group>
           <v-chip
             v-for="amenity in allAmenities"
@@ -68,9 +68,9 @@
 
       <div class="d-flex ga-2">
         <v-btn type="submit" color="primary" :loading="submitting">
-          {{ isEdit ? 'Сохранить' : 'Создать' }}
+          {{ isEdit ? $t('common.save') : $t('common.create') }}
         </v-btn>
-        <v-btn variant="text" :to="`/properties/${propertyId}/units`">Отмена</v-btn>
+        <v-btn variant="text" :to="`/properties/${propertyId}/units`">{{ $t('common.cancel') }}</v-btn>
       </div>
     </v-form>
 
@@ -82,12 +82,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useUnitsStore } from '../stores/units'
 import * as unitsApi from '../api/units'
 import * as amenitiesApi from '../api/amenities'
 import * as unitAmenitiesApi from '../api/unitAmenities'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const store = useUnitsStore()
@@ -113,22 +115,22 @@ const form = ref({
   base_price_rub: 0,
 })
 
-const unitTypes = [
-  { label: 'Комната', value: 'room' },
-  { label: 'Квартира', value: 'apartment' },
-  { label: 'Место', value: 'bed' },
-  { label: 'Студия', value: 'studio' },
-]
+const unitTypes = computed(() => [
+  { label: t('units.types.room'), value: 'room' },
+  { label: t('units.types.apartment'), value: 'apartment' },
+  { label: t('units.types.bed'), value: 'bed' },
+  { label: t('units.types.studio'), value: 'studio' },
+])
 
-const statuses = [
-  { label: 'Доступен', value: 'available' },
-  { label: 'Обслуживание', value: 'maintenance' },
-  { label: 'Заблокирован', value: 'blocked' },
-]
+const statuses = computed(() => [
+  { label: t('units.statuses.available'), value: 'available' },
+  { label: t('units.statuses.maintenance'), value: 'maintenance' },
+  { label: t('units.statuses.blocked'), value: 'blocked' },
+])
 
 const rules = {
-  required: (v) => (v !== '' && v !== null && v !== undefined) || 'Обязательное поле',
-  capacityRange: (v) => (Number(v) >= 1 && Number(v) <= 100) || 'От 1 до 100',
+  required: (v) => (v !== '' && v !== null && v !== undefined) || t('common.validation.required'),
+  capacityRange: (v) => (Number(v) >= 1 && Number(v) <= 100) || t('common.validation.capacityRange'),
 }
 
 async function loadUnit() {
@@ -143,7 +145,7 @@ async function loadUnit() {
       base_price_rub: (unit.base_price_cents || 0) / 100,
     }
   } catch (e) { console.error(e);
-    formError.value = 'Не удалось загрузить помещение'
+    formError.value = t('units.messages.loadError')
   }
 }
 
@@ -158,18 +160,18 @@ async function handleSubmit() {
   try {
     if (isEdit.value) {
       await store.update(Number(route.params.id), payload)
-      snackbarText.value = 'Помещение обновлено'
+      snackbarText.value = t('units.messages.updated')
     } else {
       if (!store.propertyId || store.propertyId !== propertyId.value) {
         store.propertyId = propertyId.value
       }
       await store.create(payload)
-      snackbarText.value = 'Помещение создано'
+      snackbarText.value = t('units.messages.created')
     }
     snackbar.value = true
     router.push(`/properties/${propertyId.value}/units`)
   } catch (e) {
-    formError.value = e.response?.data?.error || store.error || 'Ошибка сохранения'
+    formError.value = e.response?.data?.error || store.error || t('common.messages.saveError')
   } finally {
     submitting.value = false
   }
@@ -191,7 +193,7 @@ async function toggleAmenity(amenityId) {
       attachedAmenityIds.value.push(amenityId)
     }
   } catch (e) { console.error(e);
-    amenitiesError.value = 'Не удалось обновить удобства'
+    amenitiesError.value = t('units.messages.amenitiesError')
   } finally {
     togglingAmenity.value = null
   }
@@ -207,7 +209,7 @@ async function loadAmenities() {
     allAmenities.value = all
     attachedAmenityIds.value = attached.map((a) => a.id)
   } catch (e) { console.error(e);
-    amenitiesError.value = 'Не удалось загрузить удобства'
+    amenitiesError.value = t('units.messages.amenitiesLoadError')
   }
 }
 

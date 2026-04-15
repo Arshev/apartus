@@ -1,12 +1,24 @@
-# CLAUDE.md — Routing Table
+# CLAUDE.md — Project Instructions
 
-**Это routing-таблица, не носитель фактов.** Факты живут в `memory-bank/`. Этот файл — только указатель, куда смотреть.
+## MANDATORY: Read Before Any Work
 
-Точка входа: [`memory-bank/README.md`](memory-bank/README.md). Quick start: [`memory-bank/QUICKSTART.md`](memory-bank/QUICKSTART.md).
+BEFORE responding to the user's first message, you MUST read these files in order. Do NOT skip this step. Do NOT start working without reading them first.
 
-## Session Start Protocol
+1. **Read** `memory-bank/README.md` — Корневая навигация по memory-bank проекта. Читать сначала, чтобы понять где что лежит.
+2. **Read** `memory-bank/domain/problem.md` — what the product is, users, MVP scope
+3. **Read** `memory-bank/features/README.md` — current feature packages and their status
+4. **Read** `memory-bank/engineering/coding-style.md` — coding conventions
+5. **Read** `memory-bank/engineering/autonomy-boundaries.md` — what to do autonomously, where to escalate
 
-Canonical priming prompt: [`.prompts/session-start.md`](.prompts/session-start.md) — содержит полный список файлов для чтения и порядок действий.
+Then check `git status` and current branch to understand what work is in progress.
+
+After reading, confirm context briefly (project, phase, branch, current feature work) and proceed with the user's task. Do NOT recite file contents — just confirm key facts.
+
+For deeper context on specific topics, use the routing table below.
+
+## Routing Table
+
+Факты живут в `memory-bank/`. Этот файл — указатель, куда смотреть. Полный priming prompt: [`.prompts/session-start.md`](.prompts/session-start.md).
 
 ## Куда смотреть
 
@@ -22,6 +34,7 @@ Canonical priming prompt: [`.prompts/session-start.md`](.prompts/session-start.m
 | Money, currencies | [`memory-bank/domain/money-and-currency.md`](memory-bank/domain/money-and-currency.md) |
 | Use cases | [`memory-bank/use-cases/README.md`](memory-bank/use-cases/README.md) |
 | Testing policy, coverage ratchet | [`memory-bank/engineering/testing-policy.md`](memory-bank/engineering/testing-policy.md) |
+| Design system, palette, components, dark mode | [`memory-bank/engineering/design-style-guide.md`](memory-bank/engineering/design-style-guide.md) |
 | Coding style, reference implementations | [`memory-bank/engineering/coding-style.md`](memory-bank/engineering/coding-style.md) |
 | Git workflow, коммиты, PR | [`memory-bank/engineering/git-workflow.md`](memory-bank/engineering/git-workflow.md) |
 | Автономия, эскалация, lifecycle enforcement | [`memory-bank/engineering/autonomy-boundaries.md`](memory-bank/engineering/autonomy-boundaries.md) |
