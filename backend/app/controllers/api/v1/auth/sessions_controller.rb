@@ -71,7 +71,10 @@ module Api
           {
             id: org.id,
             name: org.name,
-            slug: org.slug
+            slug: org.slug,
+            # Expose only locale — other keys in `settings` (e.g. telegram tokens)
+            # are sensitive and must not leak through the auth/me boot payload.
+            settings: { locale: org.settings&.dig("locale") }
           }
         end
 

@@ -40,6 +40,17 @@ RSpec.describe "Api::V1::Auth::Sessions" do
       expect(body["membership"]["role"]).to eq("owner")
     end
 
+    it "exposes organization.settings.locale so frontend can restore UI language" do
+      organization.update!(settings: { "locale" => "en", "telegram_bot_token" => "secret" })
+      get "/api/v1/auth/me", headers: auth_headers(user, organization)
+
+      expect(response).to have_http_status(:ok)
+      settings = response.parsed_body["organization"]["settings"]
+      expect(settings).to eq("locale" => "en")
+      # Sensitive keys must NOT leak through the boot payload.
+      expect(settings).not_to have_key("telegram_bot_token")
+    end
+
     it "returns unauthorized without token" do
       get "/api/v1/auth/me"
       expect(response).to have_http_status(:unauthorized)
