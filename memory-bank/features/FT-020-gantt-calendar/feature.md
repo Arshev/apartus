@@ -84,7 +84,7 @@ must_not_define:
 - `NS-16` **Performance budget enforcement** (e.g. assert <300ms render). Будет measured вместе с virtualization в FT-022 — там это load-bearing.
 - `NS-17` **Keyboard alternative для context menu** (Shift+F10 / Menu key для open context menu без правой кнопки мыши). Phase 1 — mouse-only (`REQ-05`). A11y улучшение в follow-up backlog.
 
-[^ft-021]: Handover mode delivered in [FT-021](../FT-021-gantt-handover-mode/feature.md) (Phase 1 of NS-02). Idle gaps / overdue / heatmap / loading остаются в NS-02 follow-up.
+[^ft-021]: Handover mode delivered in [FT-021](../FT-021-gantt-handover-mode/feature.md) (Phase 1 of NS-02). Overdue mode delivered in [FT-022](../FT-022-gantt-overdue-mode/feature.md) (Phase 2 of NS-02). Idle gaps / heatmap / loading остаются в NS-02 follow-up.
 
 ### Constraints / Assumptions
 

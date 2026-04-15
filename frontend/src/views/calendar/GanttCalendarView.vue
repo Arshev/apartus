@@ -20,6 +20,16 @@
         {{ $t('calendar.gantt.modes.handover') }}
       </v-btn>
 
+      <v-btn
+        prepend-icon="mdi-alert-circle-outline"
+        :color="specialMode === 'overdue' ? 'primary' : undefined"
+        :variant="specialMode === 'overdue' ? 'elevated' : 'text'"
+        @click="toggleOverdue"
+        data-testid="overdue-btn"
+      >
+        {{ $t('calendar.gantt.modes.overdue') }}
+      </v-btn>
+
       <v-btn variant="text" prepend-icon="mdi-calendar-today" @click="goToday" data-testid="today-btn">
         {{ $t('calendar.gantt.toolbar.today') }}
       </v-btn>
@@ -85,7 +95,7 @@ import { addDays, startOfDay, formatIsoDate, parseIsoDate } from '../../utils/da
 const STORAGE_KEY = 'apartus-calendar-view'
 const DEFAULT_RANGE_DAYS = 14
 const SUPPORTED_RANGES = [7, 14, 30]
-const SUPPORTED_SPECIAL_MODES = ['', 'handover']
+const SUPPORTED_SPECIAL_MODES = ['', 'handover', 'overdue']
 
 const { t } = useI18n()
 const router = useRouter()
@@ -99,9 +109,15 @@ const loading = ref(false)
 const error = ref(null)
 const timelineEl = ref(null)
 
-function toggleHandover() {
-  specialMode.value = specialMode.value === 'handover' ? '' : 'handover'
+// FT-022: единый helper — mutual exclusion гарантируется одним местом.
+// FT-021 toggleHandover остаётся экспортированным shim'ом для обратной
+// совместимости (ER-01 регрессия тестов).
+function setSpecialMode(mode) {
+  specialMode.value = specialMode.value === mode ? '' : mode
 }
+
+function toggleHandover() { setSpecialMode('handover') }
+function toggleOverdue() { setSpecialMode('overdue') }
 
 const viewStart = computed(() => anchorDate.value)
 const viewEnd = computed(() => addDays(anchorDate.value, rangeDays.value - 1))
@@ -256,6 +272,6 @@ defineExpose({
   rangeDays, anchorDate, specialMode, viewStart, viewEnd, reservations, units, loading, error,
   tooltip, contextMenu, snackbar, jumpDate, datePickerOpen, timelineEl,
   loadData, goToday, onJumpDate, onShowBooking, onShowTooltip, onHideTooltip, onContextMenu,
-  contextEdit, contextCheckIn, contextCheckOut, contextCancel, toggleHandover,
+  contextEdit, contextCheckIn, contextCheckOut, contextCancel, toggleHandover, toggleOverdue, setSpecialMode,
 })
 </script>

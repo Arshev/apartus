@@ -230,4 +230,64 @@ describe('GanttCalendarView', () => {
       expect(stored).toEqual({ rangeDays: 7, specialMode: 'handover' })
     })
   })
+
+  // --- FT-022 Overdue Mode ---
+  describe('overdue mode + mutual exclusion (FT-022)', () => {
+    it('toggleOverdue flips "" → "overdue" → ""', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleOverdue()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('overdue')
+      wrapper.vm.toggleOverdue()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('')
+    })
+
+    it('setSpecialMode helper toggles off when same mode clicked', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.setSpecialMode('overdue')
+      expect(wrapper.vm.specialMode).toBe('overdue')
+      wrapper.vm.setSpecialMode('overdue')
+      expect(wrapper.vm.specialMode).toBe('')
+    })
+
+    it('mutual exclusion — clicking overdue while handover active switches mode (SC-02)', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleHandover()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('handover')
+      wrapper.vm.toggleOverdue()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('overdue')
+    })
+
+    it('mutual exclusion reverse — clicking handover while overdue active switches mode', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleOverdue()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleHandover()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('handover')
+    })
+
+    it('persists specialMode "overdue" to localStorage', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleOverdue()
+      await wrapper.vm.$nextTick()
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY))
+      expect(stored.specialMode).toBe('overdue')
+    })
+
+    it('reads persisted specialMode "overdue" on mount', async () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ rangeDays: 14, specialMode: 'overdue' }))
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('overdue')
+    })
+  })
 })
