@@ -97,6 +97,18 @@ Apartus frontend — это одно приложение, SPA.
 - Icon marker имеет `pointer-events: none`, чтобы не перехватывать click/contextmenu от родительского bar (SC-07).
 - Persistence: `localStorage('apartus-calendar-view')` payload расширен полем `specialMode`. Legacy payloads без поля resolve в `''` (backwards-compat).
 - Накрыто unit (`getHandoverType` matrix) + component (классы per type) + e2e (toggle triggers DOM state) + manual QA (light + dark скриншоты).
+
+### Overdue Mode (FT-022)
+
+Второй из FT-020 NS-02 special modes — подсветка просроченных выездов.
+
+- Toolbar `v-btn` «Просрочки» (mdi-alert-circle-outline). Mutually exclusive с handover через единый `setSpecialMode(mode)` helper.
+- Classification: `utils/gantt.js#getOverdueDays(booking, today)` возвращает число whole overdue days (≥1 для `status=checked_in` AND `check_out < today`, иначе `0`).
+- Visual: `gantt-item--overdue` (3px красный border) + `gantt-item--overdue-pulse` (CSS `@keyframes` 1.5s infinite) + `gantt-item__overdue-label` span `+Nд` (pointer-events: none). При `specialMode='overdue'` + `0` → `.gantt-item--dimmed`.
+- A11y: `@media (prefers-reduced-motion: reduce)` отключает pulse анимацию.
+- FT-021 `toggleHandover` сохраняется как shim над `setSpecialMode('handover')` — backward-compat защита от регрессии FT-021 тестов.
+- `SUPPORTED_SPECIAL_MODES` extended: `['', 'handover', 'overdue']`. Invalid values → `''`.
+- NEG-06 edge: `check_out === today` AND `checked_in` → НЕ overdue (принадлежит handover territory FT-021 `checkout_today`). В overdue mode такой reservation dimmed.
 - Language switcher: Settings → General → v-select ru/en. Сохраняется в `organization.settings.locale` через PATCH `/organization`.
 - При boot: `fetchCurrentUser()` читает `organization.settings.locale` и устанавливает `i18n.global.locale.value`.
 - Fallback: отсутствующий ключ в en.json → показывается русский текст. Невалидный locale → ru.

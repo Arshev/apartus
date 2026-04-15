@@ -63,4 +63,35 @@ test.describe('Gantt Calendar (CHK-07)', () => {
       { timeout: 5000 }
     )
   })
+
+  // FT-022 Overdue Mode
+  test('overdue toggle applies overdue / dimmed classes; mutual exclusion with handover (FT-022, SC-01..04)', async ({ page }) => {
+    await page.waitForSelector('.gantt-item', { timeout: 10000 })
+
+    // Activate overdue mode.
+    await page.locator('[data-testid="overdue-btn"]').click()
+    await page.waitForFunction(
+      () => document.querySelectorAll('.gantt-item--dimmed, .gantt-item--overdue').length > 0,
+      { timeout: 5000 }
+    )
+    const affected = await page.locator('.gantt-item--dimmed, .gantt-item--overdue').count()
+    expect(affected).toBeGreaterThanOrEqual(1)
+
+    // Mutual exclusion: click handover → overdue classes gone, handover classes appear.
+    await page.locator('[data-testid="handover-btn"]').click()
+    await page.waitForFunction(
+      () => document.querySelectorAll('.gantt-item--overdue').length === 0,
+      { timeout: 5000 }
+    )
+    // At this point handover mode active — at minimum some bars dimmed or handover-*.
+    const afterHandover = await page.locator('.gantt-item--dimmed, [class*="gantt-item--handover-"]').count()
+    expect(afterHandover).toBeGreaterThanOrEqual(1)
+
+    // Deactivate handover — всё чисто.
+    await page.locator('[data-testid="handover-btn"]').click()
+    await page.waitForFunction(
+      () => document.querySelectorAll('.gantt-item--dimmed, .gantt-item--overdue, [class*="gantt-item--handover-"]').length === 0,
+      { timeout: 5000 }
+    )
+  })
 })

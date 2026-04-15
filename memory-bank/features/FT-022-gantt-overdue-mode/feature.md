@@ -14,7 +14,7 @@ derived_from:
   - ../FT-020-gantt-calendar/feature.md
   - ../FT-021-gantt-handover-mode/feature.md
 status: active
-delivery_status: in_progress
+delivery_status: done
 audience: humans_and_agents
 must_not_define:
   - implementation_sequence
