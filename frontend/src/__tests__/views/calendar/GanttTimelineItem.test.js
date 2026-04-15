@@ -163,4 +163,66 @@ describe('GanttTimelineItem', () => {
       expect(wrapper.find('.gantt-item__marker').attributes('title')).toBe('Заезд сегодня')
     })
   })
+
+  // --- FT-022 Overdue mode ---
+  describe('overdue mode', () => {
+    const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    const today = new Date()
+    const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1)
+    const threeDaysAgo = new Date(today); threeDaysAgo.setDate(today.getDate() - 3)
+    const future = new Date(today); future.setDate(today.getDate() + 10)
+
+    it('does not add overdue class when specialMode is empty', () => {
+      const wrapper = setup({ specialMode: '' })
+      expect(wrapper.vm.overdueDays).toBe(0)
+      expect(wrapper.vm.itemClasses).not.toContain('gantt-item--overdue')
+    })
+
+    it('does not add overdue class when specialMode is handover', () => {
+      const booking = { ...BASE, status: 'checked_in', check_out: iso(yesterday) }
+      const wrapper = setup({ booking, specialMode: 'handover' })
+      expect(wrapper.vm.overdueDays).toBe(0)
+      expect(wrapper.vm.itemClasses).not.toContain('gantt-item--overdue')
+    })
+
+    it('dims bar when specialMode=overdue but booking is not overdue', () => {
+      const booking = { ...BASE, status: 'confirmed', check_out: iso(future) }
+      const wrapper = setup({ booking, specialMode: 'overdue' })
+      expect(wrapper.vm.overdueDays).toBe(0)
+      expect(wrapper.vm.itemClasses).toContain('gantt-item--dimmed')
+    })
+
+    it('adds overdue + overdue-pulse classes + label for checked_in yesterday', () => {
+      const booking = { ...BASE, status: 'checked_in', check_out: iso(yesterday) }
+      const wrapper = setup({ booking, specialMode: 'overdue' })
+      expect(wrapper.vm.overdueDays).toBe(1)
+      expect(wrapper.vm.itemClasses).toContain('gantt-item--overdue')
+      expect(wrapper.vm.itemClasses).toContain('gantt-item--overdue-pulse')
+      expect(wrapper.vm.itemClasses).not.toContain('gantt-item--dimmed')
+      expect(wrapper.find('.gantt-item__overdue-label').text()).toBe('+1д')
+    })
+
+    it('shows larger number for longer overdue', () => {
+      const booking = { ...BASE, status: 'checked_in', check_out: iso(threeDaysAgo) }
+      const wrapper = setup({ booking, specialMode: 'overdue' })
+      expect(wrapper.vm.overdueDays).toBe(3)
+      expect(wrapper.find('.gantt-item__overdue-label').text()).toBe('+3д')
+    })
+
+    it('overdue-label has pointer-events:none (SC-05 — click not hijacked)', async () => {
+      const booking = { ...BASE, status: 'checked_in', check_out: iso(yesterday) }
+      const wrapper = setup({ booking, specialMode: 'overdue' })
+      const label = wrapper.find('.gantt-item__overdue-label')
+      expect(label.exists()).toBe(true)
+      // Click should still emit show-booking even with label present.
+      await wrapper.find('.gantt-item').trigger('click')
+      expect(wrapper.emitted('show-booking')).toEqual([[BASE.id]])
+    })
+
+    it('does not render overdue-label when overdueDays is 0', () => {
+      const booking = { ...BASE, status: 'confirmed', check_out: iso(future) }
+      const wrapper = setup({ booking, specialMode: 'overdue' })
+      expect(wrapper.find('.gantt-item__overdue-label').exists()).toBe(false)
+    })
+  })
 })

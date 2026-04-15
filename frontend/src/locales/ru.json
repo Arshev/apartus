@@ -139,8 +139,10 @@
       },
       "today": "Сегодня",
       "modes": {
-        "handover": "Заезды/выезды"
+        "handover": "Заезды/выезды",
+        "overdue": "Просрочки"
       },
+      "overdueLabel": "+{n}д",
       "handoverMarkers": {
         "checkinToday": "Заезд сегодня",
         "checkinTomorrow": "Заезд завтра",

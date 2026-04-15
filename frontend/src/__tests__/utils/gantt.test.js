@@ -6,6 +6,7 @@ import {
   generateBottomLevelDates,
   assignLanes,
   getHandoverType,
+  getOverdueDays,
 } from '../../utils/gantt.js'
 import { parseIsoDate, startOfDay, addDays } from '../../utils/date.js'
 
@@ -251,6 +252,61 @@ describe('utils/gantt', () => {
       const tomorrow = addDays(realToday, 1)
       const tomorrowIso = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`
       expect(getHandoverType(mkBooking('confirmed', tomorrowIso, '2099-01-01'), realToday)).toBe('checkin_tomorrow')
+    })
+  })
+
+  describe('getOverdueDays (FT-022)', () => {
+    const TODAY = startOfDay(parseIsoDate('2026-04-15'))
+    const mk = (status, checkOut) => ({ status, check_out: checkOut })
+
+    it('returns 0 for null booking / today', () => {
+      expect(getOverdueDays(null, TODAY)).toBe(0)
+      expect(getOverdueDays(mk('checked_in', '2026-04-10'), null)).toBe(0)
+    })
+
+    it('returns 0 for missing check_out', () => {
+      expect(getOverdueDays({ status: 'checked_in' }, TODAY)).toBe(0)
+    })
+
+    it('returns 1 for checked_in with check_out = yesterday', () => {
+      expect(getOverdueDays(mk('checked_in', '2026-04-14'), TODAY)).toBe(1)
+    })
+
+    it('returns N for checked_in with check_out = today - N days', () => {
+      expect(getOverdueDays(mk('checked_in', '2026-04-10'), TODAY)).toBe(5)
+      expect(getOverdueDays(mk('checked_in', '2026-04-01'), TODAY)).toBe(14)
+    })
+
+    it('returns 0 for checked_in with check_out = today (edge — NEG-06)', () => {
+      // NOT overdue — it's "on time" (handover territory).
+      expect(getOverdueDays(mk('checked_in', '2026-04-15'), TODAY)).toBe(0)
+    })
+
+    it('returns 0 for checked_in with check_out in future', () => {
+      expect(getOverdueDays(mk('checked_in', '2026-04-20'), TODAY)).toBe(0)
+    })
+
+    it('returns 0 for confirmed (not checked_in yet)', () => {
+      expect(getOverdueDays(mk('confirmed', '2026-04-10'), TODAY)).toBe(0)
+    })
+
+    it('returns 0 for checked_out (guest already left)', () => {
+      expect(getOverdueDays(mk('checked_out', '2026-04-10'), TODAY)).toBe(0)
+    })
+
+    it('returns 0 for cancelled', () => {
+      expect(getOverdueDays(mk('cancelled', '2026-04-10'), TODAY)).toBe(0)
+    })
+
+    it('returns 0 for unknown status', () => {
+      expect(getOverdueDays(mk('pending', '2026-04-10'), TODAY)).toBe(0)
+    })
+
+    it('integrates with real Date — checked_in yesterday → 1', () => {
+      const realToday = startOfDay(new Date())
+      const yesterday = addDays(realToday, -1)
+      const yIso = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`
+      expect(getOverdueDays(mk('checked_in', yIso), realToday)).toBe(1)
     })
   })
 })

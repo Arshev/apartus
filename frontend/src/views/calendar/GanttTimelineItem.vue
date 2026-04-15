@@ -10,13 +10,14 @@
   >
     <span v-if="handoverMarker" class="gantt-item__marker" :title="handoverMarkerLabel">{{ handoverMarker }}</span>
     <span v-if="showLabel" class="gantt-item__label">{{ label }}</span>
+    <span v-if="overdueDays > 0" class="gantt-item__overdue-label" :title="overdueLabelFull">{{ overdueLabelShort }}</span>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { getHandoverType } from '../../utils/gantt'
+import { getHandoverType, getOverdueDays } from '../../utils/gantt'
 import { startOfDay } from '../../utils/date'
 
 const ITEM_GAP = 2
@@ -76,11 +77,30 @@ function camelCase(snake) {
   return snake.replace(/_([a-z])/g, (_, c) => c.toUpperCase())
 }
 
+// Overdue mode — count overdue days against today's local midnight.
+const overdueDays = computed(() => {
+  if (props.specialMode !== 'overdue') return 0
+  return getOverdueDays(props.booking, startOfDay(new Date()))
+})
+
+const overdueLabelShort = computed(() => {
+  if (overdueDays.value <= 0) return ''
+  return t('calendar.gantt.overdueLabel', { n: overdueDays.value })
+})
+
+const overdueLabelFull = computed(() => overdueLabelShort.value)
+
 const itemClasses = computed(() => {
   const classes = [`gantt-item--${props.booking.status}`]
   if (props.specialMode === 'handover') {
     if (handoverType.value) {
       classes.push(`gantt-item--handover-${handoverType.value}`)
+    } else {
+      classes.push('gantt-item--dimmed')
+    }
+  } else if (props.specialMode === 'overdue') {
+    if (overdueDays.value > 0) {
+      classes.push('gantt-item--overdue', 'gantt-item--overdue-pulse')
     } else {
       classes.push('gantt-item--dimmed')
     }
@@ -100,7 +120,7 @@ function onContextMenu(event) {
   emit('context-menu', { booking: props.booking, x: event.clientX, y: event.clientY })
 }
 
-defineExpose({ itemStyle, showLabel, label, itemClasses, handoverType, handoverMarker, handoverMarkerLabel, onClick, onMouseEnter, onContextMenu })
+defineExpose({ itemStyle, showLabel, label, itemClasses, handoverType, handoverMarker, handoverMarkerLabel, overdueDays, overdueLabelShort, onClick, onMouseEnter, onContextMenu })
 </script>
 
 <style scoped>
@@ -167,5 +187,37 @@ defineExpose({ itemStyle, showLabel, label, itemClasses, handoverType, handoverM
   margin-right: 3px;
   pointer-events: none;
   flex-shrink: 0;
+}
+
+/* FT-022 Overdue Mode */
+.gantt-item--overdue {
+  border: 3px solid rgb(var(--v-theme-error));
+}
+
+.gantt-item__overdue-label {
+  margin-left: auto;
+  padding: 0 4px;
+  background: rgb(var(--v-theme-error));
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 3px;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.gantt-item--overdue-pulse {
+  animation: overdue-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes overdue-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--v-theme-error), 0.6); }
+  50% { box-shadow: 0 0 0 4px rgba(var(--v-theme-error), 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gantt-item--overdue-pulse {
+    animation: none;
+  }
 }
 </style>

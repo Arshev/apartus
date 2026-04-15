@@ -154,6 +154,35 @@ export function getHandoverType(booking, today) {
 }
 
 /**
+ * Count overdue days for a reservation (FT-022 Overdue mode).
+ *
+ * A reservation is overdue when the guest is still checked_in but the
+ * `check_out` date has already passed (`check_out < today`).
+ *
+ * Returns the number of whole days overdue (≥ 1) when the condition holds,
+ * or `0` for all other statuses / future/same-day check_out / invalid dates.
+ *
+ * Caller passes `today` as local-midnight Date (use `startOfDay(new Date())`).
+ *
+ * @param {{status: string, check_out: string}} booking
+ * @param {Date} today
+ * @returns {number}
+ */
+export function getOverdueDays(booking, today) {
+  if (!booking || !today) return 0
+  if (booking.status !== 'checked_in') return 0
+  if (!booking.check_out) return 0
+  try {
+    const checkOutMs = parseIsoDate(booking.check_out).valueOf()
+    const todayMs = today.valueOf()
+    if (checkOutMs >= todayMs) return 0
+    return Math.ceil((todayMs - checkOutMs) / MS_PER_DAY)
+  } catch {
+    return 0
+  }
+}
+
+/**
  * Greedy lane assignment for overlapping bookings within one row.
  * Sorts by start ascending (longer items first on tie) and packs each item
  * into the earliest lane whose previous item ended at or before this start.
