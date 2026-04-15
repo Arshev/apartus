@@ -13,18 +13,19 @@ const RES = [
   { id: 12, unit_id: 2, check_in: '2026-04-20', check_out: '2026-04-22', status: 'checked_in' },
 ]
 
-function setup(viewStartIso, viewEndIso) {
+function setup(viewStartIso, viewEndIso, extraProps = {}) {
   return mountWithVuetify(GanttTimeline, {
     props: {
       units: UNITS,
       reservations: RES,
       viewStart: parseIsoDate(viewStartIso),
       viewEnd: parseIsoDate(viewEndIso),
+      ...extraProps,
     },
     global: {
       stubs: {
         GanttTimelineHeader: { template: '<div class="header-stub" />', props: ['viewStart', 'viewEnd', 'pixelsPerMs', 'totalWidth'] },
-        GanttTimelineRow: { template: '<div class="row-stub" :data-unit-id="unit.id" />', props: ['unit', 'bookings', 'viewStart', 'viewEnd', 'pixelsPerMs', 'totalWidth', 'baseRowHeight', 'itemHeight'] },
+        GanttTimelineRow: { template: '<div class="row-stub" :data-unit-id="unit.id" :data-special-mode="specialMode" />', props: ['unit', 'bookings', 'viewStart', 'viewEnd', 'pixelsPerMs', 'totalWidth', 'baseRowHeight', 'itemHeight', 'specialMode'] },
       },
     },
   })
@@ -94,5 +95,19 @@ describe('GanttTimeline', () => {
     const wrapper = setup('2026-04-15', '2026-04-28')
     expect(typeof wrapper.vm.scrollToToday).toBe('function')
     expect(typeof wrapper.vm.scrollToDate).toBe('function')
+  })
+
+  // FT-021: Timeline forwards specialMode prop to every rendered Row
+  it('forwards specialMode to Row children (FT-021)', () => {
+    const wrapper = setup('2026-04-15', '2026-04-28', { specialMode: 'handover' })
+    const rows = wrapper.findAll('.row-stub')
+    expect(rows).toHaveLength(2)
+    rows.forEach((r) => expect(r.attributes('data-special-mode')).toBe('handover'))
+  })
+
+  it('specialMode defaults to empty string when prop not provided', () => {
+    const wrapper = setup('2026-04-15', '2026-04-28')
+    const rows = wrapper.findAll('.row-stub')
+    rows.forEach((r) => expect(r.attributes('data-special-mode')).toBe(''))
   })
 })

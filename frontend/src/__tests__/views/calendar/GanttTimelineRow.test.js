@@ -10,7 +10,7 @@ const VIEW_END = parseIsoDate('2026-04-29')
 // 14 days * 86400000 ms; viewport 1400px → 0.000001157
 const PIXELS_PER_MS = 1400 / (14 * 86_400_000)
 
-function setup(bookings) {
+function setup(bookings, extraProps = {}) {
   return mountWithVuetify(GanttTimelineRow, {
     props: {
       unit: UNIT,
@@ -21,8 +21,9 @@ function setup(bookings) {
       totalWidth: 1400,
       baseRowHeight: 36,
       itemHeight: 28,
+      ...extraProps,
     },
-    global: { stubs: { GanttTimelineItem: { template: '<div class="item-stub" :data-lane="lane" :data-id="booking.id" />', props: ['booking', 'left', 'width', 'lane', 'itemHeight'] } } },
+    global: { stubs: { GanttTimelineItem: { template: '<div class="item-stub" :data-lane="lane" :data-id="booking.id" :data-special-mode="specialMode" />', props: ['booking', 'left', 'width', 'lane', 'itemHeight', 'specialMode'] } } },
   })
 }
 
@@ -106,5 +107,23 @@ describe('GanttTimelineRow', () => {
     expect(wrapper.vm.itemLeft(item)).toBeCloseTo(0)
     // 5 days * 86400000 * pixelsPerMs = 5/14 * 1400 = 500
     expect(wrapper.vm.itemWidth(item)).toBeCloseTo(500)
+  })
+
+  // FT-021: Row forwards specialMode prop to every rendered Item
+  it('forwards specialMode prop to child Items (FT-021)', () => {
+    const wrapper = setup(
+      [{ id: 1, unit_id: 7, check_in: '2026-04-15', check_out: '2026-04-20', status: 'confirmed' }],
+      { specialMode: 'handover' }
+    )
+    const stub = wrapper.find('.item-stub')
+    expect(stub.attributes('data-special-mode')).toBe('handover')
+  })
+
+  it('specialMode defaults to empty string when prop not provided', () => {
+    const wrapper = setup([
+      { id: 1, unit_id: 7, check_in: '2026-04-15', check_out: '2026-04-20', status: 'confirmed' },
+    ])
+    const stub = wrapper.find('.item-stub')
+    expect(stub.attributes('data-special-mode')).toBe('')
   })
 })

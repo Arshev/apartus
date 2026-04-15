@@ -36,4 +36,31 @@ test.describe('Gantt Calendar (CHK-07)', () => {
     await page.locator('[data-testid="jump-btn"]').click()
     await expect(page.locator('.v-date-picker')).toBeVisible({ timeout: 3000 })
   })
+
+  // FT-021 Handover Mode
+  test('handover toggle applies handover / dimmed classes to bars (FT-021, SC-01..04)', async ({ page }) => {
+    await page.waitForSelector('.gantt-item', { timeout: 10000 })
+
+    // Pre-toggle: bars должны быть без handover-specific классов.
+    const preCount = await page.locator('.gantt-item--dimmed').count()
+    expect(preCount).toBe(0)
+
+    // Activate handover mode.
+    await page.locator('[data-testid="handover-btn"]').click()
+    // Either some bars get handover-* class (if seed has matching reservations)
+    // or all get dimmed — at minimum, ≥1 bar should have one of these classes.
+    await page.waitForFunction(
+      () => document.querySelectorAll('.gantt-item--dimmed, .gantt-item--handover-checkin_today, .gantt-item--handover-checkin_tomorrow, .gantt-item--handover-checkout_today, .gantt-item--handover-checkout_tomorrow').length > 0,
+      { timeout: 5000 }
+    )
+    const affected = await page.locator('.gantt-item--dimmed, [class*="gantt-item--handover-"]').count()
+    expect(affected).toBeGreaterThanOrEqual(1)
+
+    // Deactivate — dimmed / handover classes gone.
+    await page.locator('[data-testid="handover-btn"]').click()
+    await page.waitForFunction(
+      () => document.querySelectorAll('.gantt-item--dimmed').length === 0,
+      { timeout: 5000 }
+    )
+  })
 })

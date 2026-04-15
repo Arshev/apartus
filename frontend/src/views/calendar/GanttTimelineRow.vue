@@ -8,6 +8,7 @@
       :width="itemWidth(item)"
       :lane="laneOf(item)"
       :item-height="itemHeight"
+      :special-mode="specialMode"
       @show-booking="$emit('show-booking', $event)"
       @show-tooltip="$emit('show-tooltip', $event)"
       @hide-tooltip="$emit('hide-tooltip')"
@@ -33,6 +34,7 @@ const props = defineProps({
   totalWidth: { type: Number, required: true },
   baseRowHeight: { type: Number, default: 36 },
   itemHeight: { type: Number, default: 28 },
+  specialMode: { type: String, default: '' },
 })
 
 defineEmits(['show-booking', 'show-tooltip', 'hide-tooltip', 'context-menu'])

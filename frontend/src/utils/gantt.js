@@ -2,6 +2,7 @@
 // Pure functions only — no DOM, no Vue. Tested in isolation.
 
 import {
+  parseIsoDate,
   startOfDay,
   startOfMonth,
   endOfMonth,
@@ -98,6 +99,58 @@ export function generateBottomLevelDates(viewStart, viewEnd, locale = 'ru') {
   }
 
   return result
+}
+
+const MS_PER_DAY = 86_400_000
+
+/**
+ * Classify a reservation for FT-021 Handover mode.
+ *
+ * Returns one of:
+ *   - 'checkin_today'     — confirmed, check_in === today
+ *   - 'checkin_tomorrow'  — confirmed, check_in === today + 1d
+ *   - 'checkout_today'    — checked_in, check_out === today
+ *   - 'checkout_tomorrow' — checked_in, check_out === today + 1d
+ *   - null                — no match (including checked_out, cancelled,
+ *                           invalid dates, or outside the ±1d bracket)
+ *
+ * Caller must pass `today` as a local-midnight Date (use `startOfDay(new Date())`).
+ *
+ * @param {{status: string, check_in: string, check_out: string}} booking
+ * @param {Date} today — local midnight
+ * @returns {string|null}
+ */
+export function getHandoverType(booking, today) {
+  if (!booking || !today) return null
+  if (!booking.check_in || !booking.check_out) return null
+  const todayMs = today.valueOf()
+  const tomorrowMs = todayMs + MS_PER_DAY
+
+  if (booking.status === 'confirmed') {
+    let checkInMs
+    try {
+      checkInMs = parseIsoDate(booking.check_in).valueOf()
+    } catch {
+      return null
+    }
+    if (checkInMs === todayMs) return 'checkin_today'
+    if (checkInMs === tomorrowMs) return 'checkin_tomorrow'
+    return null
+  }
+
+  if (booking.status === 'checked_in') {
+    let checkOutMs
+    try {
+      checkOutMs = parseIsoDate(booking.check_out).valueOf()
+    } catch {
+      return null
+    }
+    if (checkOutMs === todayMs) return 'checkout_today'
+    if (checkOutMs === tomorrowMs) return 'checkout_tomorrow'
+    return null
+  }
+
+  return null
 }
 
 /**

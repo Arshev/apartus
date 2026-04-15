@@ -137,7 +137,16 @@
         "cancelFailed": "Cancellation failed",
         "loadFailed": "Failed to load calendar"
       },
-      "today": "Today"
+      "today": "Today",
+      "modes": {
+        "handover": "Arrivals/Departures"
+      },
+      "handoverMarkers": {
+        "checkinToday": "Check-in today",
+        "checkinTomorrow": "Check-in tomorrow",
+        "checkoutToday": "Check-out today",
+        "checkoutTomorrow": "Check-out tomorrow"
+      }
     }
   },
   "properties": {

@@ -41,6 +41,7 @@
             :total-width="totalWidth"
             :base-row-height="baseRowHeight"
             :item-height="itemHeight"
+            :special-mode="specialMode"
             @show-booking="$emit('show-booking', $event)"
             @show-tooltip="$emit('show-tooltip', $event)"
             @hide-tooltip="$emit('hide-tooltip')"
@@ -78,6 +79,7 @@ const props = defineProps({
   viewEnd: { type: Date, required: true },
   baseRowHeight: { type: Number, default: 36 },
   itemHeight: { type: Number, default: 28 },
+  specialMode: { type: String, default: '' },
 })
 
 defineEmits(['show-booking', 'show-tooltip', 'hide-tooltip', 'context-menu'])
