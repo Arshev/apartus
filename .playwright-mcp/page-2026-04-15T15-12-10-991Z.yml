@@ -1,0 +1,175 @@
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - generic [ref=e6]:
+      - button [ref=e7] [cursor=pointer]:
+        - generic [ref=e9]: 󰍜
+      - generic [ref=e11]: Apartus
+      - button [ref=e12] [cursor=pointer]:
+        - generic [ref=e14]: 󰖔
+      - button "Demo User" [ref=e15] [cursor=pointer]:
+        - generic [ref=e16]:
+          - generic [ref=e17]: 󰀄
+          - text: Demo User
+          - generic [ref=e18]: 󰅀
+    - progressbar [ref=e19]
+  - navigation [ref=e23]:
+    - generic [ref=e24]:
+      - generic [ref=e25] [cursor=pointer]:
+        - generic [ref=e27]: 󰇗
+        - generic [ref=e28]:
+          - generic [ref=e29]: Demo Hostel Network
+          - generic [ref=e30]: Организация
+        - generic [ref=e32]: 󰅀
+      - separator [ref=e33]
+      - list [ref=e34]:
+        - link "Главная" [ref=e35] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e37]: 󰕮
+          - generic [ref=e39]: Главная
+        - link "Бронирования" [ref=e40] [cursor=pointer]:
+          - /url: /reservations
+          - generic [ref=e42]: 󰃯
+          - generic [ref=e44]: Бронирования
+        - link "Календарь" [ref=e45] [cursor=pointer]:
+          - /url: /calendar
+          - generic [ref=e47]: 󰸗
+          - generic [ref=e49]: Календарь
+        - link "Гости" [ref=e50] [cursor=pointer]:
+          - /url: /guests
+          - generic [ref=e52]: 󰡉
+          - generic [ref=e54]: Гости
+        - link "Объекты" [ref=e55] [cursor=pointer]:
+          - /url: /properties
+          - generic [ref=e57]: 󰇗
+          - generic [ref=e59]: Объекты
+        - link "Собственники" [ref=e60] [cursor=pointer]:
+          - /url: /owners
+          - generic [ref=e62]: 󰀋
+          - generic [ref=e64]: Собственники
+        - link "Каналы" [ref=e65] [cursor=pointer]:
+          - /url: /channels
+          - generic [ref=e67]: 󰓡
+          - generic [ref=e69]: Каналы
+        - link "Задачи" [ref=e70] [cursor=pointer]:
+          - /url: /tasks
+          - generic [ref=e72]: 󰅎
+          - generic [ref=e74]: Задачи
+        - link "Расходы" [ref=e75] [cursor=pointer]:
+          - /url: /expenses
+          - generic [ref=e77]: 󱉠
+          - generic [ref=e79]: Расходы
+        - link "Отчёты" [ref=e80] [cursor=pointer]:
+          - /url: /reports
+          - generic [ref=e82]: 󰄨
+          - generic [ref=e84]: Отчёты
+        - link "Удобства" [ref=e85] [cursor=pointer]:
+          - /url: /amenities
+          - generic [ref=e87]: 󰓏
+          - generic [ref=e89]: Удобства
+        - link "Филиалы" [ref=e90] [cursor=pointer]:
+          - /url: /branches
+          - generic [ref=e92]: 󰘬
+          - generic [ref=e94]: Филиалы
+        - link "Настройки" [ref=e95] [cursor=pointer]:
+          - /url: /settings
+          - generic [ref=e97]: 󰒓
+          - generic [ref=e99]: Настройки
+  - main [ref=e100]:
+    - generic [ref=e101]:
+      - generic [ref=e102]:
+        - heading "Календарь" [level=1] [ref=e103]
+        - generic [ref=e104]:
+          - button "7 дней" [ref=e105] [cursor=pointer]:
+            - generic [ref=e106]: 7 дней
+          - button "14 дней" [ref=e107] [cursor=pointer]:
+            - generic [ref=e108]: 14 дней
+          - button "30 дней" [ref=e109] [cursor=pointer]:
+            - generic [ref=e110]: 30 дней
+        - button "Сегодня" [ref=e111] [cursor=pointer]:
+          - generic [ref=e113]: 󰃶
+          - generic [ref=e114]: Сегодня
+        - button "Перейти к дате" [ref=e115] [cursor=pointer]:
+          - generic [ref=e117]: 󱄵
+        - button "Обновить" [ref=e118] [cursor=pointer]:
+          - generic [ref=e120]: 󰑐
+      - generic [ref=e121]:
+        - generic [ref=e122]: Юнит
+        - generic [ref=e123]:
+          - generic "Arbat Boutique Hotel — Deluxe Suite 201" [ref=e124]:
+            - generic [ref=e125]: Arbat Boutique Hotel
+            - generic [ref=e126]: Deluxe Suite 201
+          - generic "Arbat Boutique Hotel — Standard Room 101" [ref=e127]:
+            - generic [ref=e128]: Arbat Boutique Hotel
+            - generic [ref=e129]: Standard Room 101
+          - generic "Sea View Apartment — Main Studio" [ref=e130]:
+            - generic [ref=e131]: Sea View Apartment
+            - generic [ref=e132]: Main Studio
+          - generic "Sea View Apartment — Sofa bed" [ref=e133]:
+            - generic [ref=e134]: Sea View Apartment
+            - generic [ref=e135]: Sofa bed
+          - generic "Tverskaya Hostel — Dorm 6A" [ref=e136]:
+            - generic [ref=e137]: Tverskaya Hostel
+            - generic [ref=e138]: Dorm 6A
+          - generic "Tverskaya Hostel — Dorm 8B" [ref=e139]:
+            - generic [ref=e140]: Tverskaya Hostel
+            - generic [ref=e141]: Dorm 8B
+        - generic [ref=e143]:
+          - generic [ref=e144]:
+            - generic [ref=e146]: апрель 2026 г.
+            - generic [ref=e147]:
+              - generic [ref=e148]:
+                - generic [ref=e149]: ср
+                - generic [ref=e150]: 15 апр.
+              - generic [ref=e151]:
+                - generic [ref=e152]: чт
+                - generic [ref=e153]: 16 апр.
+              - generic [ref=e154]:
+                - generic [ref=e155]: пт
+                - generic [ref=e156]: 17 апр.
+              - generic [ref=e157]:
+                - generic [ref=e158]: сб
+                - generic [ref=e159]: 18 апр.
+              - generic [ref=e160]:
+                - generic [ref=e161]: вс
+                - generic [ref=e162]: 19 апр.
+              - generic [ref=e163]:
+                - generic [ref=e164]: пн
+                - generic [ref=e165]: 20 апр.
+              - generic [ref=e166]:
+                - generic [ref=e167]: вт
+                - generic [ref=e168]: 21 апр.
+              - generic [ref=e169]:
+                - generic [ref=e170]: ср
+                - generic [ref=e171]: 22 апр.
+              - generic [ref=e172]:
+                - generic [ref=e173]: чт
+                - generic [ref=e174]: 23 апр.
+              - generic [ref=e175]:
+                - generic [ref=e176]: пт
+                - generic [ref=e177]: 24 апр.
+              - generic [ref=e178]:
+                - generic [ref=e179]: сб
+                - generic [ref=e180]: 25 апр.
+              - generic [ref=e181]:
+                - generic [ref=e182]: вс
+                - generic [ref=e183]: 26 апр.
+              - generic [ref=e184]:
+                - generic [ref=e185]: пн
+                - generic [ref=e186]: 27 апр.
+              - generic [ref=e187]:
+                - generic [ref=e188]: вт
+                - generic [ref=e189]: 28 апр.
+          - generic [ref=e190]:
+            - generic [ref=e191]:
+              - generic [ref=e192] [cursor=pointer]:
+                - generic: Иван Петров
+              - generic [ref=e193] [cursor=pointer]:
+                - generic: Дмитрий Волков
+            - generic [ref=e195] [cursor=pointer]:
+              - generic: Ольга Новикова
+            - generic [ref=e197] [cursor=pointer]:
+              - generic: Иван Петров
+            - generic [ref=e199] [cursor=pointer]:
+              - generic: Алексей Козлов
+            - generic [ref=e202] [cursor=pointer]:
+              - generic: "#9"

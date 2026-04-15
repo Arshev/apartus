@@ -12,7 +12,7 @@ derived_from:
   - ../../engineering/testing-policy.md
   - ../../engineering/design-style-guide.md
 status: active
-delivery_status: in_progress
+delivery_status: done
 audience: humans_and_agents
 must_not_define:
   - implementation_sequence

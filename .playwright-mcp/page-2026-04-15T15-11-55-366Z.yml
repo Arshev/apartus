@@ -1,0 +1,25 @@
+- generic [ref=e6]:
+  - generic [ref=e7]: Apartus
+  - generic [ref=e9]:
+    - generic [ref=e10]:
+      - generic [ref=e12]:
+        - generic [ref=e14]: 󰇮
+        - generic [ref=e15]:
+          - generic: Email
+          - textbox "Email" [ref=e16]
+      - alert [ref=e17]
+    - generic [ref=e19]:
+      - generic [ref=e21]:
+        - generic [ref=e23]: 󰌾
+        - generic [ref=e24]:
+          - generic: Пароль
+          - textbox "Пароль" [ref=e25]
+        - button "Пароль добавочных действий" [ref=e27] [cursor=pointer]: 󰈈
+      - alert [ref=e28]
+    - button "Войти" [ref=e30] [cursor=pointer]:
+      - generic [ref=e31]: Войти
+  - generic [ref=e32]:
+    - generic [ref=e33]: Нет аккаунта?
+    - link "Регистрация" [ref=e34] [cursor=pointer]:
+      - /url: /auth/register
+      - generic [ref=e35]: Регистрация
