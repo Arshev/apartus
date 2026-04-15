@@ -11,7 +11,7 @@ const routes = [
   {
     path: '/calendar',
     name: 'Calendar',
-    component: () => import('../views/CalendarView.vue'),
+    component: () => import('../views/calendar/GanttCalendarView.vue'),
     meta: { requiresAuth: true },
   },
   {

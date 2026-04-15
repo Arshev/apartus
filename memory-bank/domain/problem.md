@@ -111,7 +111,7 @@ Apartus — SaaS Property Management System (PMS) для управления к
 |---|---|---|---|
 | i18n (vue-i18n) | Вынос UI строк в i18n файлы, переключение языка ru/en | high | FT-019 (planned) |
 | Multi-currency | Поддержка нескольких валют в одной org (конвертация, курсы) | low | — |
-| Visual calendar (month view) | Помесячный grid-календарь помимо timeline | medium | — |
+| Visual calendar — pixel-based Gantt | ✅ done FT-020 Phase 1 (timeline с pixel positioning, lanes, tooltip, context menu). Месячный grid как отдельный visual mode намеренно out-of-scope — 30-day timeline range покрывает use-case. | medium | FT-020 |
 | Drag-and-drop calendar | Перетаскивание бронирований на timeline | low | — |
 | AI yield management | Автоматическая оптимизация цен на основе спроса | low | — |
 | Unified Inbox | Единый inbox для сообщений из всех каналов | low | — |

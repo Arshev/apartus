@@ -104,6 +104,40 @@
     },
     "messages": {
       "loadError": "Не удалось загрузить данные календаря"
+    },
+    "gantt": {
+      "toolbar": {
+        "today": "Сегодня",
+        "refresh": "Обновить",
+        "jumpToDate": "Перейти к дате",
+        "range7": "7 дней",
+        "range14": "14 дней",
+        "range30": "30 дней",
+        "rangeCustom": "Свой период"
+      },
+      "tooltip": {
+        "guest": "Гость",
+        "checkIn": "Заезд",
+        "checkOut": "Выезд",
+        "price": "Стоимость",
+        "status": "Статус",
+        "property": "Объект",
+        "unit": "Юнит",
+        "blocking": "Блокировка"
+      },
+      "contextMenu": {
+        "edit": "Редактировать",
+        "checkIn": "Заселить",
+        "checkOut": "Выселить",
+        "cancel": "Отменить"
+      },
+      "errors": {
+        "checkInFailed": "Не удалось заселить",
+        "checkOutFailed": "Не удалось выселить",
+        "cancelFailed": "Не удалось отменить",
+        "loadFailed": "Не удалось загрузить календарь"
+      },
+      "today": "Сегодня"
     }
   },
   "properties": {

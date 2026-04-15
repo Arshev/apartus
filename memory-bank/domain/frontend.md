@@ -45,7 +45,7 @@ Apartus frontend — это одно приложение, SPA.
 - `components/` — переиспользуемые компоненты
 - `stores/` — Pinia stores: auth, branches, channels, expenses, guests, members, owners, properties, reservations, roles, tasks, units (13 stores)
 - `api/` — axios API clients (28 modules: auth, client, allUnits, amenities, branches, channels, dashboard, expenses, guestTimeline, guests, members, notifications, organizations, owners, pdfExport, photos, pricingRules, properties, publicBooking, reports, reservations, roles, seasonalPrices, tasks, unitAmenities, units)
-- `utils/` — currency formatting (formatMoney, centsToUnits, unitsToCents)
+- `utils/` — currency (formatMoney, centsToUnits, unitsToCents), date (parseIsoDate, addDays, startOfDay/Month, endOfMonth, diffDays, formatMonth, formatShortDate, formatIsoDate — FT-020), gantt (dateToPixel, bookingWidth, generateTopLevelDates, generateBottomLevelDates, assignLanes — FT-020)
 - `router/` — Vue Router config с auth guards
 - `plugins/` — Vuetify и др.
 
@@ -72,6 +72,19 @@ Apartus frontend — это одно приложение, SPA.
 - В `<template>`: `$t('key')` или `{{ $t('key', { param }) }}` для интерполяции.
 - В `<script setup>`: `import { useI18n } from 'vue-i18n'` + `const { t } = useI18n()` + `t('key')`.
 - Массивы с переводимыми строками (headers, options) оборачиваем в `computed()` для реактивности.
+
+## Calendar (FT-020 Phase 1)
+
+`/calendar` — pixel-based Gantt timeline (заменяет старую 14-day CSS-grid реализацию FT-006).
+
+- Компоненты в `views/calendar/`: `GanttCalendarView.vue` (orchestrator + toolbar) → `GanttTimeline.vue` (viewport + pixelsPerMs + today marker + scroll) → `GanttTimelineHeader.vue` (2-level: months/days) + `GanttTimelineRow.vue` (per-unit, lanes) → `GanttTimelineItem.vue` (bar) + `GanttTooltip.vue` (hover details).
+- Pixel math и lane assignment — в `utils/gantt.js` (pure functions, testable).
+- Native `Date` helpers в `utils/date.js` — `parseIsoDate` избегает TZ off-by-one трапа от `new Date("YYYY-MM-DD")`.
+- Locale namespace: `calendar.gantt.*` в ru.json/en.json.
+- Persistence: `localStorage('apartus-calendar-view')` — только `rangeDays` (7/14/30). Wrapped в try/catch для privacy mode.
+- Refresh: manual `mdi-refresh` + `visibilitychange` listener (refetch при возврате в таб).
+- Lane stacking — defensive code для edge cases (backend `Reservation#no_overlapping_reservations` блокирует создание overlap через public API).
+- Out of scope Phase 1: hourly view (требует backend schema-расширения для `check_in_time`/`check_out_time`), special modes, finance mode, PDF export, live updates, drag-and-drop — см. FT-020 NS-01..17 и планируемые FT-021/022.
 - Language switcher: Settings → General → v-select ru/en. Сохраняется в `organization.settings.locale` через PATCH `/organization`.
 - При boot: `fetchCurrentUser()` читает `organization.settings.locale` и устанавливает `i18n.global.locale.value`.
 - Fallback: отсутствующий ключ в en.json → показывается русский текст. Невалидный locale → ru.
@@ -83,7 +96,7 @@ Apartus frontend — это одно приложение, SPA.
 | Route | View | Feature |
 |---|---|---|
 | `/` | DashboardView | FT-005 |
-| `/calendar` | CalendarView | FT-006 |
+| `/calendar` | GanttCalendarView (views/calendar/*) | FT-020 (replaces FT-006 CSS-grid implementation) |
 | `/properties` | PropertyListView | FT-HW1-01 |
 | `/properties/new`, `/:id/edit` | PropertyFormView | FT-HW1-01 |
 | `/properties/:pId/units` | UnitListView | FT-HW1-02 |

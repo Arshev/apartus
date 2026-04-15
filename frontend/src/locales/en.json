@@ -104,6 +104,40 @@
     },
     "messages": {
       "loadError": "Failed to load calendar data"
+    },
+    "gantt": {
+      "toolbar": {
+        "today": "Today",
+        "refresh": "Refresh",
+        "jumpToDate": "Jump to date",
+        "range7": "7 days",
+        "range14": "14 days",
+        "range30": "30 days",
+        "rangeCustom": "Custom range"
+      },
+      "tooltip": {
+        "guest": "Guest",
+        "checkIn": "Check-in",
+        "checkOut": "Check-out",
+        "price": "Price",
+        "status": "Status",
+        "property": "Property",
+        "unit": "Unit",
+        "blocking": "Blocked"
+      },
+      "contextMenu": {
+        "edit": "Edit",
+        "checkIn": "Check in",
+        "checkOut": "Check out",
+        "cancel": "Cancel"
+      },
+      "errors": {
+        "checkInFailed": "Check-in failed",
+        "checkOutFailed": "Check-out failed",
+        "cancelFailed": "Cancellation failed",
+        "loadFailed": "Failed to load calendar"
+      },
+      "today": "Today"
     }
   },
   "properties": {

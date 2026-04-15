@@ -14,3 +14,57 @@ if (typeof globalThis.localStorage === 'undefined' ||
     key: (index) => [...store.keys()][index] ?? null,
   }
 }
+
+// jsdom does not implement ResizeObserver, but several Vuetify components
+// (VProgressCircular, VOverlay, etc.) call it during setup. Provide a no-op
+// shim so component tests don't crash on import.
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  globalThis.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+}
+
+// Vuetify's VOverlay (used by VMenu, VDatePicker) reads window.visualViewport,
+// which jsdom does not implement. Shim to keep tests from crashing on overlay
+// composables.
+if (typeof globalThis.visualViewport === 'undefined') {
+  globalThis.visualViewport = {
+    width: 1024,
+    height: 768,
+    offsetLeft: 0,
+    offsetTop: 0,
+    pageLeft: 0,
+    pageTop: 0,
+    scale: 1,
+    addEventListener() {},
+    removeEventListener() {},
+  }
+}
+
+// Vuetify v4 injects theme CSS using `@layer` cascade rules, which jsdom v25
+// cannot parse and surfaces as an unhandled error during HTMLStyleElement
+// innerHTML assignment. The injected CSS is irrelevant for component logic
+// tests — wrap the HTMLStyleElement innerHTML setter to swallow the parse
+// error so vitest exits cleanly.
+if (typeof HTMLStyleElement !== 'undefined') {
+  const proto = HTMLStyleElement.prototype
+  const desc = Object.getOwnPropertyDescriptor(proto, 'innerHTML') ||
+    Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML')
+  if (desc && desc.set) {
+    const originalSetter = desc.set
+    Object.defineProperty(proto, 'innerHTML', {
+      ...desc,
+      set(value) {
+        try {
+          originalSetter.call(this, value)
+        } catch (e) {
+          if (!String(e?.message || '').includes('Could not parse CSS')) throw e
+          // Silently drop CSS parse errors from jsdom — Vuetify @layer rules
+          // are not parseable by jsdom v25 but are not needed for tests.
+        }
+      },
+    })
+  }
+}

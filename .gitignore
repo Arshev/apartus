@@ -1,6 +1,7 @@
 .obsidian/
 apartus.code-workspace
 .claude/settings.json
+.playwright-mcp/
 
 # Homework source materials (personal reference, not part of repo)
 Материалы1.md
