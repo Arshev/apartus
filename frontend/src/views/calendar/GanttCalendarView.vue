@@ -10,6 +10,16 @@
         <v-btn :value="30">{{ $t('calendar.gantt.toolbar.range30') }}</v-btn>
       </v-btn-toggle>
 
+      <v-btn
+        prepend-icon="mdi-swap-horizontal"
+        :color="specialMode === 'handover' ? 'primary' : undefined"
+        :variant="specialMode === 'handover' ? 'elevated' : 'text'"
+        @click="toggleHandover"
+        data-testid="handover-btn"
+      >
+        {{ $t('calendar.gantt.modes.handover') }}
+      </v-btn>
+
       <v-btn variant="text" prepend-icon="mdi-calendar-today" @click="goToday" data-testid="today-btn">
         {{ $t('calendar.gantt.toolbar.today') }}
       </v-btn>
@@ -34,6 +44,7 @@
       :reservations="reservations"
       :view-start="viewStart"
       :view-end="viewEnd"
+      :special-mode="specialMode"
       @show-booking="onShowBooking"
       @show-tooltip="onShowTooltip"
       @hide-tooltip="onHideTooltip"
@@ -74,17 +85,23 @@ import { addDays, startOfDay, formatIsoDate, parseIsoDate } from '../../utils/da
 const STORAGE_KEY = 'apartus-calendar-view'
 const DEFAULT_RANGE_DAYS = 14
 const SUPPORTED_RANGES = [7, 14, 30]
+const SUPPORTED_SPECIAL_MODES = ['', 'handover']
 
 const { t } = useI18n()
 const router = useRouter()
 
 const rangeDays = ref(DEFAULT_RANGE_DAYS)
 const anchorDate = ref(startOfDay(new Date()))
+const specialMode = ref('')
 const reservations = ref([])
 const units = ref([])
 const loading = ref(false)
 const error = ref(null)
 const timelineEl = ref(null)
+
+function toggleHandover() {
+  specialMode.value = specialMode.value === 'handover' ? '' : 'handover'
+}
 
 const viewStart = computed(() => anchorDate.value)
 const viewEnd = computed(() => addDays(anchorDate.value, rangeDays.value - 1))
@@ -196,6 +213,10 @@ function loadStoredView() {
     if (!raw) return
     const parsed = JSON.parse(raw)
     if (SUPPORTED_RANGES.includes(parsed.rangeDays)) rangeDays.value = parsed.rangeDays
+    // Backwards-compat: legacy payloads without `specialMode` resolve to ''.
+    if (typeof parsed.specialMode === 'string' && SUPPORTED_SPECIAL_MODES.includes(parsed.specialMode)) {
+      specialMode.value = parsed.specialMode
+    }
   } catch {
     // Persistence is best-effort; corrupt JSON or unavailable storage falls back to defaults.
   }
@@ -203,7 +224,7 @@ function loadStoredView() {
 
 function persistView() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ rangeDays: rangeDays.value }))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ rangeDays: rangeDays.value, specialMode: specialMode.value }))
   } catch {
     // Ignore — best-effort.
   }
@@ -213,6 +234,7 @@ watch(rangeDays, () => {
   persistView()
   loadData()
 })
+watch(specialMode, () => persistView())
 watch(anchorDate, () => loadData())
 
 // Refetch on tab focus (visibilitychange).
@@ -231,9 +253,9 @@ onUnmounted(() => {
 })
 
 defineExpose({
-  rangeDays, anchorDate, viewStart, viewEnd, reservations, units, loading, error,
+  rangeDays, anchorDate, specialMode, viewStart, viewEnd, reservations, units, loading, error,
   tooltip, contextMenu, snackbar, jumpDate, datePickerOpen, timelineEl,
   loadData, goToday, onJumpDate, onShowBooking, onShowTooltip, onHideTooltip, onContextMenu,
-  contextEdit, contextCheckIn, contextCheckOut, contextCancel,
+  contextEdit, contextCheckIn, contextCheckOut, contextCancel, toggleHandover,
 })
 </script>

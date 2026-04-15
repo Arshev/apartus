@@ -5,8 +5,9 @@ import {
   generateTopLevelDates,
   generateBottomLevelDates,
   assignLanes,
+  getHandoverType,
 } from '../../utils/gantt.js'
-import { parseIsoDate } from '../../utils/date.js'
+import { parseIsoDate, startOfDay, addDays } from '../../utils/date.js'
 
 describe('utils/gantt', () => {
   describe('dateToPixel', () => {
@@ -177,6 +178,79 @@ describe('utils/gantt', () => {
       const { lanes } = assignLanes(items)
       expect(lanes.long).toBe(0)
       expect(lanes.short).toBe(1)
+    })
+  })
+
+  describe('getHandoverType (FT-021)', () => {
+    // Use a fixed "today" so tests are deterministic regardless of real clock.
+    const TODAY = startOfDay(parseIsoDate('2026-04-15'))
+    const mkBooking = (status, checkIn, checkOut) => ({
+      status,
+      check_in: checkIn,
+      check_out: checkOut,
+    })
+
+    it('returns null for null booking', () => {
+      expect(getHandoverType(null, TODAY)).toBeNull()
+    })
+
+    it('returns null for null today', () => {
+      expect(getHandoverType(mkBooking('confirmed', '2026-04-15', '2026-04-18'), null)).toBeNull()
+    })
+
+    it('returns null for booking missing dates', () => {
+      expect(getHandoverType({ status: 'confirmed' }, TODAY)).toBeNull()
+    })
+
+    it('classifies confirmed check_in === today as checkin_today', () => {
+      expect(getHandoverType(mkBooking('confirmed', '2026-04-15', '2026-04-20'), TODAY)).toBe('checkin_today')
+    })
+
+    it('classifies confirmed check_in === today+1 as checkin_tomorrow', () => {
+      expect(getHandoverType(mkBooking('confirmed', '2026-04-16', '2026-04-20'), TODAY)).toBe('checkin_tomorrow')
+    })
+
+    it('returns null for confirmed with check_in further than tomorrow', () => {
+      expect(getHandoverType(mkBooking('confirmed', '2026-04-17', '2026-04-20'), TODAY)).toBeNull()
+    })
+
+    it('returns null for confirmed with check_in before today', () => {
+      expect(getHandoverType(mkBooking('confirmed', '2026-04-14', '2026-04-20'), TODAY)).toBeNull()
+    })
+
+    it('classifies checked_in check_out === today as checkout_today', () => {
+      expect(getHandoverType(mkBooking('checked_in', '2026-04-10', '2026-04-15'), TODAY)).toBe('checkout_today')
+    })
+
+    it('classifies checked_in check_out === today+1 as checkout_tomorrow', () => {
+      expect(getHandoverType(mkBooking('checked_in', '2026-04-10', '2026-04-16'), TODAY)).toBe('checkout_tomorrow')
+    })
+
+    it('returns null for checked_in with check_out further than tomorrow', () => {
+      expect(getHandoverType(mkBooking('checked_in', '2026-04-10', '2026-04-18'), TODAY)).toBeNull()
+    })
+
+    it('returns null for checked_in with check_out before today', () => {
+      expect(getHandoverType(mkBooking('checked_in', '2026-04-10', '2026-04-14'), TODAY)).toBeNull()
+    })
+
+    it('returns null for checked_out (guest already left)', () => {
+      expect(getHandoverType(mkBooking('checked_out', '2026-04-10', '2026-04-15'), TODAY)).toBeNull()
+    })
+
+    it('returns null for cancelled', () => {
+      expect(getHandoverType(mkBooking('cancelled', '2026-04-15', '2026-04-20'), TODAY)).toBeNull()
+    })
+
+    it('returns null for unknown status', () => {
+      expect(getHandoverType(mkBooking('pending', '2026-04-15', '2026-04-20'), TODAY)).toBeNull()
+    })
+
+    it('integrates with real Date — confirmed check_in=tomorrow → checkin_tomorrow', () => {
+      const realToday = startOfDay(new Date())
+      const tomorrow = addDays(realToday, 1)
+      const tomorrowIso = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`
+      expect(getHandoverType(mkBooking('confirmed', tomorrowIso, '2099-01-01'), realToday)).toBe('checkin_tomorrow')
     })
   })
 })

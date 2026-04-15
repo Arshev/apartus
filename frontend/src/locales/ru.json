@@ -137,7 +137,16 @@
         "cancelFailed": "Не удалось отменить",
         "loadFailed": "Не удалось загрузить календарь"
       },
-      "today": "Сегодня"
+      "today": "Сегодня",
+      "modes": {
+        "handover": "Заезды/выезды"
+      },
+      "handoverMarkers": {
+        "checkinToday": "Заезд сегодня",
+        "checkinTomorrow": "Заезд завтра",
+        "checkoutToday": "Выезд сегодня",
+        "checkoutTomorrow": "Выезд завтра"
+      }
     }
   },
   "properties": {

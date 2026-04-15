@@ -169,4 +169,65 @@ describe('GanttCalendarView', () => {
     wrapper.vm.onHideTooltip()
     expect(wrapper.vm.tooltip.visible).toBe(false)
   })
+
+  // --- FT-021 Handover Mode ---
+  describe('handover mode toggle + persistence (FT-021)', () => {
+    it('defaults specialMode to empty string', () => {
+      const wrapper = setup()
+      expect(wrapper.vm.specialMode).toBe('')
+    })
+
+    it('toggleHandover flips "" → "handover" → ""', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleHandover()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('handover')
+      wrapper.vm.toggleHandover()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('')
+    })
+
+    it('persists specialMode to localStorage on toggle', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleHandover()
+      await wrapper.vm.$nextTick()
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY))
+      expect(stored.specialMode).toBe('handover')
+    })
+
+    it('reads persisted specialMode on mount', async () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ rangeDays: 14, specialMode: 'handover' }))
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('handover')
+    })
+
+    // Backwards-compat: legacy payloads without specialMode → resolves to ''.
+    it('backward-compat — legacy payload without specialMode → "" (no exception)', async () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ rangeDays: 14 }))
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('')
+      expect(wrapper.vm.rangeDays).toBe(14)
+    })
+
+    it('invalid specialMode value → "" fallback', async () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ rangeDays: 14, specialMode: 'invalid' }))
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('')
+    })
+
+    it('persists both rangeDays and specialMode together', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.rangeDays = 7
+      wrapper.vm.toggleHandover()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY))
+      expect(stored).toEqual({ rangeDays: 7, specialMode: 'handover' })
+    })
+  })
 })

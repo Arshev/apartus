@@ -88,4 +88,79 @@ describe('GanttTimelineItem', () => {
     expect(events).toHaveLength(1)
     expect(events[0][0]).toMatchObject({ booking: BASE, x: 99, y: 88 })
   })
+
+  // --- FT-021 Handover mode ---
+  describe('handover mode', () => {
+    // Helper: build booking with today-relative dates so tests work regardless
+    // of real clock.
+    const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    const today = new Date()
+    const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1)
+    const far = new Date(today); far.setDate(today.getDate() + 10)
+
+    it('does not add handover class when specialMode is empty', () => {
+      const wrapper = setup({ specialMode: '' })
+      expect(wrapper.vm.handoverType).toBeNull()
+      expect(wrapper.vm.itemClasses).not.toContain('gantt-item--dimmed')
+      expect(wrapper.vm.itemClasses.find((c) => c.startsWith('gantt-item--handover-'))).toBeUndefined()
+    })
+
+    it('dims bar when handoverType is null (specialMode=handover but no match)', () => {
+      const booking = { ...BASE, status: 'confirmed', check_in: iso(far), check_out: '2099-01-01' }
+      const wrapper = setup({ booking, specialMode: 'handover' })
+      expect(wrapper.vm.handoverType).toBeNull()
+      expect(wrapper.vm.itemClasses).toContain('gantt-item--dimmed')
+    })
+
+    it('adds handover-checkin_today class + ↗ marker for confirmed check_in today', () => {
+      const booking = { ...BASE, status: 'confirmed', check_in: iso(today), check_out: iso(far) }
+      const wrapper = setup({ booking, specialMode: 'handover' })
+      expect(wrapper.vm.handoverType).toBe('checkin_today')
+      expect(wrapper.vm.itemClasses).toContain('gantt-item--handover-checkin_today')
+      expect(wrapper.vm.handoverMarker).toBe('\u2197')
+      expect(wrapper.find('.gantt-item__marker').text()).toBe('\u2197')
+    })
+
+    it('adds handover-checkin_tomorrow class (no marker) for confirmed check_in tomorrow', () => {
+      const booking = { ...BASE, status: 'confirmed', check_in: iso(tomorrow), check_out: iso(far) }
+      const wrapper = setup({ booking, specialMode: 'handover' })
+      expect(wrapper.vm.handoverType).toBe('checkin_tomorrow')
+      expect(wrapper.vm.itemClasses).toContain('gantt-item--handover-checkin_tomorrow')
+      // Tomorrow bracket has no marker — only today does (per REQ-03).
+      expect(wrapper.vm.handoverMarker).toBeNull()
+      expect(wrapper.find('.gantt-item__marker').exists()).toBe(false)
+    })
+
+    it('adds handover-checkout_today class + ↙ marker for checked_in check_out today', () => {
+      const booking = { ...BASE, status: 'checked_in', check_in: '2026-01-01', check_out: iso(today) }
+      const wrapper = setup({ booking, specialMode: 'handover' })
+      expect(wrapper.vm.handoverType).toBe('checkout_today')
+      expect(wrapper.vm.itemClasses).toContain('gantt-item--handover-checkout_today')
+      expect(wrapper.vm.handoverMarker).toBe('\u2199')
+    })
+
+    it('adds handover-checkout_tomorrow class (no marker) for checked_in check_out tomorrow', () => {
+      const booking = { ...BASE, status: 'checked_in', check_in: '2026-01-01', check_out: iso(tomorrow) }
+      const wrapper = setup({ booking, specialMode: 'handover' })
+      expect(wrapper.vm.handoverType).toBe('checkout_tomorrow')
+      expect(wrapper.vm.itemClasses).toContain('gantt-item--handover-checkout_tomorrow')
+      expect(wrapper.vm.handoverMarker).toBeNull()
+    })
+
+    it('marker span has pointer-events:none (SC-07 — click not hijacked)', async () => {
+      const booking = { ...BASE, status: 'confirmed', check_in: iso(today), check_out: iso(far) }
+      const wrapper = setup({ booking, specialMode: 'handover' })
+      const marker = wrapper.find('.gantt-item__marker')
+      expect(marker.exists()).toBe(true)
+      // click through the bar should still emit show-booking even with marker present
+      await wrapper.find('.gantt-item').trigger('click')
+      expect(wrapper.emitted('show-booking')).toEqual([[BASE.id]])
+    })
+
+    it('marker has accessible title from i18n', () => {
+      const booking = { ...BASE, status: 'confirmed', check_in: iso(today), check_out: iso(far) }
+      const wrapper = setup({ booking, specialMode: 'handover' })
+      expect(wrapper.find('.gantt-item__marker').attributes('title')).toBe('Заезд сегодня')
+    })
+  })
 })
