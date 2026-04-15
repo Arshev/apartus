@@ -132,6 +132,7 @@ Vuetify utility classes on an 4px grid:
 Configured in `src/plugins/vuetify.js` `defaults` section:
 
 ### Buttons (`VBtn`)
+
 - `variant: 'elevated'` — primary actions
 - `rounded: 'lg'`
 - No text-transform, no letter-spacing
@@ -140,26 +141,31 @@ Configured in `src/plugins/vuetify.js` `defaults` section:
 - **Destructive:** `color="error"`
 
 ### Cards (`VCard`)
+
 - `rounded: 'lg'`, `elevation: 1`
 - Use `variant="tonal"` + semantic color for status cards
 - Use `variant="outlined"` for kanban column containers
 
 ### Inputs (`VTextField`, `VSelect`, `VTextarea`, `VAutocomplete`)
+
 - `variant: 'outlined'`
 - `density: 'comfortable'`
 - `rounded: 'lg'`
 
 ### Data Tables (`VDataTable`)
+
 - `density: 'comfortable'`
 - `hover: true`
 - Status column uses `v-chip` with semantic color
 
 ### Navigation
+
 - `VAppBar`: flat, border bottom (`border="b"`)
 - `VNavigationDrawer`: no elevation, border right (`border="e"`)
 - Active sidebar item highlighted by Vuetify router integration
 
 ### Alerts (`VAlert`)
+
 - `variant: 'tonal'`, `rounded: 'lg'`
 
 ## Dark Mode
@@ -190,7 +196,8 @@ background: rgba(var(--v-theme-primary), 0.08);
 ## Layout Patterns
 
 ### Page Structure
-```
+
+```vue
 <v-container>
   <div class="d-flex align-center mb-4">
     <h1 class="text-h4">Page Title</h1>
@@ -202,7 +209,8 @@ background: rgba(var(--v-theme-primary), 0.08);
 ```
 
 ### Dashboard KPI Cards
-```
+
+```vue
 <v-row class="mb-4">
   <v-col cols="12" sm="4">
     <v-card>
@@ -216,7 +224,8 @@ background: rgba(var(--v-theme-primary), 0.08);
 ```
 
 ### Status Chips
-```
+
+```vue
 <v-chip :color="statusColor(item.status)" size="small" variant="elevated">
   {{ statusLabel(item.status) }}
 </v-chip>
@@ -233,7 +242,7 @@ background: rgba(var(--v-theme-primary), 0.08);
 
 ## File Structure
 
-```
+```text
 src/
   plugins/vuetify.js     — Theme config, colors, component defaults
   styles/settings.scss   — SASS variable overrides (typography, radius)
