@@ -85,6 +85,18 @@ Apartus frontend — это одно приложение, SPA.
 - Refresh: manual `mdi-refresh` + `visibilitychange` listener (refetch при возврате в таб).
 - Lane stacking — defensive code для edge cases (backend `Reservation#no_overlapping_reservations` блокирует создание overlap через public API).
 - Out of scope Phase 1: hourly view (требует backend schema-расширения для `check_in_time`/`check_out_time`), special modes, finance mode, PDF export, live updates, drag-and-drop — см. FT-020 NS-01..17 и планируемые FT-021/022.
+
+### Handover Mode (FT-021)
+
+Первый из special modes FT-020 NS-02 — подсветка предстоящих заездов/выездов.
+
+- Toolbar `v-btn` «Заезды/выезды» (mdi-swap-horizontal). Одиночная кнопка-toggle, не `v-btn-toggle` — проще null-state.
+- State: reactive `specialMode: '' | 'handover'` в `GanttCalendarView`. Проброшен пропом в `GanttTimeline → GanttTimelineRow → GanttTimelineItem`.
+- Classification: `utils/gantt.js#getHandoverType(booking, today: Date)` возвращает один из 5 states: `checkin_today`, `checkin_tomorrow`, `checkout_today`, `checkout_tomorrow`, `null`. Caller передаёт `today = startOfDay(new Date())`.
+- Visual: `checkin_today` → 3px зелёный border + ↗ marker, `checkin_tomorrow` → 3px светло-зелёный (без marker), `checkout_today` → 3px красный + ↙, `checkout_tomorrow` → 3px оранжевый. При `specialMode='handover'` + `null` → opacity 0.35 (`.gantt-item--dimmed`).
+- Icon marker имеет `pointer-events: none`, чтобы не перехватывать click/contextmenu от родительского bar (SC-07).
+- Persistence: `localStorage('apartus-calendar-view')` payload расширен полем `specialMode`. Legacy payloads без поля resolve в `''` (backwards-compat).
+- Накрыто unit (`getHandoverType` matrix) + component (классы per type) + e2e (toggle triggers DOM state) + manual QA (light + dark скриншоты).
 - Language switcher: Settings → General → v-select ru/en. Сохраняется в `organization.settings.locale` через PATCH `/organization`.
 - При boot: `fetchCurrentUser()` читает `organization.settings.locale` и устанавливает `i18n.global.locale.value`.
 - Fallback: отсутствующий ключ в en.json → показывается русский текст. Невалидный locale → ru.

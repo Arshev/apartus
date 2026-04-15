@@ -13,7 +13,7 @@ derived_from:
   - ../../engineering/design-style-guide.md
   - ../FT-020-gantt-calendar/feature.md
 status: active
-delivery_status: in_progress
+delivery_status: done
 audience: humans_and_agents
 must_not_define:
   - implementation_sequence

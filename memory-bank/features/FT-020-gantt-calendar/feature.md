@@ -67,7 +67,7 @@ must_not_define:
 ### Non-Scope
 
 - `NS-01` **Hourly view.** Требует backend schema-расширения: `Reservation.check_in`/`check_out` сейчас тип `date`, без часов. Вынесено в отдельную backend-фичу + последующее frontend-расширение.
-- `NS-02` **Special modes** (handover / idle gaps / overdue / heatmap / loading). Будут в FT-021.
+- `NS-02` **Special modes** (handover / idle gaps / overdue / heatmap / loading). Будут в FT-021.[^ft-021]
 - `NS-03` **Finance mode / progress bar внутри бара** (paid% gradient). Будет в FT-021; потребует добавления поля `paid_cents` в Reservation (или join с payments).
 - `NS-04` **Search (по гостю/property)** — FT-022.
 - `NS-05` **Tag-filter / group-by** — в Apartus нет тегов на Unit/Reservation, отдельная фича.
@@ -83,6 +83,8 @@ must_not_define:
 - `NS-15` **Overdue-animation / pulsing** — FT-021.
 - `NS-16` **Performance budget enforcement** (e.g. assert <300ms render). Будет measured вместе с virtualization в FT-022 — там это load-bearing.
 - `NS-17` **Keyboard alternative для context menu** (Shift+F10 / Menu key для open context menu без правой кнопки мыши). Phase 1 — mouse-only (`REQ-05`). A11y улучшение в follow-up backlog.
+
+[^ft-021]: Handover mode delivered in [FT-021](../FT-021-gantt-handover-mode/feature.md) (Phase 1 of NS-02). Idle gaps / overdue / heatmap / loading остаются в NS-02 follow-up.
 
 ### Constraints / Assumptions
 
