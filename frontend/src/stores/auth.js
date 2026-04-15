@@ -97,9 +97,7 @@ export const useAuthStore = defineStore('auth', () => {
         organization.value = response.organization
         membership.value = response.membership
         const locale = response.organization.settings?.locale
-        if (locale && ['ru', 'en'].includes(locale)) {
-          i18n.global.locale.value = locale
-        }
+        i18n.global.locale.value = (locale && ['ru', 'en'].includes(locale)) ? locale : 'ru'
       }
       return response
     } catch (e) {

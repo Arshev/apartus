@@ -1,6 +1,9 @@
 import 'vuetify/styles'
 import '@mdi/font/css/materialdesignicons.css'
 import { createVuetify } from 'vuetify'
+import { createVueI18nAdapter } from 'vuetify/locale/adapters/vue-i18n'
+import { useI18n } from 'vue-i18n'
+import i18n from './i18n'
 
 // ── Apartus Design Tokens ──────────────────────────────────────
 // Light theme: RentProg-inspired — green primary, white bg, saturated statuses
@@ -135,6 +138,10 @@ const apartusDark = {
 }
 
 export default createVuetify({
+  locale: {
+    adapter: createVueI18nAdapter({ i18n, useI18n }),
+  },
+
   theme: {
     defaultTheme: 'apartusLight',
     themes: {

@@ -217,12 +217,13 @@ async function saveTelegram() {
   telegramSaving.value = true
   telegramError.value = null
   try {
-    await organizationsApi.update({
-      settings: {
-        telegram_bot_token: telegramForm.value.bot_token,
-        telegram_chat_id: telegramForm.value.chat_id,
-      },
-    })
+    const nextSettings = {
+      ...orgSettings.value,
+      telegram_bot_token: telegramForm.value.bot_token,
+      telegram_chat_id: telegramForm.value.chat_id,
+    }
+    const updated = await organizationsApi.update({ settings: nextSettings })
+    orgSettings.value = updated?.settings || nextSettings
     telegramSuccess.value = false
   } catch (e) {
     console.error(e)
@@ -258,16 +259,20 @@ const localeOptions = [
 const orgSaving = ref(false)
 const orgError = ref(null)
 const orgSnackbar = ref(false)
+// Mirrors the server's full settings JSON so locale + telegram saves don't
+// overwrite each other (backend replaces the whole JSON column on update).
+const orgSettings = ref({})
 
 async function loadOrg() {
   if (!authStore.organization?.id) return
   try {
     const org = await organizationsApi.get()
+    orgSettings.value = org.settings || {}
     orgForm.value.name = org.name
     orgForm.value.currency = org.currency || 'RUB'
-    orgForm.value.locale = org.settings?.locale || 'ru'
-    telegramForm.value.bot_token = org.settings?.telegram_bot_token || ''
-    telegramForm.value.chat_id = org.settings?.telegram_chat_id || ''
+    orgForm.value.locale = orgSettings.value.locale || 'ru'
+    telegramForm.value.bot_token = orgSettings.value.telegram_bot_token || ''
+    telegramForm.value.chat_id = orgSettings.value.telegram_chat_id || ''
   } catch (e) { console.error(e);
     orgError.value = t('settings.general.loadError')
   }
@@ -277,11 +282,13 @@ async function handleOrgSave() {
   orgSaving.value = true
   orgError.value = null
   try {
-    await organizationsApi.update({
+    const nextSettings = { ...orgSettings.value, locale: orgForm.value.locale }
+    const updated = await organizationsApi.update({
       name: orgForm.value.name,
       currency: orgForm.value.currency,
-      settings: { locale: orgForm.value.locale },
+      settings: nextSettings,
     })
+    orgSettings.value = updated?.settings || nextSettings
     i18n.global.locale.value = orgForm.value.locale
     orgSnackbar.value = true
   } catch (e) {
