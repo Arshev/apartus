@@ -197,7 +197,7 @@ import { useRolesStore } from '../stores/roles'
 import * as organizationsApi from '../api/organizations'
 import apiClient from '../api/client'
 import { CURRENCY_LIST } from '../utils/currency'
-import i18n from '../plugins/i18n'
+import { setAppLocale } from '../plugins/i18n'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -289,7 +289,7 @@ async function handleOrgSave() {
       settings: nextSettings,
     })
     orgSettings.value = updated?.settings || nextSettings
-    i18n.global.locale.value = orgForm.value.locale
+    setAppLocale(orgForm.value.locale)
     orgSnackbar.value = true
   } catch (e) {
     orgError.value = e.response?.data?.error || t('common.messages.error')

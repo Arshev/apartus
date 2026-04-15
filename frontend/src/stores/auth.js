@@ -2,7 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import * as authApi from '../api/auth'
 import { setAuthToken, setRefreshToken, removeAuthTokens, getAuthToken } from '../api/client'
-import i18n from '../plugins/i18n'
+import i18n, { LOCALE_STORAGE_KEY, setAppLocale } from '../plugins/i18n'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
@@ -72,6 +72,7 @@ export const useAuthStore = defineStore('auth', () => {
     } finally {
       removeAuthTokens()
       localStorage.removeItem('currentOrganizationId')
+      localStorage.removeItem(LOCALE_STORAGE_KEY)
       user.value = null
       organization.value = null
       organizations.value = []
@@ -97,7 +98,7 @@ export const useAuthStore = defineStore('auth', () => {
         organization.value = response.organization
         membership.value = response.membership
         const locale = response.organization.settings?.locale
-        i18n.global.locale.value = (locale && ['ru', 'en'].includes(locale)) ? locale : 'ru'
+        setAppLocale(locale && ['ru', 'en'].includes(locale) ? locale : 'ru')
       }
       return response
     } catch (e) {
