@@ -40,6 +40,16 @@
         {{ $t('calendar.gantt.modes.idle') }}
       </v-btn>
 
+      <v-btn
+        prepend-icon="mdi-grid"
+        :color="specialMode === 'heatmap' ? 'primary' : undefined"
+        :variant="specialMode === 'heatmap' ? 'elevated' : 'text'"
+        @click="toggleHeatmap"
+        data-testid="heatmap-btn"
+      >
+        {{ $t('calendar.gantt.modes.heatmap') }}
+      </v-btn>
+
       <v-btn variant="text" prepend-icon="mdi-calendar-today" @click="goToday" data-testid="today-btn">
         {{ $t('calendar.gantt.toolbar.today') }}
       </v-btn>
@@ -105,7 +115,7 @@ import { addDays, startOfDay, formatIsoDate, parseIsoDate } from '../../utils/da
 const STORAGE_KEY = 'apartus-calendar-view'
 const DEFAULT_RANGE_DAYS = 14
 const SUPPORTED_RANGES = [7, 14, 30]
-const SUPPORTED_SPECIAL_MODES = ['', 'handover', 'overdue', 'idle']
+const SUPPORTED_SPECIAL_MODES = ['', 'handover', 'overdue', 'idle', 'heatmap']
 
 const { t } = useI18n()
 const router = useRouter()
@@ -129,6 +139,7 @@ function setSpecialMode(mode) {
 function toggleHandover() { setSpecialMode('handover') }
 function toggleOverdue() { setSpecialMode('overdue') }
 function toggleIdle() { setSpecialMode('idle') }
+function toggleHeatmap() { setSpecialMode('heatmap') }
 
 const viewStart = computed(() => anchorDate.value)
 const viewEnd = computed(() => addDays(anchorDate.value, rangeDays.value - 1))
@@ -283,6 +294,6 @@ defineExpose({
   rangeDays, anchorDate, specialMode, viewStart, viewEnd, reservations, units, loading, error,
   tooltip, contextMenu, snackbar, jumpDate, datePickerOpen, timelineEl,
   loadData, goToday, onJumpDate, onShowBooking, onShowTooltip, onHideTooltip, onContextMenu,
-  contextEdit, contextCheckIn, contextCheckOut, contextCancel, toggleHandover, toggleOverdue, toggleIdle, setSpecialMode,
+  contextEdit, contextCheckIn, contextCheckOut, contextCancel, toggleHandover, toggleOverdue, toggleIdle, toggleHeatmap, setSpecialMode,
 })
 </script>

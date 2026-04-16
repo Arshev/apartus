@@ -1,5 +1,14 @@
 <template>
   <div class="gantt-row" :style="rowStyle">
+    <!-- FT-024 Heatmap layer — under items, pointer-events: none. -->
+    <div
+      v-for="(cell, idx) in heatCells"
+      :key="`heat-${idx}`"
+      class="gantt-row__heat-cell"
+      :class="`gantt-row__heat-cell--${cell.status}`"
+      :style="heatCellStyle(cell)"
+    />
+
     <!-- FT-023 Idle Gaps layer — under items, pointer-events: none (see REQ-03). -->
     <div
       v-for="(gap, idx) in idleGaps"
@@ -31,8 +40,10 @@
 import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import GanttTimelineItem from './GanttTimelineItem.vue'
-import { dateToPixel, bookingWidth, assignLanes, findIdleGaps } from '../../utils/gantt'
-import { parseIsoDate } from '../../utils/date'
+import { dateToPixel, bookingWidth, assignLanes, findIdleGaps, getDayCellStatus } from '../../utils/gantt'
+import { parseIsoDate, startOfDay, addDays } from '../../utils/date'
+
+const MS_PER_DAY = 86_400_000
 
 const { t } = useI18n()
 
@@ -126,7 +137,33 @@ function gapPixelWidth(gap) {
     - dateToPixel(gap.start, props.viewStart, props.pixelsPerMs)
 }
 
-defineExpose({ enrichedBookings, laneData, computedRowHeight, rowStyle, itemLeft, itemWidth, laneOf, idleGaps, gapStyle, gapPixelWidth })
+// FT-024: heatmap cells — array of {date, status} per day in viewport.
+const heatCells = computed(() => {
+  if (props.specialMode !== 'heatmap') return []
+  const cells = []
+  const viewStartDay = startOfDay(props.viewStart)
+  const viewEndDay = startOfDay(props.viewEnd)
+  let cursor = viewStartDay
+  while (cursor.valueOf() <= viewEndDay.valueOf()) {
+    cells.push({
+      date: cursor,
+      status: getDayCellStatus(cursor, enrichedBookings.value),
+    })
+    cursor = addDays(cursor, 1)
+  }
+  return cells
+})
+
+function heatCellStyle(cell) {
+  const left = dateToPixel(cell.date, props.viewStart, props.pixelsPerMs)
+  const width = MS_PER_DAY * props.pixelsPerMs
+  return {
+    left: left + 'px',
+    width: width + 'px',
+  }
+}
+
+defineExpose({ enrichedBookings, laneData, computedRowHeight, rowStyle, itemLeft, itemWidth, laneOf, idleGaps, gapStyle, gapPixelWidth, heatCells, heatCellStyle })
 </script>
 
 <style scoped>
@@ -163,5 +200,22 @@ defineExpose({ enrichedBookings, laneData, computedRowHeight, rowStyle, itemLeft
   font-weight: 700;
   padding: 1px 5px;
   border-radius: 3px;
+}
+
+/* FT-024 Heatmap */
+.gantt-row__heat-cell {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.gantt-row__heat-cell--busy {
+  background: rgba(var(--v-theme-error), 0.20);
+}
+
+.gantt-row__heat-cell--free {
+  background: rgba(var(--v-theme-success), 0.15);
 }
 </style>

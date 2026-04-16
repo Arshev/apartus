@@ -212,4 +212,69 @@ describe('GanttTimelineRow', () => {
       expect(last.height).toBeGreaterThan(36) // baseRowHeight
     })
   })
+
+  // --- FT-024 Heatmap ---
+  describe('heatmap cells (FT-024)', () => {
+    it('does not render heat cells when specialMode is empty', () => {
+      const wrapper = setup([
+        { id: 1, unit_id: 7, check_in: '2026-04-17', check_out: '2026-04-20', status: 'confirmed' },
+      ])
+      expect(wrapper.vm.heatCells).toHaveLength(0)
+      expect(wrapper.findAll('.gantt-row__heat-cell')).toHaveLength(0)
+    })
+
+    it('does not render heat cells when specialMode is idle', () => {
+      const wrapper = setup(
+        [{ id: 1, unit_id: 7, check_in: '2026-04-17', check_out: '2026-04-20', status: 'confirmed' }],
+        { specialMode: 'idle' }
+      )
+      expect(wrapper.vm.heatCells).toHaveLength(0)
+    })
+
+    it('renders one cell per day in viewport (14 days for VIEW range)', () => {
+      const wrapper = setup([], { specialMode: 'heatmap' })
+      // VIEW_START = 2026-04-15, VIEW_END = 2026-04-29 → 15 days inclusive
+      expect(wrapper.vm.heatCells).toHaveLength(15)
+      expect(wrapper.findAll('.gantt-row__heat-cell')).toHaveLength(15)
+    })
+
+    it('marks cells busy where booking covers the day', () => {
+      const wrapper = setup(
+        [{ id: 1, unit_id: 7, check_in: '2026-04-17', check_out: '2026-04-20', status: 'confirmed' }],
+        { specialMode: 'heatmap' }
+      )
+      const statuses = wrapper.vm.heatCells.map((c) => c.status)
+      // 04-15 free, 04-16 free, 04-17 busy, 04-18 busy, 04-19 busy, 04-20 free (exclusive end)...
+      expect(statuses[0]).toBe('free')  // 04-15
+      expect(statuses[2]).toBe('busy')  // 04-17
+      expect(statuses[4]).toBe('busy')  // 04-19
+      expect(statuses[5]).toBe('free')  // 04-20 (exclusive)
+    })
+
+    it('cancelled booking does not mark busy', () => {
+      const wrapper = setup(
+        [{ id: 1, unit_id: 7, check_in: '2026-04-17', check_out: '2026-04-20', status: 'cancelled' }],
+        { specialMode: 'heatmap' }
+      )
+      // Cancelled filtered out before heatmap sees them (existing Row behavior).
+      expect(wrapper.vm.heatCells.every((c) => c.status === 'free')).toBe(true)
+    })
+
+    it('busy class applied on busy cells', () => {
+      const wrapper = setup(
+        [{ id: 1, unit_id: 7, check_in: '2026-04-17', check_out: '2026-04-20', status: 'confirmed' }],
+        { specialMode: 'heatmap' }
+      )
+      expect(wrapper.findAll('.gantt-row__heat-cell--busy').length).toBeGreaterThan(0)
+      expect(wrapper.findAll('.gantt-row__heat-cell--free').length).toBeGreaterThan(0)
+    })
+
+    it('heatCellStyle left/width are px strings', () => {
+      const wrapper = setup([], { specialMode: 'heatmap' })
+      const cell = wrapper.vm.heatCells[0]
+      const style = wrapper.vm.heatCellStyle(cell)
+      expect(style.left).toMatch(/^-?\d+(\.\d+)?px$/)
+      expect(style.width).toMatch(/^\d+(\.\d+)?px$/)
+    })
+  })
 })
