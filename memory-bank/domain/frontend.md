@@ -119,6 +119,16 @@ Apartus frontend — это одно приложение, SPA.
 - Visual (Row-level — впервые не Item-level): absolute-positioned `.gantt-row__idle-gap` div layer с `repeating-linear-gradient` error-tint hatched pattern, dashed borders, `{n}д` label span (визуализация через `pointer-events: none` не перехватывает клики на bars сверху).
 - Z-index: gap layer `z-index: 0`, items стандартно поверх. Bars остаются на full opacity (REQ-05 — в отличие от handover/overdue где non-matching dimmed).
 - `SUPPORTED_SPECIAL_MODES` extended: `['', 'handover', 'overdue', 'idle']`.
+
+### Heatmap Mode (FT-024)
+
+Четвёртый и финальный FT-020 NS-02 special mode — per-day heatmap tint по занятости юнита.
+
+- Toolbar `v-btn` «Тепловая карта» (mdi-grid). Mutually exclusive с handover/overdue/idle.
+- Classification: `utils/gantt.js#getDayCellStatus(day, bookings)` — binary (`busy` / `free`). Day busy если non-cancelled non-checked_out booking covers `[_start, _end)`. **Partial state** не применимо для Apartus date-level bookings — откладывается до появления hourly model.
+- Visual (Row-level): absolute-positioned day-cell layer (`<div class="gantt-row__heat-cell gantt-row__heat-cell--{status}">`) под items. CSS tint через `--v-theme-error` (0.20 busy) / `--v-theme-success` (0.15 free). `pointer-events: none`, z-index 0 — click-through to bars preserved.
+- `SUPPORTED_SPECIAL_MODES` extended: `['', 'handover', 'overdue', 'idle', 'heatmap']`.
+- **FT-020 NS-02 closed** — все 4 special modes delivered (handover FT-021, overdue FT-022, idle FT-023, heatmap FT-024).
 - Language switcher: Settings → General → v-select ru/en. Сохраняется в `organization.settings.locale` через PATCH `/organization`.
 - При boot: `fetchCurrentUser()` читает `organization.settings.locale` и устанавливает `i18n.global.locale.value`.
 - Fallback: отсутствующий ключ в en.json → показывается русский текст. Невалидный locale → ru.

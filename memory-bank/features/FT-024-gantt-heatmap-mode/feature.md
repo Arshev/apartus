@@ -15,7 +15,7 @@ derived_from:
   - ../FT-022-gantt-overdue-mode/feature.md
   - ../FT-023-gantt-idle-gaps-mode/feature.md
 status: active
-delivery_status: in_progress
+delivery_status: done
 audience: humans_and_agents
 must_not_define:
   - implementation_sequence

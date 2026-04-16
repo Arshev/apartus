@@ -96,6 +96,38 @@ test.describe('Gantt Calendar (CHK-07)', () => {
     )
   })
 
+  // FT-024 Heatmap Mode
+  test('heatmap toggle renders per-day tint cells; mutual exclusion (FT-024, SC-01,04)', async ({ page }) => {
+    await page.waitForSelector('.gantt-item', { timeout: 10000 })
+
+    // Pre-toggle: no heat cells.
+    const preCount = await page.locator('.gantt-row__heat-cell').count()
+    expect(preCount).toBe(0)
+
+    // Activate heatmap mode.
+    await page.locator('[data-testid="heatmap-btn"]').click()
+    await page.waitForFunction(
+      () => document.querySelectorAll('.gantt-row__heat-cell').length > 0,
+      { timeout: 5000 }
+    )
+    const cellCount = await page.locator('.gantt-row__heat-cell').count()
+    expect(cellCount).toBeGreaterThanOrEqual(1)
+
+    // Mutual exclusion: switch to idle → heatmap cells disappear.
+    await page.locator('[data-testid="idle-btn"]').click()
+    await page.waitForFunction(
+      () => document.querySelectorAll('.gantt-row__heat-cell').length === 0,
+      { timeout: 5000 }
+    )
+
+    // Deactivate idle — clean state.
+    await page.locator('[data-testid="idle-btn"]').click()
+    await page.waitForFunction(
+      () => document.querySelectorAll('.gantt-row__heat-cell, .gantt-row__idle-gap, [class*="gantt-item--handover-"]').length === 0,
+      { timeout: 5000 }
+    )
+  })
+
   // FT-022 Overdue Mode
   test('overdue toggle applies overdue / dimmed classes; mutual exclusion with handover (FT-022, SC-01..04)', async ({ page }) => {
     await page.waitForSelector('.gantt-item', { timeout: 10000 })
