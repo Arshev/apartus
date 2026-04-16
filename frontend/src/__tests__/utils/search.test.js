@@ -18,6 +18,27 @@ const reservations = [
 ]
 
 describe('utils/search.filterUnitsAndReservations', () => {
+  describe('defensive null/undefined inputs', () => {
+    it('returns empty arrays when units is null', () => {
+      const result = filterUnitsAndReservations(null, reservations, 'Arbat')
+      expect(result.units).toEqual([])
+      expect(result.reservations).toEqual([])
+    })
+
+    it('returns empty arrays when reservations is null (non-empty query)', () => {
+      const result = filterUnitsAndReservations(units, null, 'Volkov')
+      // Query matches no unit.name/property → no guest fallback → 0 results.
+      expect(result.units).toEqual([])
+      expect(result.reservations).toEqual([])
+    })
+
+    it('returns empty arrays when both inputs are undefined', () => {
+      const result = filterUnitsAndReservations(undefined, undefined, '')
+      expect(result.units).toEqual([])
+      expect(result.reservations).toEqual([])
+    })
+  })
+
   describe('empty/identity query', () => {
     it('returns inputs unchanged for empty string', () => {
       const result = filterUnitsAndReservations(units, reservations, '')

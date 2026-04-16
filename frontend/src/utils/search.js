@@ -20,15 +20,20 @@
 // Trim applies only to leading/trailing whitespace (FM-09) — internal spaces
 // in the query are part of the substring match.
 export function filterUnitsAndReservations(units, reservations, query) {
+  // Defensive: null/undefined inputs (e.g. API returns null, not-yet-loaded
+  // state) would throw cryptic TypeError deep in the filter pipeline. Return
+  // empty arrays so the template falls back to the empty-state branch cleanly.
+  const safeUnits = Array.isArray(units) ? units : []
+  const safeReservations = Array.isArray(reservations) ? reservations : []
   const needle = typeof query === 'string' ? query.trim().toLowerCase() : ''
 
   if (needle === '') {
-    return { units, reservations }
+    return { units: safeUnits, reservations: safeReservations }
   }
 
   const matchingUnitIds = new Set()
 
-  for (const unit of units) {
+  for (const unit of safeUnits) {
     const name = (unit.name || '').toLowerCase()
     const propertyName = (unit.property_name || '').toLowerCase()
     if (name.includes(needle) || propertyName.includes(needle)) {
@@ -36,7 +41,7 @@ export function filterUnitsAndReservations(units, reservations, query) {
     }
   }
 
-  for (const reservation of reservations) {
+  for (const reservation of safeReservations) {
     if (matchingUnitIds.has(reservation.unit_id)) continue
     const guestName = (reservation.guest_name || '').toLowerCase()
     if (guestName.includes(needle)) {
@@ -44,8 +49,8 @@ export function filterUnitsAndReservations(units, reservations, query) {
     }
   }
 
-  const filteredUnits = units.filter((u) => matchingUnitIds.has(u.id))
-  const filteredReservations = reservations.filter((r) => matchingUnitIds.has(r.unit_id))
+  const filteredUnits = safeUnits.filter((u) => matchingUnitIds.has(u.id))
+  const filteredReservations = safeReservations.filter((r) => matchingUnitIds.has(r.unit_id))
 
   return { units: filteredUnits, reservations: filteredReservations }
 }

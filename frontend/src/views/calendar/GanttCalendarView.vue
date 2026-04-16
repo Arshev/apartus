@@ -55,7 +55,6 @@
            (visual indicator of active filter). Escape clears + collapses. -->
       <template v-if="searchOpen">
         <v-text-field
-          ref="searchInputEl"
           v-model="searchQuery"
           :placeholder="$t('calendar.gantt.search.placeholder')"
           density="compact"
@@ -180,7 +179,6 @@ const timelineEl = ref(null)
 const searchQuery = ref('')
 const debouncedQuery = ref('')
 const searchOpen = ref(false)
-const searchInputEl = ref(null)
 const searchBtnEl = ref(null)
 
 // FT-022: единый helper — mutual exclusion гарантируется одним местом.

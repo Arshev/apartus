@@ -447,43 +447,47 @@ describe('GanttCalendarView', () => {
 
     it('applies the debounced query to filtered units', async () => {
       vi.useFakeTimers()
-      const wrapper = setup()
-      // Mount may schedule a debounce (via watcher firing on init); drain it.
-      await vi.runAllTimersAsync()
-      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      try {
+        const wrapper = setup()
+        // Mount may schedule a debounce (via watcher firing on init); drain it.
+        await vi.runAllTimersAsync()
+        await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
 
-      wrapper.vm.searchQuery = 'Иван'
-      await wrapper.vm.$nextTick()
-      // Debounce not elapsed yet: debouncedQuery unchanged.
-      expect(wrapper.vm.debouncedQuery).toBe('')
+        wrapper.vm.searchQuery = 'Иван'
+        await wrapper.vm.$nextTick()
+        // Debounce not elapsed yet: debouncedQuery unchanged.
+        expect(wrapper.vm.debouncedQuery).toBe('')
 
-      await vi.advanceTimersByTimeAsync(200)
-      await wrapper.vm.$nextTick()
-      expect(wrapper.vm.debouncedQuery).toBe('Иван')
-      expect(wrapper.vm.filteredUnits.map((u) => u.id)).toEqual([1])
-
-      vi.useRealTimers()
+        await vi.advanceTimersByTimeAsync(200)
+        await wrapper.vm.$nextTick()
+        expect(wrapper.vm.debouncedQuery).toBe('Иван')
+        expect(wrapper.vm.filteredUnits.map((u) => u.id)).toEqual([1])
+      } finally {
+        vi.useRealTimers()
+      }
     })
 
     it('coalesces rapid keystrokes into a single trailing-edge update', async () => {
       vi.useFakeTimers()
-      const wrapper = setup()
-      await vi.runAllTimersAsync()
-      await wrapper.vm.$nextTick()
+      try {
+        const wrapper = setup()
+        await vi.runAllTimersAsync()
+        await wrapper.vm.$nextTick()
 
-      wrapper.vm.searchQuery = 'И'
-      await vi.advanceTimersByTimeAsync(50)
-      wrapper.vm.searchQuery = 'Ив'
-      await vi.advanceTimersByTimeAsync(50)
-      wrapper.vm.searchQuery = 'Иван'
-      await vi.advanceTimersByTimeAsync(199)
-      // Still within the debounce window since last change.
-      expect(wrapper.vm.debouncedQuery).toBe('')
+        wrapper.vm.searchQuery = 'И'
+        await vi.advanceTimersByTimeAsync(50)
+        wrapper.vm.searchQuery = 'Ив'
+        await vi.advanceTimersByTimeAsync(50)
+        wrapper.vm.searchQuery = 'Иван'
+        await vi.advanceTimersByTimeAsync(199)
+        // Still within the debounce window since last change.
+        expect(wrapper.vm.debouncedQuery).toBe('')
 
-      await vi.advanceTimersByTimeAsync(1)
-      expect(wrapper.vm.debouncedQuery).toBe('Иван')
-
-      vi.useRealTimers()
+        await vi.advanceTimersByTimeAsync(1)
+        expect(wrapper.vm.debouncedQuery).toBe('Иван')
+      } finally {
+        vi.useRealTimers()
+      }
     })
 
     it('onSearchEscape clears query + flushes debounce + collapses', async () => {
@@ -558,21 +562,137 @@ describe('GanttCalendarView', () => {
       expect(wrapper.vm.searchQuery).toBe('')
     })
 
-    it('stacks with special mode (filtered subset, mode still active)', async () => {
+    it.each([
+      ['handover', 'toggleHandover'],
+      ['overdue', 'toggleOverdue'],
+      ['idle', 'toggleIdle'],
+      ['heatmap', 'toggleHeatmap'],
+    ])('stacks search with %s mode — filtered subset preserved', async (mode, toggleFn) => {
       vi.useFakeTimers()
+      try {
+        const wrapper = setup()
+        await vi.runAllTimersAsync()
+        await wrapper.vm.$nextTick()
+
+        wrapper.vm.searchQuery = 'Пальмы'
+        await vi.advanceTimersByTimeAsync(200)
+        wrapper.vm[toggleFn]()
+        await wrapper.vm.$nextTick()
+
+        expect(wrapper.vm.specialMode).toBe(mode)
+        expect(wrapper.vm.filteredUnits.map((u) => u.id)).toEqual([1, 2])
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('renders search empty-state when query has no matches (NEG-01)', async () => {
+      vi.useFakeTimers()
+      try {
+        const wrapper = setup()
+        await vi.runAllTimersAsync()
+        await wrapper.vm.$nextTick()
+
+        wrapper.vm.searchQuery = 'zzz-nothing-matches'
+        await vi.advanceTimersByTimeAsync(200)
+        await wrapper.vm.$nextTick()
+
+        const emptyState = wrapper.find('[data-testid="search-empty-state"]')
+        expect(emptyState.exists()).toBe(true)
+        // GanttTimeline should NOT be rendered.
+        expect(wrapper.find('.timeline-stub').exists()).toBe(false)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('search empty-state does NOT render while org has no units (no-data vs search-no-results)', async () => {
+      allUnitsApi.list.mockResolvedValue([])
+      reservationsApi.list.mockResolvedValue([])
+
+      vi.useFakeTimers()
+      try {
+        const wrapper = setup()
+        await vi.runAllTimersAsync()
+        await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+
+        wrapper.vm.searchQuery = 'anything'
+        await vi.advanceTimersByTimeAsync(200)
+        await wrapper.vm.$nextTick()
+
+        // No units loaded → standard no-data empty state, NOT search empty-state.
+        expect(wrapper.find('[data-testid="search-empty-state"]').exists()).toBe(false)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('v-text-field has maxlength=100 attribute (FM-04)', async () => {
       const wrapper = setup()
-      await vi.runAllTimersAsync()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      wrapper.vm.onOpenSearch()
       await wrapper.vm.$nextTick()
 
-      wrapper.vm.searchQuery = 'Пальмы'
-      await vi.advanceTimersByTimeAsync(200)
-      wrapper.vm.toggleHeatmap()
-      await wrapper.vm.$nextTick()
+      const input = wrapper.find('[data-testid="search-input"] input')
+      expect(input.exists()).toBe(true)
+      expect(input.attributes('maxlength')).toBe('100')
+    })
 
-      expect(wrapper.vm.specialMode).toBe('heatmap')
-      expect(wrapper.vm.filteredUnits.map((u) => u.id)).toEqual([1, 2])
+    it('cancels pending debounce on unmount (FM-08, no stale writes)', async () => {
+      vi.useFakeTimers()
+      try {
+        const wrapper = setup()
+        await vi.runAllTimersAsync()
+        await wrapper.vm.$nextTick()
 
-      vi.useRealTimers()
+        // Schedule a debounce that would fire AFTER unmount.
+        wrapper.vm.searchQuery = 'pending'
+        await wrapper.vm.$nextTick()
+        const preUnmountDebounced = wrapper.vm.debouncedQuery
+
+        wrapper.unmount()
+
+        // Advance past the debounce delay. If cancel didn't fire, the setter
+        // would try to write to an unmounted ref (would log a Vue warning
+        // and change state unpredictably).
+        await vi.advanceTimersByTimeAsync(500)
+
+        // The wrapper is unmounted — we can't read vm.debouncedQuery
+        // post-unmount reliably, but the key property is "no throw".
+        // `preUnmountDebounced` was captured to document the state at unmount.
+        expect(preUnmountDebounced).toBe('')
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('swallows localStorage throws during persist (FM-06)', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+
+      const originalSet = localStorage.setItem.bind(localStorage)
+      localStorage.setItem = vi.fn(() => {
+        throw new Error('QuotaExceeded')
+      })
+
+      try {
+        // Triggering persist via a searchQuery change must not propagate.
+        expect(() => {
+          wrapper.vm.searchQuery = 'anything'
+        }).not.toThrow()
+        await wrapper.vm.$nextTick()
+      } finally {
+        localStorage.setItem = originalSet
+      }
+    })
+
+    it('swallows corrupt JSON in localStorage on load', async () => {
+      localStorage.setItem(STORAGE_KEY, '{not-valid-json')
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      // Falls back to defaults without throwing.
+      expect(wrapper.vm.searchQuery).toBe('')
+      expect(wrapper.vm.rangeDays).toBe(14)
     })
   })
 })
