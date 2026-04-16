@@ -158,4 +158,51 @@ test.describe('Gantt Calendar (CHK-07)', () => {
       { timeout: 5000 }
     )
   })
+
+  // FT-025 Search Bar
+  test('search bar filters units + persists across reload (FT-025, SC-01,04,05)', async ({ page }) => {
+    await page.waitForSelector('.gantt-item', { timeout: 10000 })
+    const initialRowCount = await page.locator('.gantt-timeline__unit-cell').count()
+    expect(initialRowCount).toBeGreaterThanOrEqual(1)
+
+    // Open search.
+    await page.locator('[data-testid="search-btn"]').click()
+    await page.waitForSelector('[data-testid="search-input"]', { timeout: 5000 })
+    await expect(page.locator('[data-testid="search-input"]')).toBeVisible()
+
+    // Type a query that should not match any seed data — DOM shrinks to empty state.
+    const input = page.locator('[data-testid="search-input"] input')
+    await input.fill('zzzzzz-notreal')
+    // Wait for debounce (200ms) + render.
+    await page.waitForSelector('[data-testid="search-empty-state"]', { timeout: 2000 })
+    await expect(page.locator('[data-testid="search-empty-state"]')).toBeVisible()
+
+    // Escape clears + restores.
+    await input.press('Escape')
+    await page.waitForFunction(
+      () => document.querySelectorAll('[data-testid="search-empty-state"]').length === 0,
+      { timeout: 2000 }
+    )
+    // After clear the unit list is back.
+    const restoredRowCount = await page.locator('.gantt-timeline__unit-cell').count()
+    expect(restoredRowCount).toBe(initialRowCount)
+
+    // Persistence: set a matching query (substring of a seed unit/guest name),
+    // reload, verify state is restored.
+    await page.locator('[data-testid="search-btn"]').click()
+    await page.waitForSelector('[data-testid="search-input"]', { timeout: 5000 })
+    await page.locator('[data-testid="search-input"] input').fill('a')
+    // Wait for debounce + persist watcher.
+    await page.waitForTimeout(300)
+
+    await page.reload()
+    // On reload the bar should be auto-expanded (since query non-empty) and the
+    // input should contain the restored value.
+    await page.waitForSelector('[data-testid="search-input"]', { timeout: 10000 })
+    const restored = await page.locator('[data-testid="search-input"] input').inputValue()
+    expect(restored).toBe('a')
+
+    // Cleanup: clear so we don't leak state to the next test run.
+    await page.locator('[data-testid="search-input"] input').press('Escape')
+  })
 })

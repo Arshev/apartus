@@ -151,6 +151,11 @@
         "checkinTomorrow": "Заезд завтра",
         "checkoutToday": "Выезд сегодня",
         "checkoutTomorrow": "Выезд завтра"
+      },
+      "search": {
+        "open": "Найти гостя или юнит",
+        "placeholder": "Поиск…",
+        "empty": "Ничего не найдено по «{query}»"
       }
     }
   },

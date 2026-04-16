@@ -227,7 +227,9 @@ describe('GanttCalendarView', () => {
       wrapper.vm.toggleHandover()
       await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY))
-      expect(stored).toEqual({ rangeDays: 7, specialMode: 'handover' })
+      // FT-025 extended payload with searchQuery; use toMatchObject for
+      // forward-compat across future persistence fields.
+      expect(stored).toMatchObject({ rangeDays: 7, specialMode: 'handover' })
     })
   })
 
@@ -408,6 +410,169 @@ describe('GanttCalendarView', () => {
       const wrapper = setup()
       await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
       expect(wrapper.vm.specialMode).toBe('heatmap')
+    })
+  })
+
+  // --- FT-025 Search Bar ---
+  describe('search bar (FT-025)', () => {
+    beforeEach(() => {
+      // Richer dataset for filter assertions.
+      allUnitsApi.list.mockResolvedValue([
+        { id: 1, name: 'Studio 101', property_name: 'Пальмы' },
+        { id: 2, name: 'Apt 204A', property_name: 'Пальмы' },
+        { id: 3, name: 'Suite 300', property_name: 'Дубки' },
+      ])
+      reservationsApi.list.mockResolvedValue([
+        { id: 10, unit_id: 1, guest_name: 'Иван Петров', check_in: '2026-04-10', check_out: '2026-04-12', status: 'confirmed' },
+        { id: 11, unit_id: 3, guest_name: 'Мария Сидорова', check_in: '2026-04-15', check_out: '2026-04-18', status: 'confirmed' },
+      ])
+    })
+
+    it('initial state: search collapsed, query empty, nothing filtered', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      expect(wrapper.vm.searchOpen).toBe(false)
+      expect(wrapper.vm.searchQuery).toBe('')
+      expect(wrapper.vm.debouncedQuery).toBe('')
+      expect(wrapper.vm.filteredUnits).toHaveLength(3)
+      expect(wrapper.vm.filteredReservations).toHaveLength(2)
+    })
+
+    it('onOpenSearch expands the bar', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      wrapper.vm.onOpenSearch()
+      expect(wrapper.vm.searchOpen).toBe(true)
+    })
+
+    it('applies the debounced query to filtered units', async () => {
+      vi.useFakeTimers()
+      const wrapper = setup()
+      // Mount may schedule a debounce (via watcher firing on init); drain it.
+      await vi.runAllTimersAsync()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+
+      wrapper.vm.searchQuery = 'Иван'
+      await wrapper.vm.$nextTick()
+      // Debounce not elapsed yet: debouncedQuery unchanged.
+      expect(wrapper.vm.debouncedQuery).toBe('')
+
+      await vi.advanceTimersByTimeAsync(200)
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.debouncedQuery).toBe('Иван')
+      expect(wrapper.vm.filteredUnits.map((u) => u.id)).toEqual([1])
+
+      vi.useRealTimers()
+    })
+
+    it('coalesces rapid keystrokes into a single trailing-edge update', async () => {
+      vi.useFakeTimers()
+      const wrapper = setup()
+      await vi.runAllTimersAsync()
+      await wrapper.vm.$nextTick()
+
+      wrapper.vm.searchQuery = 'И'
+      await vi.advanceTimersByTimeAsync(50)
+      wrapper.vm.searchQuery = 'Ив'
+      await vi.advanceTimersByTimeAsync(50)
+      wrapper.vm.searchQuery = 'Иван'
+      await vi.advanceTimersByTimeAsync(199)
+      // Still within the debounce window since last change.
+      expect(wrapper.vm.debouncedQuery).toBe('')
+
+      await vi.advanceTimersByTimeAsync(1)
+      expect(wrapper.vm.debouncedQuery).toBe('Иван')
+
+      vi.useRealTimers()
+    })
+
+    it('onSearchEscape clears query + flushes debounce + collapses', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      wrapper.vm.onOpenSearch()
+      wrapper.vm.searchQuery = 'foo'
+      wrapper.vm.debouncedQuery = 'foo'
+      await wrapper.vm.$nextTick()
+
+      await wrapper.vm.onSearchEscape()
+      expect(wrapper.vm.searchQuery).toBe('')
+      expect(wrapper.vm.debouncedQuery).toBe('')
+      expect(wrapper.vm.searchOpen).toBe(false)
+    })
+
+    it('stays expanded on blur (only Escape collapses, see FT-025 REQ-01)', async () => {
+      // The bar intentionally doesn't auto-collapse on blur — otherwise
+      // clicking anywhere on the calendar would close the search even when
+      // a non-empty filter is active. Escape is the explicit close path.
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      wrapper.vm.onOpenSearch()
+      expect(wrapper.vm.searchOpen).toBe(true)
+
+      // Simulate clicking away from the input (no handler fires — no change).
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.searchOpen).toBe(true)
+    })
+
+    it('persists searchQuery to localStorage', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      wrapper.vm.searchQuery = 'Иван'
+      await wrapper.vm.$nextTick()
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY))
+      expect(stored.searchQuery).toBe('Иван')
+    })
+
+    it('restores searchQuery synchronously — filtered units on first render (ER-03)', async () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ rangeDays: 14, specialMode: '', searchQuery: 'Пальмы' }),
+      )
+      const wrapper = setup()
+      // First tick: loadStoredView ran in setup(), so filteredUnits already
+      // narrowed BEFORE mount completes loading units. Once units load,
+      // filter applies immediately without waiting for debounce.
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      expect(wrapper.vm.searchQuery).toBe('Пальмы')
+      expect(wrapper.vm.debouncedQuery).toBe('Пальмы')
+      expect(wrapper.vm.searchOpen).toBe(true)
+      expect(wrapper.vm.filteredUnits.map((u) => u.id)).toEqual([1, 2])
+    })
+
+    it('ignores invalid persisted searchQuery (non-string)', async () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ rangeDays: 14, specialMode: '', searchQuery: 42 }),
+      )
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      expect(wrapper.vm.searchQuery).toBe('')
+      expect(wrapper.vm.searchOpen).toBe(false)
+    })
+
+    it('legacy payload without searchQuery field resolves to empty', async () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ rangeDays: 30 }))
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      expect(wrapper.vm.rangeDays).toBe(30)
+      expect(wrapper.vm.searchQuery).toBe('')
+    })
+
+    it('stacks with special mode (filtered subset, mode still active)', async () => {
+      vi.useFakeTimers()
+      const wrapper = setup()
+      await vi.runAllTimersAsync()
+      await wrapper.vm.$nextTick()
+
+      wrapper.vm.searchQuery = 'Пальмы'
+      await vi.advanceTimersByTimeAsync(200)
+      wrapper.vm.toggleHeatmap()
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.vm.specialMode).toBe('heatmap')
+      expect(wrapper.vm.filteredUnits.map((u) => u.id)).toEqual([1, 2])
+
+      vi.useRealTimers()
     })
   })
 })

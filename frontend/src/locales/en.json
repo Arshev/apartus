@@ -151,6 +151,11 @@
         "checkinTomorrow": "Check-in tomorrow",
         "checkoutToday": "Check-out today",
         "checkoutTomorrow": "Check-out tomorrow"
+      },
+      "search": {
+        "open": "Search guest or unit",
+        "placeholder": "Search…",
+        "empty": "No results for \"{query}\""
       }
     }
   },
