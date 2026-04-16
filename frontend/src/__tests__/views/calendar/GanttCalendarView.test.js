@@ -290,4 +290,64 @@ describe('GanttCalendarView', () => {
       expect(wrapper.vm.specialMode).toBe('overdue')
     })
   })
+
+  // --- FT-023 Idle Gaps Mode ---
+  describe('idle gaps mode (FT-023)', () => {
+    it('toggleIdle flips "" → "idle" → ""', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleIdle()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('idle')
+      wrapper.vm.toggleIdle()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('')
+    })
+
+    it('mutual exclusion — handover → idle', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleHandover()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleIdle()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('idle')
+    })
+
+    it('mutual exclusion — overdue → idle', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleOverdue()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleIdle()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('idle')
+    })
+
+    it('mutual exclusion — idle → handover', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleIdle()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleHandover()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('handover')
+    })
+
+    it('persists "idle" to localStorage', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleIdle()
+      await wrapper.vm.$nextTick()
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY))
+      expect(stored.specialMode).toBe('idle')
+    })
+
+    it('reads persisted "idle" on mount', async () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ rangeDays: 14, specialMode: 'idle' }))
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('idle')
+    })
+  })
 })

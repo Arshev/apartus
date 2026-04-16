@@ -109,6 +109,16 @@ Apartus frontend — это одно приложение, SPA.
 - FT-021 `toggleHandover` сохраняется как shim над `setSpecialMode('handover')` — backward-compat защита от регрессии FT-021 тестов.
 - `SUPPORTED_SPECIAL_MODES` extended: `['', 'handover', 'overdue']`. Invalid values → `''`.
 - NEG-06 edge: `check_out === today` AND `checked_in` → НЕ overdue (принадлежит handover territory FT-021 `checkout_today`). В overdue mode такой reservation dimmed.
+
+### Idle Gaps Mode (FT-023)
+
+Третий из FT-020 NS-02 special modes — подсветка окон простоя между бронированиями.
+
+- Toolbar `v-btn` «Окна простоя» (mdi-clock-alert-outline). Mutually exclusive с handover/overdue.
+- Gap calculation: `utils/gantt.js#findIdleGaps(bookings, viewStart, viewEnd)` — pure function. Cancelled и checked_out reservations НЕ считаются busy (юнит продаваем). Gaps < 1 day не emittятся.
+- Visual (Row-level — впервые не Item-level): absolute-positioned `.gantt-row__idle-gap` div layer с `repeating-linear-gradient` error-tint hatched pattern, dashed borders, `{n}д` label span (визуализация через `pointer-events: none` не перехватывает клики на bars сверху).
+- Z-index: gap layer `z-index: 0`, items стандартно поверх. Bars остаются на full opacity (REQ-05 — в отличие от handover/overdue где non-matching dimmed).
+- `SUPPORTED_SPECIAL_MODES` extended: `['', 'handover', 'overdue', 'idle']`.
 - Language switcher: Settings → General → v-select ru/en. Сохраняется в `organization.settings.locale` через PATCH `/organization`.
 - При boot: `fetchCurrentUser()` читает `organization.settings.locale` и устанавливает `i18n.global.locale.value`.
 - Fallback: отсутствующий ключ в en.json → показывается русский текст. Невалидный locale → ru.

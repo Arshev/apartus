@@ -183,6 +183,60 @@ export function getOverdueDays(booking, today) {
 }
 
 /**
+ * Find idle gaps for a row (FT-023 Idle Gaps mode).
+ *
+ * A "busy" booking occupies [_start, _end). Cancelled and checked_out
+ * reservations are NOT considered busy (guest gone / booking never
+ * happened — unit is sellable). Gaps < 1 full day are skipped.
+ *
+ * @param {Array<{_start: Date, _end: Date, status: string}>} bookings
+ * @param {Date} viewStart
+ * @param {Date} viewEnd
+ * @returns {Array<{start: Date, end: Date, days: number}>}
+ */
+export function findIdleGaps(bookings, viewStart, viewEnd) {
+  const busy = (bookings || [])
+    .filter((b) => b && b._start && b._end && b.status !== 'cancelled' && b.status !== 'checked_out')
+    .sort((a, b) => a._start.valueOf() - b._start.valueOf())
+
+  const gaps = []
+  const viewStartMs = viewStart.valueOf()
+  const viewEndMs = viewEnd.valueOf()
+
+  if (busy.length === 0) {
+    const days = Math.floor((viewEndMs - viewStartMs) / MS_PER_DAY)
+    if (days >= 1) gaps.push({ start: new Date(viewStart), end: new Date(viewEnd), days })
+    return gaps
+  }
+
+  let cursor = viewStartMs
+
+  for (const b of busy) {
+    const bStartMs = b._start.valueOf()
+    const bEndMs = b._end.valueOf()
+    if (bStartMs > cursor) {
+      const gapEndMs = Math.min(bStartMs, viewEndMs)
+      const days = Math.floor((gapEndMs - cursor) / MS_PER_DAY)
+      if (days >= 1) {
+        gaps.push({ start: new Date(cursor), end: new Date(gapEndMs), days })
+      }
+    }
+    if (bEndMs > cursor) cursor = bEndMs
+    if (cursor >= viewEndMs) break
+  }
+
+  // Trailing gap: between last booking _end and viewEnd (ER-01).
+  if (cursor < viewEndMs) {
+    const days = Math.floor((viewEndMs - cursor) / MS_PER_DAY)
+    if (days >= 1) {
+      gaps.push({ start: new Date(cursor), end: new Date(viewEnd), days })
+    }
+  }
+
+  return gaps
+}
+
+/**
  * Greedy lane assignment for overlapping bookings within one row.
  * Sorts by start ascending (longer items first on tie) and packs each item
  * into the earliest lane whose previous item ended at or before this start.

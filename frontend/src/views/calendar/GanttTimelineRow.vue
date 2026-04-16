@@ -1,5 +1,15 @@
 <template>
   <div class="gantt-row" :style="rowStyle">
+    <!-- FT-023 Idle Gaps layer — under items, pointer-events: none (see REQ-03). -->
+    <div
+      v-for="(gap, idx) in idleGaps"
+      :key="`gap-${idx}`"
+      class="gantt-row__idle-gap"
+      :style="gapStyle(gap)"
+    >
+      <span v-if="gapPixelWidth(gap) > 40" class="gantt-row__idle-gap-label">{{ t('calendar.gantt.idleLabel', { n: gap.days }) }}</span>
+    </div>
+
     <GanttTimelineItem
       v-for="item in enrichedBookings"
       :key="item.id"
@@ -19,9 +29,12 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import GanttTimelineItem from './GanttTimelineItem.vue'
-import { dateToPixel, bookingWidth, assignLanes } from '../../utils/gantt'
+import { dateToPixel, bookingWidth, assignLanes, findIdleGaps } from '../../utils/gantt'
 import { parseIsoDate } from '../../utils/date'
+
+const { t } = useI18n()
 
 const ITEM_GAP = 2
 
@@ -88,12 +101,62 @@ function laneOf(item) {
   return laneData.value.lanes[item.id] || 0
 }
 
-defineExpose({ enrichedBookings, laneData, computedRowHeight, rowStyle, itemLeft, itemWidth, laneOf })
+// FT-023: idle gaps — only when specialMode === 'idle'.
+const idleGaps = computed(() => {
+  if (props.specialMode !== 'idle') return []
+  return findIdleGaps(enrichedBookings.value, props.viewStart, props.viewEnd)
+})
+
+function gapStyle(gap) {
+  const left = dateToPixel(gap.start, props.viewStart, props.pixelsPerMs)
+  const width = dateToPixel(gap.end, props.viewStart, props.pixelsPerMs) - left
+  return {
+    left: left + 'px',
+    width: Math.max(width, 2) + 'px',
+  }
+}
+
+function gapPixelWidth(gap) {
+  return dateToPixel(gap.end, props.viewStart, props.pixelsPerMs)
+    - dateToPixel(gap.start, props.viewStart, props.pixelsPerMs)
+}
+
+defineExpose({ enrichedBookings, laneData, computedRowHeight, rowStyle, itemLeft, itemWidth, laneOf, idleGaps, gapStyle, gapPixelWidth })
 </script>
 
 <style scoped>
 .gantt-row {
   border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   box-sizing: border-box;
+}
+
+/* FT-023 Idle Gaps */
+.gantt-row__idle-gap {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(var(--v-theme-error), 0.08),
+    rgba(var(--v-theme-error), 0.08) 4px,
+    rgba(var(--v-theme-error), 0.18) 4px,
+    rgba(var(--v-theme-error), 0.18) 8px
+  );
+  border-left: 2px dashed rgba(var(--v-theme-error), 0.5);
+  border-right: 2px dashed rgba(var(--v-theme-error), 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.gantt-row__idle-gap-label {
+  background: rgba(var(--v-theme-error), 0.85);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
 }
 </style>

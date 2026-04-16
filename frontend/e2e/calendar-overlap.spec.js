@@ -64,6 +64,38 @@ test.describe('Gantt Calendar (CHK-07)', () => {
     )
   })
 
+  // FT-023 Idle Gaps Mode
+  test('idle toggle renders gap layer under bars; mutual exclusion with handover (FT-023, SC-01,04)', async ({ page }) => {
+    await page.waitForSelector('.gantt-item', { timeout: 10000 })
+
+    // Pre-toggle: no gap layer.
+    const preGapCount = await page.locator('.gantt-row__idle-gap').count()
+    expect(preGapCount).toBe(0)
+
+    // Activate idle mode.
+    await page.locator('[data-testid="idle-btn"]').click()
+    await page.waitForFunction(
+      () => document.querySelectorAll('.gantt-row__idle-gap').length > 0,
+      { timeout: 5000 }
+    )
+    const gapCount = await page.locator('.gantt-row__idle-gap').count()
+    expect(gapCount).toBeGreaterThanOrEqual(1)
+
+    // Mutual exclusion: switch to handover → gaps disappear.
+    await page.locator('[data-testid="handover-btn"]').click()
+    await page.waitForFunction(
+      () => document.querySelectorAll('.gantt-row__idle-gap').length === 0,
+      { timeout: 5000 }
+    )
+
+    // Back to normal — deactivate handover.
+    await page.locator('[data-testid="handover-btn"]').click()
+    await page.waitForFunction(
+      () => document.querySelectorAll('.gantt-row__idle-gap, .gantt-item--dimmed, [class*="gantt-item--handover-"]').length === 0,
+      { timeout: 5000 }
+    )
+  })
+
   // FT-022 Overdue Mode
   test('overdue toggle applies overdue / dimmed classes; mutual exclusion with handover (FT-022, SC-01..04)', async ({ page }) => {
     await page.waitForSelector('.gantt-item', { timeout: 10000 })
