@@ -187,4 +187,29 @@ describe('GanttTimelineRow', () => {
       expect(style.width).toMatch(/px$/)
     })
   })
+
+  // --- Bugfix: sidebar height sync ---
+  describe('row-height-changed event (sidebar sync)', () => {
+    it('emits row-height-changed immediately on mount with unitId + height', () => {
+      const wrapper = setup([
+        { id: 1, unit_id: 7, check_in: '2026-04-15', check_out: '2026-04-20', status: 'confirmed' },
+      ])
+      const events = wrapper.emitted('row-height-changed')
+      expect(events).toBeTruthy()
+      expect(events.length).toBeGreaterThanOrEqual(1)
+      expect(events[0][0]).toEqual({ unitId: 7, height: wrapper.vm.computedRowHeight })
+    })
+
+    it('emits larger height when lanes grow from overlap', () => {
+      const wrapper = setup([
+        { id: 1, unit_id: 7, check_in: '2026-04-15', check_out: '2026-04-22', status: 'confirmed' },
+        { id: 2, unit_id: 7, check_in: '2026-04-16', check_out: '2026-04-23', status: 'confirmed' },
+        { id: 3, unit_id: 7, check_in: '2026-04-17', check_out: '2026-04-24', status: 'confirmed' },
+      ])
+      const events = wrapper.emitted('row-height-changed')
+      const last = events.at(-1)[0]
+      expect(last.unitId).toBe(7)
+      expect(last.height).toBeGreaterThan(36) // baseRowHeight
+    })
+  })
 })

@@ -110,4 +110,23 @@ describe('GanttTimeline', () => {
     const rows = wrapper.findAll('.row-stub')
     rows.forEach((r) => expect(r.attributes('data-special-mode')).toBe(''))
   })
+
+  // --- Bugfix: sidebar height sync from rows ---
+  it('onRowHeightChanged updates rowHeights map per unit id', () => {
+    const wrapper = setup('2026-04-15', '2026-04-28')
+    wrapper.vm.onRowHeightChanged({ unitId: 1, height: 60 })
+    expect(wrapper.vm.rowHeights[1]).toBe(60)
+    wrapper.vm.onRowHeightChanged({ unitId: 2, height: 80 })
+    expect(wrapper.vm.rowHeights[2]).toBe(80)
+    expect(wrapper.vm.rowHeights[1]).toBe(60)
+  })
+
+  it('onRowHeightChanged ignores no-op updates', () => {
+    const wrapper = setup('2026-04-15', '2026-04-28')
+    wrapper.vm.onRowHeightChanged({ unitId: 1, height: 60 })
+    const refBefore = wrapper.vm.rowHeights
+    wrapper.vm.onRowHeightChanged({ unitId: 1, height: 60 })
+    // Same value — no object reallocation (identity preserved).
+    expect(wrapper.vm.rowHeights).toBe(refBefore)
+  })
 })

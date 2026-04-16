@@ -28,7 +28,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import GanttTimelineItem from './GanttTimelineItem.vue'
 import { dateToPixel, bookingWidth, assignLanes, findIdleGaps } from '../../utils/gantt'
@@ -50,7 +50,7 @@ const props = defineProps({
   specialMode: { type: String, default: '' },
 })
 
-defineEmits(['show-booking', 'show-tooltip', 'hide-tooltip', 'context-menu'])
+const emit = defineEmits(['show-booking', 'show-tooltip', 'hide-tooltip', 'context-menu', 'row-height-changed'])
 
 // Enrich with parsed Date objects; filter out invalid + cancelled + orphan.
 const enrichedBookings = computed(() => {
@@ -88,6 +88,11 @@ const rowStyle = computed(() => ({
   width: props.totalWidth + 'px',
   position: 'relative',
 }))
+
+// Keep sidebar cell in sync with the computed row height (lanes can grow rows).
+watch(computedRowHeight, (height) => {
+  emit('row-height-changed', { unitId: props.unit.id, height })
+}, { immediate: true })
 
 function itemLeft(item) {
   return dateToPixel(item._start, props.viewStart, props.pixelsPerMs)
