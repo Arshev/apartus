@@ -140,9 +140,11 @@
       "today": "Today",
       "modes": {
         "handover": "Arrivals/Departures",
-        "overdue": "Overdue"
+        "overdue": "Overdue",
+        "idle": "Idle gaps"
       },
       "overdueLabel": "+{n}d",
+      "idleLabel": "{n}d",
       "handoverMarkers": {
         "checkinToday": "Check-in today",
         "checkinTomorrow": "Check-in tomorrow",

@@ -7,6 +7,7 @@ import {
   assignLanes,
   getHandoverType,
   getOverdueDays,
+  findIdleGaps,
 } from '../../utils/gantt.js'
 import { parseIsoDate, startOfDay, addDays } from '../../utils/date.js'
 
@@ -307,6 +308,108 @@ describe('utils/gantt', () => {
       const yesterday = addDays(realToday, -1)
       const yIso = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`
       expect(getOverdueDays(mk('checked_in', yIso), realToday)).toBe(1)
+    })
+  })
+
+  describe('findIdleGaps (FT-023)', () => {
+    const VS = parseIsoDate('2026-04-01')
+    const VE = parseIsoDate('2026-04-30')
+    const mkB = (from, to, status = 'confirmed') => ({
+      _start: parseIsoDate(from),
+      _end: parseIsoDate(to),
+      status,
+    })
+
+    it('empty bookings → one gap across full viewport', () => {
+      const gaps = findIdleGaps([], VS, VE)
+      expect(gaps).toHaveLength(1)
+      expect(gaps[0].days).toBe(29)
+    })
+
+    it('null bookings → one gap across full viewport', () => {
+      const gaps = findIdleGaps(null, VS, VE)
+      expect(gaps).toHaveLength(1)
+    })
+
+    it('single booking in middle → 2 gaps (before and after)', () => {
+      const gaps = findIdleGaps([mkB('2026-04-10', '2026-04-15')], VS, VE)
+      expect(gaps).toHaveLength(2)
+      expect(gaps[0].days).toBe(9)  // 04-01..04-10
+      expect(gaps[1].days).toBe(15) // 04-15..04-30
+    })
+
+    it('two non-overlapping bookings → 3 gaps', () => {
+      const gaps = findIdleGaps([
+        mkB('2026-04-05', '2026-04-10'),
+        mkB('2026-04-20', '2026-04-25'),
+      ], VS, VE)
+      expect(gaps).toHaveLength(3)
+      expect(gaps[0].days).toBe(4)  // 01..05
+      expect(gaps[1].days).toBe(10) // 10..20
+      expect(gaps[2].days).toBe(5)  // 25..30
+    })
+
+    it('back-to-back bookings (no gap) → skips micro-gap', () => {
+      const gaps = findIdleGaps([
+        mkB('2026-04-05', '2026-04-15'),
+        mkB('2026-04-15', '2026-04-25'),
+      ], VS, VE)
+      // Only edge gaps: 01..05 = 4d; 25..30 = 5d.
+      expect(gaps).toHaveLength(2)
+      expect(gaps[0].days).toBe(4)
+      expect(gaps[1].days).toBe(5)
+    })
+
+    it('cancelled booking ignored → gap includes its interval', () => {
+      const gaps = findIdleGaps([
+        mkB('2026-04-10', '2026-04-15', 'cancelled'),
+      ], VS, VE)
+      expect(gaps).toHaveLength(1)
+      expect(gaps[0].days).toBe(29)
+    })
+
+    it('checked_out booking ignored → gap includes its interval', () => {
+      const gaps = findIdleGaps([
+        mkB('2026-04-10', '2026-04-15', 'checked_out'),
+      ], VS, VE)
+      expect(gaps).toHaveLength(1)
+      expect(gaps[0].days).toBe(29)
+    })
+
+    it('checked_in booking counts as busy', () => {
+      const gaps = findIdleGaps([
+        mkB('2026-04-10', '2026-04-15', 'checked_in'),
+      ], VS, VE)
+      expect(gaps).toHaveLength(2)
+    })
+
+    it('booking spans entire viewport → no gaps', () => {
+      const gaps = findIdleGaps([mkB('2026-03-15', '2026-05-15')], VS, VE)
+      expect(gaps).toHaveLength(0)
+    })
+
+    it('overlapping cluster handled as single busy period (max end)', () => {
+      const gaps = findIdleGaps([
+        mkB('2026-04-10', '2026-04-18'),
+        mkB('2026-04-14', '2026-04-22'),
+      ], VS, VE)
+      // Gaps: 01..10 = 9d; 22..30 = 8d.
+      expect(gaps).toHaveLength(2)
+      expect(gaps[0].days).toBe(9)
+      expect(gaps[1].days).toBe(8)
+    })
+
+    it('booking with invalid _start/_end filtered out', () => {
+      const gaps = findIdleGaps([{ status: 'confirmed' }], VS, VE)
+      expect(gaps).toHaveLength(1)
+      expect(gaps[0].days).toBe(29)
+    })
+
+    it('single-day booking inside viewport', () => {
+      const gaps = findIdleGaps([mkB('2026-04-10', '2026-04-11')], VS, VE)
+      expect(gaps).toHaveLength(2)
+      expect(gaps[0].days).toBe(9)   // 01..10
+      expect(gaps[1].days).toBe(19)  // 11..30
     })
   })
 })

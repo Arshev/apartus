@@ -30,6 +30,16 @@
         {{ $t('calendar.gantt.modes.overdue') }}
       </v-btn>
 
+      <v-btn
+        prepend-icon="mdi-clock-alert-outline"
+        :color="specialMode === 'idle' ? 'primary' : undefined"
+        :variant="specialMode === 'idle' ? 'elevated' : 'text'"
+        @click="toggleIdle"
+        data-testid="idle-btn"
+      >
+        {{ $t('calendar.gantt.modes.idle') }}
+      </v-btn>
+
       <v-btn variant="text" prepend-icon="mdi-calendar-today" @click="goToday" data-testid="today-btn">
         {{ $t('calendar.gantt.toolbar.today') }}
       </v-btn>
@@ -95,7 +105,7 @@ import { addDays, startOfDay, formatIsoDate, parseIsoDate } from '../../utils/da
 const STORAGE_KEY = 'apartus-calendar-view'
 const DEFAULT_RANGE_DAYS = 14
 const SUPPORTED_RANGES = [7, 14, 30]
-const SUPPORTED_SPECIAL_MODES = ['', 'handover', 'overdue']
+const SUPPORTED_SPECIAL_MODES = ['', 'handover', 'overdue', 'idle']
 
 const { t } = useI18n()
 const router = useRouter()
@@ -118,6 +128,7 @@ function setSpecialMode(mode) {
 
 function toggleHandover() { setSpecialMode('handover') }
 function toggleOverdue() { setSpecialMode('overdue') }
+function toggleIdle() { setSpecialMode('idle') }
 
 const viewStart = computed(() => anchorDate.value)
 const viewEnd = computed(() => addDays(anchorDate.value, rangeDays.value - 1))
@@ -272,6 +283,6 @@ defineExpose({
   rangeDays, anchorDate, specialMode, viewStart, viewEnd, reservations, units, loading, error,
   tooltip, contextMenu, snackbar, jumpDate, datePickerOpen, timelineEl,
   loadData, goToday, onJumpDate, onShowBooking, onShowTooltip, onHideTooltip, onContextMenu,
-  contextEdit, contextCheckIn, contextCheckOut, contextCancel, toggleHandover, toggleOverdue, setSpecialMode,
+  contextEdit, contextCheckIn, contextCheckOut, contextCancel, toggleHandover, toggleOverdue, toggleIdle, setSpecialMode,
 })
 </script>

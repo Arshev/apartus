@@ -126,4 +126,65 @@ describe('GanttTimelineRow', () => {
     const stub = wrapper.find('.item-stub')
     expect(stub.attributes('data-special-mode')).toBe('')
   })
+
+  // --- FT-023 Idle Gaps ---
+  describe('idle gaps (FT-023)', () => {
+    it('does not render gap layer when specialMode is empty', () => {
+      const wrapper = setup([
+        { id: 1, unit_id: 7, check_in: '2026-04-20', check_out: '2026-04-25', status: 'confirmed' },
+      ])
+      expect(wrapper.vm.idleGaps).toHaveLength(0)
+      expect(wrapper.findAll('.gantt-row__idle-gap')).toHaveLength(0)
+    })
+
+    it('does not render gap layer when specialMode is handover', () => {
+      const wrapper = setup(
+        [{ id: 1, unit_id: 7, check_in: '2026-04-20', check_out: '2026-04-25', status: 'confirmed' }],
+        { specialMode: 'handover' }
+      )
+      expect(wrapper.vm.idleGaps).toHaveLength(0)
+    })
+
+    it('renders full-viewport gap when unit has no bookings', () => {
+      const wrapper = setup([], { specialMode: 'idle' })
+      expect(wrapper.vm.idleGaps).toHaveLength(1)
+      expect(wrapper.findAll('.gantt-row__idle-gap')).toHaveLength(1)
+    })
+
+    it('renders 2 gap elements around single booking', () => {
+      const wrapper = setup(
+        [{ id: 1, unit_id: 7, check_in: '2026-04-20', check_out: '2026-04-22', status: 'confirmed' }],
+        { specialMode: 'idle' }
+      )
+      expect(wrapper.vm.idleGaps).toHaveLength(2)
+      expect(wrapper.findAll('.gantt-row__idle-gap')).toHaveLength(2)
+    })
+
+    it('gap label shown only when gap is wide enough (>40px)', () => {
+      const wrapper = setup(
+        [{ id: 1, unit_id: 7, check_in: '2026-04-20', check_out: '2026-04-22', status: 'confirmed' }],
+        { specialMode: 'idle' }
+      )
+      // 14-day viewport, 1400px total, so 100px/day. First gap ~5 days = 500px → label shown.
+      const labels = wrapper.findAll('.gantt-row__idle-gap-label')
+      expect(labels.length).toBeGreaterThanOrEqual(1)
+    })
+
+    it('cancelled booking does not create busy interval', () => {
+      const wrapper = setup(
+        [{ id: 1, unit_id: 7, check_in: '2026-04-20', check_out: '2026-04-22', status: 'cancelled' }],
+        { specialMode: 'idle' }
+      )
+      // Row filters cancelled (existing FT-020 behavior) before findIdleGaps sees them.
+      expect(wrapper.vm.idleGaps).toHaveLength(1) // full viewport
+    })
+
+    it('gap style left and width match pixel math', () => {
+      const wrapper = setup([], { specialMode: 'idle' })
+      const gap = wrapper.vm.idleGaps[0]
+      const style = wrapper.vm.gapStyle(gap)
+      expect(style.left).toMatch(/px$/)
+      expect(style.width).toMatch(/px$/)
+    })
+  })
 })
