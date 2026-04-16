@@ -350,4 +350,64 @@ describe('GanttCalendarView', () => {
       expect(wrapper.vm.specialMode).toBe('idle')
     })
   })
+
+  // --- FT-024 Heatmap Mode ---
+  describe('heatmap mode (FT-024)', () => {
+    it('toggleHeatmap flips "" → "heatmap" → ""', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleHeatmap()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('heatmap')
+      wrapper.vm.toggleHeatmap()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('')
+    })
+
+    it('mutual exclusion — handover → heatmap', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleHandover()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleHeatmap()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('heatmap')
+    })
+
+    it('mutual exclusion — idle → heatmap', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleIdle()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleHeatmap()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('heatmap')
+    })
+
+    it('mutual exclusion — overdue → heatmap', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleOverdue()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleHeatmap()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('heatmap')
+    })
+
+    it('persists "heatmap" to localStorage', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleHeatmap()
+      await wrapper.vm.$nextTick()
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY))
+      expect(stored.specialMode).toBe('heatmap')
+    })
+
+    it('reads persisted "heatmap" on mount', async () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ rangeDays: 14, specialMode: 'heatmap' }))
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      expect(wrapper.vm.specialMode).toBe('heatmap')
+    })
+  })
 })

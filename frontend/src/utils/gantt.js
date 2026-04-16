@@ -237,6 +237,33 @@ export function findIdleGaps(bookings, viewStart, viewEnd) {
 }
 
 /**
+ * Classify a single day's occupancy for a row (FT-024 Heatmap mode).
+ *
+ * A day is `'busy'` if any non-cancelled non-checked_out booking covers it
+ * (`b._start.valueOf() <= day.valueOf() < b._end.valueOf()`). Otherwise
+ * `'free'`. Bookings must be pre-enriched with `{_start, _end}` Date
+ * objects (existing Row pattern used by findIdleGaps).
+ *
+ * Apartus uses date-level check_in/check_out so the `partial` state from
+ * the reference (rentprog) implementation is not applicable — binary
+ * classification is sufficient.
+ *
+ * @param {Date} day — local-midnight Date for the day
+ * @param {Array<{_start: Date, _end: Date, status: string}>} bookings
+ * @returns {'busy' | 'free'}
+ */
+export function getDayCellStatus(day, bookings) {
+  if (!day || !bookings || bookings.length === 0) return 'free'
+  const dayMs = day.valueOf()
+  for (const b of bookings) {
+    if (!b || !b._start || !b._end) continue
+    if (b.status === 'cancelled' || b.status === 'checked_out') continue
+    if (b._start.valueOf() <= dayMs && dayMs < b._end.valueOf()) return 'busy'
+  }
+  return 'free'
+}
+
+/**
  * Greedy lane assignment for overlapping bookings within one row.
  * Sorts by start ascending (longer items first on tie) and packs each item
  * into the earliest lane whose previous item ended at or before this start.

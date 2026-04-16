@@ -8,6 +8,7 @@ import {
   getHandoverType,
   getOverdueDays,
   findIdleGaps,
+  getDayCellStatus,
 } from '../../utils/gantt.js'
 import { parseIsoDate, startOfDay, addDays } from '../../utils/date.js'
 
@@ -410,6 +411,78 @@ describe('utils/gantt', () => {
       expect(gaps).toHaveLength(2)
       expect(gaps[0].days).toBe(9)   // 01..10
       expect(gaps[1].days).toBe(19)  // 11..30
+    })
+  })
+
+  describe('getDayCellStatus (FT-024)', () => {
+    const mkB = (from, to, status = 'confirmed') => ({
+      _start: parseIsoDate(from),
+      _end: parseIsoDate(to),
+      status,
+    })
+
+    it('returns free for empty bookings', () => {
+      expect(getDayCellStatus(parseIsoDate('2026-04-15'), [])).toBe('free')
+    })
+
+    it('returns free for null bookings', () => {
+      expect(getDayCellStatus(parseIsoDate('2026-04-15'), null)).toBe('free')
+    })
+
+    it('returns free for null day', () => {
+      expect(getDayCellStatus(null, [mkB('2026-04-15', '2026-04-20')])).toBe('free')
+    })
+
+    it('returns busy when day is inside booking interval', () => {
+      const bookings = [mkB('2026-04-15', '2026-04-20')]
+      expect(getDayCellStatus(parseIsoDate('2026-04-15'), bookings)).toBe('busy')
+      expect(getDayCellStatus(parseIsoDate('2026-04-17'), bookings)).toBe('busy')
+      expect(getDayCellStatus(parseIsoDate('2026-04-19'), bookings)).toBe('busy')
+    })
+
+    it('returns free when day == check_out (exclusive boundary)', () => {
+      const bookings = [mkB('2026-04-15', '2026-04-20')]
+      expect(getDayCellStatus(parseIsoDate('2026-04-20'), bookings)).toBe('free')
+    })
+
+    it('returns free when day is before check_in', () => {
+      const bookings = [mkB('2026-04-15', '2026-04-20')]
+      expect(getDayCellStatus(parseIsoDate('2026-04-14'), bookings)).toBe('free')
+    })
+
+    it('returns free when day is after check_out', () => {
+      const bookings = [mkB('2026-04-15', '2026-04-20')]
+      expect(getDayCellStatus(parseIsoDate('2026-04-22'), bookings)).toBe('free')
+    })
+
+    it('cancelled booking does not contribute busy', () => {
+      const bookings = [mkB('2026-04-15', '2026-04-20', 'cancelled')]
+      expect(getDayCellStatus(parseIsoDate('2026-04-17'), bookings)).toBe('free')
+    })
+
+    it('checked_out booking does not contribute busy', () => {
+      const bookings = [mkB('2026-04-15', '2026-04-20', 'checked_out')]
+      expect(getDayCellStatus(parseIsoDate('2026-04-17'), bookings)).toBe('free')
+    })
+
+    it('confirmed and checked_in both count as busy', () => {
+      expect(getDayCellStatus(parseIsoDate('2026-04-17'), [mkB('2026-04-15', '2026-04-20', 'confirmed')])).toBe('busy')
+      expect(getDayCellStatus(parseIsoDate('2026-04-17'), [mkB('2026-04-15', '2026-04-20', 'checked_in')])).toBe('busy')
+    })
+
+    it('invalid booking (missing _start/_end) is skipped', () => {
+      const bookings = [{ status: 'confirmed' }, mkB('2026-04-15', '2026-04-20')]
+      expect(getDayCellStatus(parseIsoDate('2026-04-17'), bookings)).toBe('busy')
+    })
+
+    it('returns busy if any of multiple bookings cover the day', () => {
+      const bookings = [
+        mkB('2026-04-10', '2026-04-13'),
+        mkB('2026-04-15', '2026-04-20'),
+      ]
+      expect(getDayCellStatus(parseIsoDate('2026-04-17'), bookings)).toBe('busy')
+      // Gap day between the two.
+      expect(getDayCellStatus(parseIsoDate('2026-04-14'), bookings)).toBe('free')
     })
   })
 })

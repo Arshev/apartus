@@ -141,7 +141,8 @@
       "modes": {
         "handover": "Заезды/выезды",
         "overdue": "Просрочки",
-        "idle": "Окна простоя"
+        "idle": "Окна простоя",
+        "heatmap": "Тепловая карта"
       },
       "overdueLabel": "+{n}д",
       "idleLabel": "{n}д",
