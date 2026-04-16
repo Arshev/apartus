@@ -11,7 +11,7 @@
         v-for="unit in units"
         :key="unit.id"
         class="gantt-timeline__unit-cell"
-        :style="{ height: rowHeights[unit.id] || baseRowHeight + 'px' }"
+        :style="{ height: (rowHeights[unit.id] || baseRowHeight) + 'px' }"
         :title="`${unit.property_name} — ${unit.name}`"
       >
         <div class="gantt-timeline__unit-property">{{ unit.property_name }}</div>
@@ -46,6 +46,7 @@
             @show-tooltip="$emit('show-tooltip', $event)"
             @hide-tooltip="$emit('hide-tooltip')"
             @context-menu="$emit('context-menu', $event)"
+            @row-height-changed="onRowHeightChanged"
           />
         </div>
 
@@ -108,8 +109,13 @@ const todayInRange = computed(() => {
 
 const todayLeft = computed(() => dateToPixel(startOfDay(new Date()), props.viewStart, pixelsPerMs.value))
 
-// Track row heights for sidebar sync (lanes can grow rows).
+// Track row heights for sidebar sync. Row emits row-height-changed when
+// its computedRowHeight changes (lanes can grow rows beyond baseRowHeight).
 const rowHeights = ref({})
+function onRowHeightChanged({ unitId, height }) {
+  if (rowHeights.value[unitId] === height) return
+  rowHeights.value = { ...rowHeights.value, [unitId]: height }
+}
 
 function updateViewport() {
   if (scrollEl.value) viewportWidth.value = scrollEl.value.clientWidth || DEFAULT_VIEWPORT_WIDTH
@@ -138,14 +144,14 @@ onUnmounted(() => {
 })
 
 defineExpose({
-  pixelsPerMs, totalWidth, todayInRange, todayLeft, rowHeights, scrollToToday, scrollToDate, updateViewport,
+  pixelsPerMs, totalWidth, todayInRange, todayLeft, rowHeights, onRowHeightChanged, scrollToToday, scrollToDate, updateViewport,
 })
 </script>
 
 <style scoped>
 .gantt-timeline {
   display: grid;
-  grid-template-columns: 200px 1fr;
+  grid-template-columns: 240px 1fr;
   grid-template-rows: auto 1fr;
   border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   border-radius: 8px;
