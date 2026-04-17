@@ -225,4 +225,18 @@ test.describe('Gantt Calendar (CHK-07)', () => {
     // Cleanup: clear so we don't leak state to the next test run.
     await page.locator('[data-testid="search-input"] input').press('Escape')
   })
+
+  // FT-027 Reservation Bar Density
+  test('revenue chip rendered on wide bars, hidden on narrow (FT-027, SC-01,03)', async ({ page }) => {
+    await page.waitForSelector('.gantt-item', { timeout: 10000 })
+    // Demo seed has at least one multi-night confirmed reservation at 14d
+    // range = ~560px viewport / 14 days ≈ 40px/day, so 5-night booking ≈ 200px
+    // — wide enough to trigger both revenue (≥140px) and nights (≥180px).
+    const revenueCount = await page.locator('.gantt-item__revenue').count()
+    expect(revenueCount).toBeGreaterThanOrEqual(1)
+
+    // Revenue chip should contain a currency-formatted value (digits + symbol).
+    const firstRevenue = await page.locator('.gantt-item__revenue').first().textContent()
+    expect(firstRevenue).toMatch(/[\d ].*[₽$€]|[₽$€].*[\d]/)
+  })
 })

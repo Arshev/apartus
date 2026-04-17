@@ -10,7 +10,9 @@
   >
     <span v-if="handoverMarker" class="gantt-item__marker" :title="handoverMarkerLabel">{{ handoverMarker }}</span>
     <span v-if="showLabel" class="gantt-item__label">{{ label }}</span>
+    <span v-if="showNights" class="gantt-item__nights text-tabular">{{ nightsLabel }}</span>
     <span v-if="overdueDays > 0" class="gantt-item__overdue-label" :title="overdueLabelFull">{{ overdueLabelShort }}</span>
+    <span v-if="showRevenue" class="gantt-item__revenue text-tabular">{{ formattedRevenue }}</span>
   </div>
 </template>
 
@@ -18,9 +20,14 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getHandoverType, getOverdueDays } from '../../utils/gantt'
-import { startOfDay } from '../../utils/date'
+import { startOfDay, diffDays } from '../../utils/date'
+import { formatMoney } from '../../utils/currency'
 
 const ITEM_GAP = 2
+
+// FT-027: width thresholds for progressive disclosure — see feature REQ-03.
+const WIDTH_REVENUE_MIN = 140
+const WIDTH_NIGHTS_MIN = 180
 const HANDOVER_MARKERS = {
   checkin_today: '\u2197', // ↗
   checkin_tomorrow: '\u2197', // ↗ (same icon, lighter border differentiates)
@@ -37,6 +44,9 @@ const props = defineProps({
   lane: { type: Number, default: 0 },
   itemHeight: { type: Number, default: 28 },
   specialMode: { type: String, default: '' },
+  // FT-027: currency resolved once at Row level (REQ-06) — default ensures
+  // tests/mocks without a store still render sensibly.
+  currency: { type: String, default: 'RUB' },
 })
 
 const emit = defineEmits(['show-booking', 'show-tooltip', 'hide-tooltip', 'context-menu'])
@@ -90,6 +100,53 @@ const overdueLabelShort = computed(() => {
 
 const overdueLabelFull = computed(() => overdueLabelShort.value)
 
+// FT-027: nights count from pre-enriched booking (_start / _end are Date
+// objects added by Row before passing). Guarded against invalid dates and
+// 0-night edge cases (check_in === check_out).
+const nights = computed(() => {
+  const start = props.booking._start
+  const end = props.booking._end
+  if (!(start instanceof Date) || !(end instanceof Date)) return 0
+  const n = diffDays(start, end)
+  return Number.isFinite(n) && n > 0 ? n : 0
+})
+
+const nightsLabel = computed(() => t('calendar.gantt.nightsLabel', { n: nights.value }))
+
+// FT-027 REQ-03: dimmed state = special mode active but booking doesn't match
+// (handover non-matching, overdue non-matching). Revenue/nights would be
+// unreadable at opacity 0.35, so suppress both per FM-06.
+const isDimmed = computed(() => {
+  if (props.specialMode === 'handover') return handoverType.value === null
+  if (props.specialMode === 'overdue') return overdueDays.value === 0
+  return false
+})
+
+// FT-027 REQ-03: revenue chip visibility.
+// - Width ≥ 140px
+// - Non-zero total_price_cents (blocking reservations skip)
+// - NOT in overdue state where `+Nд` label claims the right slot (FM-05)
+// - NOT dimmed (illegible)
+const showRevenue = computed(() => {
+  if (props.width < WIDTH_REVENUE_MIN) return false
+  if (!props.booking.total_price_cents || props.booking.total_price_cents <= 0) return false
+  if (overdueDays.value > 0) return false
+  if (isDimmed.value) return false
+  return true
+})
+
+// FT-027 REQ-03: nights indicator visibility. Same override set as revenue,
+// plus requires width ≥ 180px (narrower bars need guest-name space).
+const showNights = computed(() => {
+  if (props.width < WIDTH_NIGHTS_MIN) return false
+  if (nights.value <= 0) return false
+  if (overdueDays.value > 0) return false
+  if (isDimmed.value) return false
+  return true
+})
+
+const formattedRevenue = computed(() => formatMoney(props.booking.total_price_cents, props.currency))
+
 const itemClasses = computed(() => {
   const classes = [`gantt-item--${props.booking.status}`]
   if (props.specialMode === 'handover') {
@@ -120,7 +177,12 @@ function onContextMenu(event) {
   emit('context-menu', { booking: props.booking, x: event.clientX, y: event.clientY })
 }
 
-defineExpose({ itemStyle, showLabel, label, itemClasses, handoverType, handoverMarker, handoverMarkerLabel, overdueDays, overdueLabelShort, onClick, onMouseEnter, onContextMenu })
+defineExpose({
+  itemStyle, showLabel, label, itemClasses, handoverType, handoverMarker, handoverMarkerLabel,
+  overdueDays, overdueLabelShort, onClick, onMouseEnter, onContextMenu,
+  // FT-027
+  nights, nightsLabel, isDimmed, showRevenue, showNights, formattedRevenue,
+})
 </script>
 
 <style scoped>
@@ -142,7 +204,11 @@ defineExpose({ itemStyle, showLabel, label, itemClasses, handoverType, handoverM
 
 .gantt-item:hover {
   opacity: 0.9;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  /* FT-027 REQ-04: theme-aware outline replaces opaque box-shadow.
+     Outline sits outside the box model so it doesn't displace flex children,
+     and tints consistently in light + dark via --v-theme-on-surface. */
+  outline: 2px solid rgba(var(--v-theme-on-surface), 0.3);
+  outline-offset: 2px;
   z-index: 2;
 }
 
@@ -151,7 +217,33 @@ defineExpose({ itemStyle, showLabel, label, itemClasses, handoverType, handoverM
   overflow: hidden;
   text-overflow: ellipsis;
   pointer-events: none;
-  width: 100%;
+  /* FT-027: switch from `width: 100%` to flex to share space with revenue + nights. */
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* FT-027: revenue chip — right-aligned via flex order + margin-left: auto trick.
+   Compact, tabular numerics, muted. Does not intercept clicks. */
+.gantt-item__revenue {
+  margin-left: auto;
+  padding-left: 6px;
+  font-size: 11px;
+  line-height: 1;
+  opacity: 0.9;
+  white-space: nowrap;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+/* FT-027: nights indicator — between label and revenue, subtle. */
+.gantt-item__nights {
+  padding: 0 6px;
+  font-size: 10px;
+  line-height: 1;
+  opacity: 0.75;
+  white-space: nowrap;
+  flex-shrink: 0;
+  pointer-events: none;
 }
 
 .gantt-item--confirmed { background: rgb(var(--v-theme-status-confirmed)); }

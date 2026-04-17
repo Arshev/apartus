@@ -28,6 +28,7 @@
       :lane="laneOf(item)"
       :item-height="itemHeight"
       :special-mode="specialMode"
+      :currency="currency"
       @show-booking="$emit('show-booking', $event)"
       @show-tooltip="$emit('show-tooltip', $event)"
       @hide-tooltip="$emit('hide-tooltip')"
@@ -42,6 +43,12 @@ import { useI18n } from 'vue-i18n'
 import GanttTimelineItem from './GanttTimelineItem.vue'
 import { dateToPixel, bookingWidth, assignLanes, findIdleGaps, getDayCellStatus } from '../../utils/gantt'
 import { parseIsoDate, startOfDay, addDays } from '../../utils/date'
+import { useAuthStore } from '../../stores/auth'
+
+// FT-027: resolve currency once at row level and pass to each Item as prop.
+// Avoids each Item repeating the auth-store lookup in its own scope.
+const authStore = useAuthStore()
+const currency = computed(() => authStore.organization?.currency || 'RUB')
 
 const MS_PER_DAY = 86_400_000
 
@@ -163,7 +170,7 @@ function heatCellStyle(cell) {
   }
 }
 
-defineExpose({ enrichedBookings, laneData, computedRowHeight, rowStyle, itemLeft, itemWidth, laneOf, idleGaps, gapStyle, gapPixelWidth, heatCells, heatCellStyle })
+defineExpose({ enrichedBookings, laneData, computedRowHeight, rowStyle, itemLeft, itemWidth, laneOf, idleGaps, gapStyle, gapPixelWidth, heatCells, heatCellStyle, currency })
 </script>
 
 <style scoped>
