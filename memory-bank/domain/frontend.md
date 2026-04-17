@@ -131,6 +131,21 @@ Apartus frontend — это одно приложение, SPA.
 - `SUPPORTED_SPECIAL_MODES` extended: `['', 'handover', 'overdue', 'idle', 'heatmap']`.
 - **FT-020 NS-02 closed** — все 4 special modes delivered (handover FT-021, overdue FT-022, idle FT-023, heatmap FT-024).
 
+### Keyboard Shortcuts (FT-029)
+
+Gantt поддерживает 6 keyboard shortcuts (via `composables/useGanttShortcuts.js`):
+
+| Key | Action |
+|---|---|
+| `/` | Открыть поиск и сфокусировать input |
+| `T` | Перейти к сегодня (centers today marker) |
+| `[` | Предыдущий период (`anchorDate −= rangeDays`) |
+| `]` | Следующий период (`anchorDate += rangeDays`) |
+| `Esc` | Закрыть dialog / очистить поиск |
+| `?` | Показать help dialog со списком shortcuts |
+
+Handler dispatches по `event.code` (layout-independent) + fallback на `event.key === '?'` для Russian layout (Shift+7). Guards — no-op когда target = input/textarea/contenteditable OR active Vuetify overlay (`.v-overlay--active`). Help dialog — `v-dialog` с autofocus on close button.
+
 ### Reservation Bar Density (FT-027)
 
 - `GanttTimelineItem` теперь несёт прогрессивно раскрываемую информацию: `guest_name` + **revenue chip** (right-aligned, tabular) + **nights indicator** (`{n} н` / `{n} n`).

@@ -774,4 +774,51 @@ describe('GanttCalendarView', () => {
       expect(pushSpy).toHaveBeenCalledWith('/properties/new')
     })
   })
+
+  // --- FT-029 Keyboard shortcuts integration ---
+  describe('keyboard shortcuts (FT-029)', () => {
+    it('exposes shortcutRows with 6 entries (one per shortcut)', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.shortcutRows).toHaveLength(6)
+      expect(wrapper.vm.shortcutRows.map((r) => r.key)).toEqual(['/', 'T', '[', ']', 'Esc', '?'])
+    })
+
+    it('shiftRange moves anchorDate by ±rangeDays days', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      const before = wrapper.vm.anchorDate.valueOf()
+      wrapper.vm.shiftRange(1)
+      await wrapper.vm.$nextTick()
+      const expectedDelta = wrapper.vm.rangeDays * 24 * 60 * 60 * 1000
+      expect(wrapper.vm.anchorDate.valueOf() - before).toBe(expectedDelta)
+    })
+
+    it('shiftRange(-1) moves anchorDate backward', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      const before = wrapper.vm.anchorDate.valueOf()
+      wrapper.vm.shiftRange(-1)
+      await wrapper.vm.$nextTick()
+      const expectedDelta = -wrapper.vm.rangeDays * 24 * 60 * 60 * 1000
+      expect(wrapper.vm.anchorDate.valueOf() - before).toBe(expectedDelta)
+    })
+
+    it('focusSearchInput opens search bar when closed', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.searchOpen).toBe(false)
+      await wrapper.vm.focusSearchInput()
+      expect(wrapper.vm.searchOpen).toBe(true)
+    })
+
+    it('helpOpen defaults to false, toggleable via exposed ref', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.helpOpen).toBe(false)
+      wrapper.vm.helpOpen = true
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.helpOpen).toBe(true)
+    })
+  })
 })

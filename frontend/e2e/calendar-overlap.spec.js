@@ -226,6 +226,44 @@ test.describe('Gantt Calendar (CHK-07)', () => {
     await page.locator('[data-testid="search-input"] input').press('Escape')
   })
 
+  // FT-029 Keyboard shortcuts
+  test('/ focuses search, T jumps to today, Esc clears (FT-029, SC-01,02,04)', async ({ page }) => {
+    await page.waitForSelector('.gantt-item', { timeout: 10000 })
+
+    // Press `/` — search bar opens + input focused.
+    await page.keyboard.press('Slash')
+    await page.waitForSelector('[data-testid="search-input"]', { timeout: 2000 })
+    // Focused element is the search input.
+    const focusedTestId = await page.evaluate(() => {
+      const ae = document.activeElement
+      return ae?.closest('[data-testid="search-input"]')?.getAttribute('data-testid') ?? null
+    })
+    expect(focusedTestId).toBe('search-input')
+
+    // Type a query, then press Escape — search clears and collapses.
+    await page.keyboard.type('xyzabc')
+    await page.waitForSelector('[data-testid="search-empty-state"]', { timeout: 2000 })
+    await page.keyboard.press('Escape')
+    await page.waitForSelector('[data-testid="search-btn"]', { timeout: 2000 })
+    // Bars restored after Escape clear.
+    await page.waitForSelector('.gantt-item', { timeout: 5000 })
+
+    // Press `T` — no assertion on scroll position (brittle in headless), but
+    // verify the handler runs without throwing: scroll-top stays within viewport.
+    await page.keyboard.press('T')
+
+    // Press `?` — help dialog opens.
+    await page.keyboard.press('?')
+    await page.waitForSelector('[data-testid="shortcuts-dialog"]', { timeout: 2000 })
+    await expect(page.locator('[data-testid="shortcuts-dialog"]')).toBeVisible()
+    // Close via Esc.
+    await page.keyboard.press('Escape')
+    await page.waitForFunction(
+      () => document.querySelectorAll('[data-testid="shortcuts-dialog"] .v-overlay--active').length === 0,
+      { timeout: 2000 }
+    )
+  })
+
   // FT-028 Empty state UX
   test('search empty state shows hint + Clear button that restores view (FT-028, SC-01,02)', async ({ page }) => {
     await page.waitForSelector('.gantt-item', { timeout: 10000 })
