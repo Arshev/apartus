@@ -518,6 +518,20 @@ describe('GanttCalendarView', () => {
       expect(wrapper.vm.searchOpen).toBe(true)
     })
 
+    it('coerces null (from v-text-field clearable) back to empty string', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      wrapper.vm.searchQuery = 'foo'
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.searchQuery).toBe('foo')
+
+      // Vuetify's clearable X-button sets model to null, not ''. Ensure the
+      // watcher coerces it back so persistence + filtering stay string-typed.
+      wrapper.vm.searchQuery = null
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      expect(wrapper.vm.searchQuery).toBe('')
+    })
+
     it('persists searchQuery to localStorage', async () => {
       const wrapper = setup()
       await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()

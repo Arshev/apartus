@@ -153,6 +153,9 @@ import { addDays, startOfDay, formatIsoDate, parseIsoDate } from '../../utils/da
 import { debounce } from '../../utils/debounce'
 import { filterUnitsAndReservations } from '../../utils/search'
 
+// FT-025 REQ-02: 200ms trailing-edge — Material guideline for search input
+// responsiveness. Tuned per ASM-05 perf budget (50 units × 10 reservations =
+// 500 items × 3 substring checks per keystroke is imperceptible under 200ms).
 const SEARCH_DEBOUNCE_MS = 200
 
 const STORAGE_KEY = 'apartus-calendar-view'
@@ -209,7 +212,15 @@ const debouncedSetQuery = debounce((q) => {
   debouncedQuery.value = q
 }, SEARCH_DEBOUNCE_MS)
 
-watch(searchQuery, (q) => debouncedSetQuery(q))
+// Vuetify's `clearable` X-button emits `null` (not `''`) when clicked. Coerce
+// here so both refs stay typed as strings and persistence serializes a string.
+watch(searchQuery, (q) => {
+  if (q === null || q === undefined) {
+    searchQuery.value = ''
+    return // the re-assignment above will re-fire this watcher with ''
+  }
+  debouncedSetQuery(q)
+})
 
 function onOpenSearch() {
   searchOpen.value = true
@@ -348,8 +359,13 @@ function loadStoredView() {
       debouncedQuery.value = parsed.searchQuery
       searchOpen.value = true
     }
-  } catch {
-    // Persistence is best-effort; corrupt JSON or unavailable storage falls back to defaults.
+  } catch (err) {
+    // Persistence is best-effort; corrupt JSON or unavailable storage falls
+    // back to defaults. Log in dev so regressions are debuggable; silent in
+    // production to avoid noise in user consoles (Safari private mode, etc).
+    if (import.meta.env.DEV) {
+      console.warn('[gantt] loadStoredView: ignoring persisted state', err)
+    }
   }
 }
 
@@ -368,8 +384,11 @@ function persistView() {
         searchQuery: searchQuery.value,
       }),
     )
-  } catch {
-    // Ignore — best-effort.
+  } catch (err) {
+    // Quota exhaustion / storage disabled — best-effort only.
+    if (import.meta.env.DEV) {
+      console.warn('[gantt] persistView: could not write state', err)
+    }
   }
 }
 
