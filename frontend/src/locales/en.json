@@ -172,9 +172,14 @@
           "today": "Jump to today",
           "panPrev": "Previous period",
           "panNext": "Next period",
+          "sidebar": "Toggle sidebar",
           "clear": "Close or clear",
           "help": "Show help"
         }
+      },
+      "sidebar": {
+        "toggleExpand": "Expand sidebar",
+        "toggleCollapse": "Collapse sidebar"
       }
     }
   },

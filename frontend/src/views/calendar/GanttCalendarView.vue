@@ -123,6 +123,8 @@
       :view-start="viewStart"
       :view-end="viewEnd"
       :special-mode="specialMode"
+      :sidebar-collapsed="sidebarCollapsed"
+      @toggle-sidebar="toggleSidebar"
       @show-booking="onShowBooking"
       @show-tooltip="onShowTooltip"
       @hide-tooltip="onHideTooltip"
@@ -283,6 +285,8 @@ const searchInputEl = ref(null)
 // FT-029: help dialog open state.
 const helpOpen = ref(false)
 const helpCloseBtnEl = ref(null)
+// FT-030: sidebar collapse state (toggle via `S` shortcut or corner button).
+const sidebarCollapsed = ref(false)
 const searchQuery = ref('')
 const debouncedQuery = ref('')
 const searchOpen = ref(false)
@@ -368,12 +372,18 @@ function shiftRange(direction) {
   anchorDate.value = addDays(anchorDate.value, direction * rangeDays.value)
 }
 
+// FT-030: sidebar collapse toggle — also bound to `S` shortcut.
+function toggleSidebar() {
+  sidebarCollapsed.value = !sidebarCollapsed.value
+}
+
 // Shortcut rows — single source of truth for the help dialog table.
 const shortcutRows = [
   { key: '/', label: 'calendar.gantt.shortcuts.keys.search' },
   { key: 'T', label: 'calendar.gantt.shortcuts.keys.today' },
   { key: '[', label: 'calendar.gantt.shortcuts.keys.panPrev' },
   { key: ']', label: 'calendar.gantt.shortcuts.keys.panNext' },
+  { key: 'S', label: 'calendar.gantt.shortcuts.keys.sidebar' },
   { key: 'Esc', label: 'calendar.gantt.shortcuts.keys.clear' },
   { key: '?', label: 'calendar.gantt.shortcuts.keys.help' },
 ]
@@ -382,6 +392,7 @@ useGanttShortcuts({
   focusSearchInput,
   goToday,
   shiftRange,
+  toggleSidebar,
   onSearchEscape,
   helpOpen,
   searchQuery,
@@ -507,6 +518,11 @@ function loadStoredView() {
       debouncedQuery.value = parsed.searchQuery
       searchOpen.value = true
     }
+    // FT-030: restore sidebar collapse state. Boolean-only type guard —
+    // malformed values fall back to default (expanded).
+    if (typeof parsed.sidebarCollapsed === 'boolean') {
+      sidebarCollapsed.value = parsed.sidebarCollapsed
+    }
   } catch (err) {
     // Persistence is best-effort; corrupt JSON or unavailable storage falls
     // back to defaults. Log in dev so regressions are debuggable; silent in
@@ -530,6 +546,7 @@ function persistView() {
         rangeDays: rangeDays.value,
         specialMode: specialMode.value,
         searchQuery: searchQuery.value,
+        sidebarCollapsed: sidebarCollapsed.value,
       }),
     )
   } catch (err) {
@@ -546,6 +563,7 @@ watch(rangeDays, () => {
 })
 watch(specialMode, () => persistView())
 watch(searchQuery, () => persistView())
+watch(sidebarCollapsed, () => persistView())
 watch(anchorDate, () => loadData())
 
 // Refetch on tab focus (visibilitychange).
@@ -581,6 +599,8 @@ defineExpose({
   display, MODE_BUTTONS,
   // FT-029
   helpOpen, shortcutRows, focusSearchInput, shiftRange,
+  // FT-030
+  sidebarCollapsed, toggleSidebar,
 })
 </script>
 

@@ -119,6 +119,20 @@ describe('useGanttShortcuts', () => {
       press('BracketRight')
       expect(state.shiftRange).toHaveBeenCalledWith(1)
     })
+
+    it('S calls toggleSidebar (FT-030)', () => {
+      const toggleSidebar = vi.fn()
+      const { state } = mountWithShortcuts({ toggleSidebar })
+      press('KeyS')
+      expect(toggleSidebar).toHaveBeenCalledTimes(1)
+    })
+
+    it('S is a no-op when toggleSidebar handler is missing (backward-compat)', () => {
+      // Default mountWithShortcuts doesn't include toggleSidebar. Older
+      // callers should still mount without error.
+      mountWithShortcuts()
+      expect(() => press('KeyS')).not.toThrow()
+    })
   })
 
   describe('? — help dialog', () => {

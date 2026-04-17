@@ -264,6 +264,32 @@ test.describe('Gantt Calendar (CHK-07)', () => {
     )
   })
 
+  // FT-030 Sidebar collapse
+  test('sidebar toggle collapses to 48px and S shortcut toggles back (FT-030, SC-01,02,03)', async ({ page }) => {
+    await page.waitForSelector('.gantt-item', { timeout: 10000 })
+
+    // Initial: sidebar is 240px expanded.
+    const sidebar = page.locator('.gantt-timeline__sidebar').first()
+    const initialBox = await sidebar.boundingBox()
+    expect(initialBox.width).toBeGreaterThanOrEqual(200)
+
+    // Click toggle button → sidebar collapses.
+    await page.locator('[data-testid="sidebar-toggle"]').first().click()
+    // Wait for CSS transition + state update.
+    await page.waitForTimeout(350)
+    const collapsedBox = await sidebar.boundingBox()
+    expect(collapsedBox.width).toBeLessThan(80)
+    // Abbreviation cells rendered.
+    const abbrCount = await page.locator('.gantt-timeline__unit-abbr').count()
+    expect(abbrCount).toBeGreaterThanOrEqual(1)
+
+    // Press `S` → expand back.
+    await page.keyboard.press('S')
+    await page.waitForTimeout(350)
+    const reExpandedBox = await sidebar.boundingBox()
+    expect(reExpandedBox.width).toBeGreaterThanOrEqual(200)
+  })
+
   // FT-028 Empty state UX
   test('search empty state shows hint + Clear button that restores view (FT-028, SC-01,02)', async ({ page }) => {
     await page.waitForSelector('.gantt-item', { timeout: 10000 })

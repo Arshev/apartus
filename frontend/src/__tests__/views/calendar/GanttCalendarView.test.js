@@ -777,11 +777,11 @@ describe('GanttCalendarView', () => {
 
   // --- FT-029 Keyboard shortcuts integration ---
   describe('keyboard shortcuts (FT-029)', () => {
-    it('exposes shortcutRows with 6 entries (one per shortcut)', async () => {
+    it('exposes shortcutRows with 7 entries (FT-030 adds S)', async () => {
       const wrapper = setup()
       await wrapper.vm.$nextTick()
-      expect(wrapper.vm.shortcutRows).toHaveLength(6)
-      expect(wrapper.vm.shortcutRows.map((r) => r.key)).toEqual(['/', 'T', '[', ']', 'Esc', '?'])
+      expect(wrapper.vm.shortcutRows).toHaveLength(7)
+      expect(wrapper.vm.shortcutRows.map((r) => r.key)).toEqual(['/', 'T', '[', ']', 'S', 'Esc', '?'])
     })
 
     it('shiftRange moves anchorDate by ±rangeDays days', async () => {
@@ -819,6 +819,66 @@ describe('GanttCalendarView', () => {
       wrapper.vm.helpOpen = true
       await wrapper.vm.$nextTick()
       expect(wrapper.vm.helpOpen).toBe(true)
+    })
+  })
+
+  // --- FT-030 Sidebar collapse ---
+  describe('sidebar collapse (FT-030)', () => {
+    it('sidebarCollapsed defaults to false', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.sidebarCollapsed).toBe(false)
+    })
+
+    it('toggleSidebar flips state', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleSidebar()
+      expect(wrapper.vm.sidebarCollapsed).toBe(true)
+      wrapper.vm.toggleSidebar()
+      expect(wrapper.vm.sidebarCollapsed).toBe(false)
+    })
+
+    it('persists sidebarCollapsed to localStorage', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleSidebar()
+      await wrapper.vm.$nextTick()
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY))
+      expect(stored.sidebarCollapsed).toBe(true)
+    })
+
+    it('restores sidebarCollapsed from localStorage on mount', async () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ rangeDays: 14, specialMode: '', searchQuery: '', sidebarCollapsed: true }),
+      )
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      expect(wrapper.vm.sidebarCollapsed).toBe(true)
+    })
+
+    it('ignores invalid persisted sidebarCollapsed (non-boolean)', async () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ rangeDays: 14, sidebarCollapsed: 'yes' }),
+      )
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      expect(wrapper.vm.sidebarCollapsed).toBe(false)
+    })
+
+    it('legacy payload without sidebarCollapsed defaults to false', async () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ rangeDays: 30, specialMode: 'handover' }),
+      )
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      expect(wrapper.vm.sidebarCollapsed).toBe(false)
+      // other fields still restored
+      expect(wrapper.vm.rangeDays).toBe(30)
+      expect(wrapper.vm.specialMode).toBe('handover')
     })
   })
 })
