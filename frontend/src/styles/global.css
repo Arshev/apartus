@@ -1,4 +1,53 @@
-/* Apartus — Global Styles */
+/* Apartus — Global Styles (FT-026 design refresh).
+ *
+ * - Design tokens (spacing, tracking, type) live on :root.
+ * - @font-face rules come from fonts.css (imported separately in main.js).
+ * - Vuetify theme colors (primary/surface/...) live in plugins/vuetify.js.
+ */
+
+:root {
+  /* ── Typography tokens ──────────────────────────────────────── */
+  --font-display: 'Geologica', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, 'Liberation Mono', Consolas, monospace;
+
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.05em;
+
+  /* ── Spacing scale (4pt, semantic names) ────────────────────── */
+  --space-3xs: 2px;
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --space-4xl: 96px;
+}
+
+/* ── Tabular numerals — applied where column alignment matters ─── */
+.text-tabular,
+.gantt-timeline-header__day-number,
+.gantt-item__overdue-label,
+.gantt-tooltip__price,
+.money-cell,
+.dashboard-metric__value {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/* ── Table column headers — quieter uppercase labels ──────────── */
+.text-table-header {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+}
 
 /* ── Scrollbar ──────────────────────────────────────────────────── */
 ::-webkit-scrollbar {

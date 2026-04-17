@@ -142,7 +142,8 @@
         "handover": "Arrivals/Departures",
         "overdue": "Overdue",
         "idle": "Idle gaps",
-        "heatmap": "Heatmap"
+        "heatmap": "Heatmap",
+        "groupLabel": "Modes"
       },
       "overdueLabel": "+{n}d",
       "idleLabel": "{n}d",

@@ -20,26 +20,37 @@ canonical_for:
 
 ## Design Philosophy
 
-Apartus follows PMS industry conventions (inspired by RentProg). The design is:
+Apartus strives for **operational, trustworthy, quietly modern** — canonical design context in [`/.impeccable.md`](../../.impeccable.md). Not «bookkeeping software 2008»; not «AI SaaS slop». Editorial-operational aesthetic that respects an 8-hour session.
 
-- **Clean white base** — pure white backgrounds, no grey/off-white tinting
-- **Green primary** — single consistent CTA color across all screens
-- **Saturated status colors** — bold chips and badges, not washed-out tonal variants
-- **Status-driven** — color conveys meaning (reservation state, priority, finance)
-- **Theme-aware** — full light + dark mode support via Vuetify theme system
-- **Rounded & modern** — 8-12px border radius, elevated buttons, outlined inputs
+- **Typography does the work** — hierarchy via size/weight/case, not boxes. Geologica (display) + Geist (body), both OFL 1.1, both Cyrillic-ready, self-hosted.
+- **Tinted neutrals** — OKLCH-derived palette with 1–2% chroma toward brand hue. No pure `#FFF` / `#000`.
+- **Green primary used sparingly** — only for CTAs and true active states. 60/30/10 visual weight.
+- **Saturated status colors = function** — reservation state, priority, finance. Not decoration. Preserved from PMS industry standard.
+- **Theme-aware** — light (daytime operational work) + dark (cool blue-green, not Material black). Both first-class.
+- **Rounded & modern** — 8-12px border radius, soft elevation, outlined inputs.
 
 ## Color Palette
 
-### Brand Colors
+### Brand Colors (OKLCH-derived since FT-026)
 
-| Token | Light | Dark | Usage |
-|---|---|---|---|
-| `primary` | `#43A047` | `#4DB6AC` | Main brand, all CTAs, active nav |
-| `primary-darken-1` | `#2E7D32` | `#00897B` | Hover states, emphasis |
-| `primary-lighten-1` | `#66BB6A` | `#80CBC4` | Subtle highlights |
-| `secondary` | `#FB8C00` | `#FFB74D` | Orange accent, secondary actions |
-| `secondary-darken-1` | `#EF6C00` | `#F57C00` | Secondary hover |
+| Token | Light | Dark | OKLCH Source | Usage |
+|---|---|---|---|---|
+| `primary` | `#3b9555` | `#51bb9a` | L=60/72 C=0.13/0.11 H=150/170 | Main brand, all CTAs, active nav |
+| `primary-darken-1` | `#007329` | `#00906f` | L=48/58 H=150/170 | Hover states, emphasis |
+| `primary-lighten-1` | `#53be70` | `#98dfc6` | L=72/85 H=150/170 | Subtle highlights |
+| `secondary` | `#e57600` | `#ff9b50` | L=68/78 C=0.17/0.15 H=55 | Orange accent, secondary actions |
+| `secondary-darken-1` | `#cc4c00` | `#e77412` | L=58/68 H=52 | Secondary hover |
+
+### Surface Colors (tinted neutrals, OKLCH)
+
+| Token | Light | Dark | OKLCH Source | Usage |
+|---|---|---|---|---|
+| `background` | `#fafdfa` | `#091111` | L=99/17 C=0.004/0.012 H=150/200 | Page background |
+| `surface` | `#fcfefc` | `#111a1b` | L=99.5/21 H=150/200 | Cards, sheets |
+| `surface-light` | `#f2f6f3` | `#1d2929` | L=97/27 H=150/200 | Subtle fills |
+| `surface-variant` | `#e8ede8` | `#323d3e` | L=94/35 H=150/200 | Dividers, muted bg |
+| `on-surface` | `#171c19` | `#e1e6e2` | L=22/92 H=155 | Primary text |
+| `on-surface-variant` | `#5f6561` | `#b9c0bb` | L=50/80 H=155 | Secondary text |
 
 ### Semantic Colors
 
@@ -89,9 +100,15 @@ Apartus follows PMS industry conventions (inspired by RentProg). The design is:
 
 ## Typography
 
-- **Font family:** Inter, system fallbacks
-- **Configured via:** SASS variables in `src/styles/settings.scss`
-- **Scale:** Vuetify default Material Design scale (`text-h1`..`text-h6`, `text-body-1`, `text-body-2`, `text-caption`, `text-subtitle-1`)
+Since FT-026: **Geologica (display) + Geist (body)**, both OFL 1.1, self-hosted в `frontend/public/fonts/`, Cyrillic-ready. NO Inter / Roboto / system defaults.
+
+- **`--font-display`:** Geologica — для headings (variable font, weights 400–700)
+- **`--font-body`:** Geist — для body text, tables, inputs (weights 400, 500)
+- **`--font-mono`:** system `ui-monospace` stack — для IDs, timestamps
+- **Configured via:** CSS vars на `:root` (`src/styles/global.css`) + SASS vars в `settings.scss`
+- **Scale:** Vuetify default Material scale (rem-fixed app UI, not fluid)
+- **Tabular numerics:** `.text-tabular` utility class для date columns, money, counts — auto-applied в `global.css` к `.gantt-timeline-header__day-number`, `.money-cell` etc.
+- **Preloaded weights:** Geologica 500 (cyrillic + latin), Geist 400 — в `index.html`.
 
 ### Usage
 

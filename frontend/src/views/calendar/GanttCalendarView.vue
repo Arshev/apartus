@@ -1,96 +1,108 @@
 <template>
   <v-container fluid class="pa-4">
-    <div class="d-flex align-center mb-4 ga-2 flex-wrap">
-      <h1 class="text-h5">{{ $t('calendar.title') }}</h1>
+    <!-- FT-026: toolbar split into 3 clusters for visual hierarchy.
+         1. view-config (range) — how much we show
+         2. modes (handover/overdue/idle/heatmap) — what we highlight
+         3. utilities (search/today/jump/refresh) — navigation + refresh
+         Active mode uses `variant="tonal"` (subtle tinted bg) — NOT elevated
+         primary — so primary color stays reserved for true CTAs. -->
+    <div class="gantt-toolbar">
+      <h1 class="gantt-toolbar__title text-h5">{{ $t('calendar.title') }}</h1>
       <v-spacer />
 
-      <v-btn-toggle v-model="rangeDays" mandatory density="comfortable" variant="outlined" color="primary">
-        <v-btn :value="7">{{ $t('calendar.gantt.toolbar.range7') }}</v-btn>
-        <v-btn :value="14">{{ $t('calendar.gantt.toolbar.range14') }}</v-btn>
-        <v-btn :value="30">{{ $t('calendar.gantt.toolbar.range30') }}</v-btn>
-      </v-btn-toggle>
+      <!-- Group 1: view-config -->
+      <div class="gantt-toolbar__group" data-testid="toolbar-group-view-config">
+        <v-btn-toggle v-model="rangeDays" mandatory density="comfortable" variant="outlined" color="primary">
+          <v-btn :value="7">{{ $t('calendar.gantt.toolbar.range7') }}</v-btn>
+          <v-btn :value="14">{{ $t('calendar.gantt.toolbar.range14') }}</v-btn>
+          <v-btn :value="30">{{ $t('calendar.gantt.toolbar.range30') }}</v-btn>
+        </v-btn-toggle>
+      </div>
 
-      <v-btn
-        prepend-icon="mdi-swap-horizontal"
-        :color="specialMode === 'handover' ? 'primary' : undefined"
-        :variant="specialMode === 'handover' ? 'elevated' : 'text'"
-        @click="toggleHandover"
-        data-testid="handover-btn"
-      >
-        {{ $t('calendar.gantt.modes.handover') }}
-      </v-btn>
-
-      <v-btn
-        prepend-icon="mdi-alert-circle-outline"
-        :color="specialMode === 'overdue' ? 'primary' : undefined"
-        :variant="specialMode === 'overdue' ? 'elevated' : 'text'"
-        @click="toggleOverdue"
-        data-testid="overdue-btn"
-      >
-        {{ $t('calendar.gantt.modes.overdue') }}
-      </v-btn>
-
-      <v-btn
-        prepend-icon="mdi-clock-alert-outline"
-        :color="specialMode === 'idle' ? 'primary' : undefined"
-        :variant="specialMode === 'idle' ? 'elevated' : 'text'"
-        @click="toggleIdle"
-        data-testid="idle-btn"
-      >
-        {{ $t('calendar.gantt.modes.idle') }}
-      </v-btn>
-
-      <v-btn
-        prepend-icon="mdi-grid"
-        :color="specialMode === 'heatmap' ? 'primary' : undefined"
-        :variant="specialMode === 'heatmap' ? 'elevated' : 'text'"
-        @click="toggleHeatmap"
-        data-testid="heatmap-btn"
-      >
-        {{ $t('calendar.gantt.modes.heatmap') }}
-      </v-btn>
-
-      <!-- FT-025: collapsible search. Icon-only when closed and empty;
-           expands to input on click. Stays expanded while query is non-empty
-           (visual indicator of active filter). Escape clears + collapses. -->
-      <template v-if="searchOpen">
-        <v-text-field
-          v-model="searchQuery"
-          :placeholder="$t('calendar.gantt.search.placeholder')"
-          density="compact"
-          hide-details
-          clearable
-          autofocus
-          :maxlength="100"
-          prepend-inner-icon="mdi-magnify"
-          style="max-width: 240px"
-          data-testid="search-input"
-          @keydown.esc="onSearchEscape"
-        />
-      </template>
-      <v-btn
-        v-else
-        ref="searchBtnEl"
-        icon="mdi-magnify"
-        variant="text"
-        :title="$t('calendar.gantt.search.open')"
-        :aria-label="$t('calendar.gantt.search.open')"
-        data-testid="search-btn"
-        @click="onOpenSearch"
-      />
-
-      <v-btn variant="text" prepend-icon="mdi-calendar-today" @click="goToday" data-testid="today-btn">
-        {{ $t('calendar.gantt.toolbar.today') }}
-      </v-btn>
-
-      <v-menu v-model="datePickerOpen" :close-on-content-click="false" location="bottom end">
-        <template v-slot:activator="{ props: menuProps }">
-          <v-btn v-bind="menuProps" icon="mdi-calendar-arrow-right" variant="text" :title="$t('calendar.gantt.toolbar.jumpToDate')" data-testid="jump-btn" />
+      <!-- Group 2: modes — expanded row on lgAndUp, collapsed v-menu otherwise -->
+      <div class="gantt-toolbar__group" data-testid="toolbar-group-modes">
+        <template v-if="display.lgAndUp.value">
+          <v-btn
+            v-for="mode in MODE_BUTTONS"
+            :key="mode.value"
+            :prepend-icon="mode.icon"
+            :variant="specialMode === mode.value ? 'tonal' : 'text'"
+            :class="{ 'gantt-mode-btn--active': specialMode === mode.value }"
+            :data-testid="`${mode.value}-btn`"
+            @click="setSpecialMode(mode.value)"
+          >
+            {{ $t(`calendar.gantt.modes.${mode.value}`) }}
+          </v-btn>
         </template>
-        <v-date-picker v-model="jumpDate" hide-header @update:model-value="onJumpDate" />
-      </v-menu>
+        <v-menu v-else location="bottom end" :close-on-content-click="true">
+          <template v-slot:activator="{ props: menuProps }">
+            <v-btn
+              v-bind="menuProps"
+              prepend-icon="mdi-view-dashboard-variant"
+              append-icon="mdi-menu-down"
+              :variant="specialMode ? 'tonal' : 'text'"
+              :class="{ 'gantt-mode-btn--active': !!specialMode }"
+              data-testid="modes-menu-btn"
+            >
+              {{ specialMode ? $t(`calendar.gantt.modes.${specialMode}`) : $t('calendar.gantt.modes.groupLabel') }}
+            </v-btn>
+          </template>
+          <v-list density="compact">
+            <v-list-item
+              v-for="mode in MODE_BUTTONS"
+              :key="mode.value"
+              :prepend-icon="mode.icon"
+              :title="$t(`calendar.gantt.modes.${mode.value}`)"
+              :active="specialMode === mode.value"
+              :data-testid="`${mode.value}-menu-item`"
+              @click="setSpecialMode(mode.value)"
+            />
+          </v-list>
+        </v-menu>
+      </div>
 
-      <v-btn icon="mdi-refresh" variant="text" :loading="loading" @click="loadData" :title="$t('calendar.gantt.toolbar.refresh')" data-testid="refresh-btn" />
+      <!-- Group 3: utilities (search + today + jump + refresh) -->
+      <div class="gantt-toolbar__group" data-testid="toolbar-group-utilities">
+        <!-- FT-025 search (collapsible) -->
+        <template v-if="searchOpen">
+          <v-text-field
+            v-model="searchQuery"
+            :placeholder="$t('calendar.gantt.search.placeholder')"
+            density="compact"
+            hide-details
+            clearable
+            autofocus
+            :maxlength="100"
+            prepend-inner-icon="mdi-magnify"
+            style="max-width: 240px"
+            data-testid="search-input"
+            @keydown.esc="onSearchEscape"
+          />
+        </template>
+        <v-btn
+          v-else
+          ref="searchBtnEl"
+          icon="mdi-magnify"
+          variant="text"
+          :title="$t('calendar.gantt.search.open')"
+          :aria-label="$t('calendar.gantt.search.open')"
+          data-testid="search-btn"
+          @click="onOpenSearch"
+        />
+
+        <v-btn variant="text" prepend-icon="mdi-calendar-today" @click="goToday" data-testid="today-btn">
+          {{ $t('calendar.gantt.toolbar.today') }}
+        </v-btn>
+
+        <v-menu v-model="datePickerOpen" :close-on-content-click="false" location="bottom end">
+          <template v-slot:activator="{ props: menuProps }">
+            <v-btn v-bind="menuProps" icon="mdi-calendar-arrow-right" variant="text" :title="$t('calendar.gantt.toolbar.jumpToDate')" data-testid="jump-btn" />
+          </template>
+          <v-date-picker v-model="jumpDate" hide-header @update:model-value="onJumpDate" />
+        </v-menu>
+
+        <v-btn icon="mdi-refresh" variant="text" :loading="loading" @click="loadData" :title="$t('calendar.gantt.toolbar.refresh')" data-testid="refresh-btn" />
+      </div>
     </div>
 
     <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-2" />
@@ -145,6 +157,7 @@
 import { ref, computed, onMounted, onUnmounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { useDisplay } from 'vuetify'
 import GanttTimeline from './GanttTimeline.vue'
 import GanttTooltip from './GanttTooltip.vue'
 import * as reservationsApi from '../../api/reservations'
@@ -152,6 +165,21 @@ import * as allUnitsApi from '../../api/allUnits'
 import { addDays, startOfDay, formatIsoDate, parseIsoDate } from '../../utils/date'
 import { debounce } from '../../utils/debounce'
 import { filterUnitsAndReservations } from '../../utils/search'
+
+// FT-026: viewport-aware mode-group collapse.
+// `lgAndUp` = ≥ 1280px per Vuetify 4 breakpoints. Below that, the 4 mode
+// buttons collapse into a single dropdown to free toolbar horizontal space.
+const display = useDisplay()
+
+// FT-026: mode button registry — driven by the same data as before. Keeping
+// this inline (not in a separate module) because it's tightly coupled to
+// i18n keys under `calendar.gantt.modes.*` and shouldn't be reused elsewhere.
+const MODE_BUTTONS = [
+  { value: 'handover', icon: 'mdi-swap-horizontal' },
+  { value: 'overdue', icon: 'mdi-alert-circle-outline' },
+  { value: 'idle', icon: 'mdi-clock-alert-outline' },
+  { value: 'heatmap', icon: 'mdi-grid' },
+]
 
 // FT-025 REQ-02: 200ms trailing-edge — Material guideline for search input
 // responsiveness. Tuned per ASM-05 perf budget (50 units × 10 reservations =
@@ -430,5 +458,40 @@ defineExpose({
   loadData, goToday, onJumpDate, onShowBooking, onShowTooltip, onHideTooltip, onContextMenu,
   contextEdit, contextCheckIn, contextCheckOut, contextCancel, toggleHandover, toggleOverdue, toggleIdle, toggleHeatmap, setSpecialMode,
   onOpenSearch, onSearchEscape,
+  display, MODE_BUTTONS,
 })
 </script>
+
+<style scoped>
+/* FT-026: toolbar rhythm. Three clusters separated by an invisible spacer
+   plus subtle vertical divider suggestion (via gap + group padding). */
+.gantt-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md, 16px);
+  margin-bottom: var(--space-md, 16px);
+  flex-wrap: wrap;
+}
+
+.gantt-toolbar__title {
+  font-family: var(--font-display);
+  letter-spacing: var(--tracking-tight);
+  margin-right: var(--space-sm, 12px);
+}
+
+.gantt-toolbar__group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs, 8px);
+}
+
+/* Active-mode styling: tonal variant + bold weight. Underlines the active
+   mode subtly without claiming the primary-CTA color weight. */
+:deep(.gantt-mode-btn--active) {
+  font-weight: 600;
+}
+
+:deep(.gantt-mode-btn--active .v-btn__overlay) {
+  opacity: 0.12;
+}
+</style>

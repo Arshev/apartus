@@ -1,34 +1,13 @@
-// Apartus Design System — Vuetify SASS Overrides
-// These compile into Vuetify's internal variables at build time.
+// Apartus Design System — Vuetify SASS Overrides (FT-026).
+// vite-plugin-vuetify uses this as Vuetify's SASS entry point (see
+// vite.config.js `styles.configFile`). Entry compiles full Vuetify CSS with
+// our overrides baked in.
+//
+// Fonts are self-hosted in `public/fonts/` and declared in `fonts.css`.
+// Geologica = display face, Geist = body face. Both OFL 1.1.
 
-@use 'vuetify/settings' with (
-  // Typography
-  $body-font-family: ('Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif),
-  $heading-font-family: ('Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif),
-
-  // Border radius — rounded-lg feel across UI
+@use 'vuetify' with (
+  $body-font-family: ('Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif),
+  $heading-font-family: ('Geologica', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif),
   $border-radius-root: 8px,
-
-  // Buttons
-  $button-height: 40px,
-  $button-border-radius: 8px,
-  $button-font-weight: 500,
-  $button-text-transform: none,
-  $button-letter-spacing: 0,
-
-  // Cards
-  $card-border-radius: 12px,
-  $card-elevation: 1,
-
-  // Text fields
-  $text-field-border-radius: 8px,
-
-  // Snackbar
-  $snackbar-border-radius: 8px,
-
-  // Chip
-  $chip-border-radius: 8px,
-
-  // Navigation drawer
-  $navigation-drawer-border-radius: 0,
 );
