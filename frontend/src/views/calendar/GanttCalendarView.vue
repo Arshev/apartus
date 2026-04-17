@@ -66,6 +66,7 @@
         <!-- FT-025 search (collapsible) -->
         <template v-if="searchOpen">
           <v-text-field
+            ref="searchInputEl"
             v-model="searchQuery"
             :placeholder="$t('calendar.gantt.search.placeholder')"
             density="compact"
@@ -84,13 +85,19 @@
           ref="searchBtnEl"
           icon="mdi-magnify"
           variant="text"
-          :title="$t('calendar.gantt.search.open')"
+          :title="`${$t('calendar.gantt.search.open')} (/)`"
           :aria-label="$t('calendar.gantt.search.open')"
           data-testid="search-btn"
           @click="onOpenSearch"
         />
 
-        <v-btn variant="text" prepend-icon="mdi-calendar-today" @click="goToday" data-testid="today-btn">
+        <v-btn
+          variant="text"
+          prepend-icon="mdi-calendar-today"
+          :title="`${$t('calendar.gantt.toolbar.today')} (T)`"
+          @click="goToday"
+          data-testid="today-btn"
+        >
           {{ $t('calendar.gantt.toolbar.today') }}
         </v-btn>
 
@@ -180,6 +187,37 @@
     </v-menu>
 
     <v-snackbar v-model="snackbar.open" :color="snackbar.color" :timeout="3000">{{ snackbar.text }}</v-snackbar>
+
+    <!-- FT-029: keyboard shortcuts help dialog -->
+    <v-dialog v-model="helpOpen" max-width="480" data-testid="shortcuts-dialog">
+      <v-card>
+        <v-card-title class="gantt-shortcuts__title">{{ $t('calendar.gantt.shortcuts.title') }}</v-card-title>
+        <v-card-subtitle class="gantt-shortcuts__caption">{{ $t('calendar.gantt.shortcuts.caption') }}</v-card-subtitle>
+        <v-card-text>
+          <table class="gantt-shortcuts__table">
+            <tbody>
+              <tr v-for="row in shortcutRows" :key="row.key">
+                <td class="gantt-shortcuts__kbd-cell"><kbd class="gantt-shortcuts__kbd">{{ row.key }}</kbd></td>
+                <td class="gantt-shortcuts__label">{{ $t(row.label) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            ref="helpCloseBtnEl"
+            variant="text"
+            color="primary"
+            autofocus
+            data-testid="shortcuts-close"
+            @click="helpOpen = false"
+          >
+            {{ $t('calendar.gantt.shortcuts.close') }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -195,6 +233,7 @@ import * as allUnitsApi from '../../api/allUnits'
 import { addDays, startOfDay, formatIsoDate, parseIsoDate } from '../../utils/date'
 import { debounce } from '../../utils/debounce'
 import { filterUnitsAndReservations } from '../../utils/search'
+import { useGanttShortcuts } from '../../composables/useGanttShortcuts'
 
 // FT-026: viewport-aware mode-group collapse.
 // `lgAndUp` = ≥ 1280px per Vuetify 4 breakpoints. Below that, the 4 mode
@@ -237,6 +276,13 @@ const timelineEl = ref(null)
 // searchQuery — raw v-model for the text field (updates on every keystroke).
 // debouncedQuery — the value actually applied to filtering (200ms trailing-edge).
 // searchOpen — controls collapsed-icon vs expanded-input toolbar UI.
+// FT-029: search input template ref — used by shortcuts composable to
+// programmatically focus the field on `/`. `searchInputEl.value` is the
+// Vuetify VTextField public instance; `.focus()` is a stable public API.
+const searchInputEl = ref(null)
+// FT-029: help dialog open state.
+const helpOpen = ref(false)
+const helpCloseBtnEl = ref(null)
 const searchQuery = ref('')
 const debouncedQuery = ref('')
 const searchOpen = ref(false)
@@ -303,6 +349,44 @@ async function onSearchEscape() {
   await nextTick()
   if (searchBtnEl.value?.$el?.focus) searchBtnEl.value.$el.focus()
 }
+
+// FT-029: keyboard shortcuts wiring.
+// `focusSearchInput` handles the `/` shortcut — opens the collapsible bar
+// if closed, waits for the input to mount, then focuses it. `shiftRange`
+// is `[` / `]` panning by current range.
+async function focusSearchInput() {
+  if (!searchOpen.value) searchOpen.value = true
+  await nextTick()
+  // VTextField exposes `.focus()` as a public method; fall back to the
+  // inner <input> via $el in case we're mid-transition.
+  const vm = searchInputEl.value
+  if (vm?.focus) vm.focus()
+  else vm?.$el?.querySelector?.('input')?.focus()
+}
+
+function shiftRange(direction) {
+  anchorDate.value = addDays(anchorDate.value, direction * rangeDays.value)
+}
+
+// Shortcut rows — single source of truth for the help dialog table.
+const shortcutRows = [
+  { key: '/', label: 'calendar.gantt.shortcuts.keys.search' },
+  { key: 'T', label: 'calendar.gantt.shortcuts.keys.today' },
+  { key: '[', label: 'calendar.gantt.shortcuts.keys.panPrev' },
+  { key: ']', label: 'calendar.gantt.shortcuts.keys.panNext' },
+  { key: 'Esc', label: 'calendar.gantt.shortcuts.keys.clear' },
+  { key: '?', label: 'calendar.gantt.shortcuts.keys.help' },
+]
+
+useGanttShortcuts({
+  focusSearchInput,
+  goToday,
+  shiftRange,
+  onSearchEscape,
+  helpOpen,
+  searchQuery,
+  searchOpen,
+})
 
 // Tooltip state
 const tooltip = ref({ booking: null, visible: false, x: 0, y: 0 })
@@ -495,6 +579,8 @@ defineExpose({
   contextEdit, contextCheckIn, contextCheckOut, contextCancel, toggleHandover, toggleOverdue, toggleIdle, toggleHeatmap, setSpecialMode,
   onOpenSearch, onSearchEscape, onEmptyStateCta,
   display, MODE_BUTTONS,
+  // FT-029
+  helpOpen, shortcutRows, focusSearchInput, shiftRange,
 })
 </script>
 
@@ -529,5 +615,39 @@ defineExpose({
 
 :deep(.gantt-mode-btn--active .v-btn__overlay) {
   opacity: 0.12;
+}
+
+/* FT-029: keyboard shortcuts help dialog. */
+.gantt-shortcuts__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.gantt-shortcuts__table td {
+  padding: 6px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.gantt-shortcuts__kbd-cell {
+  width: 80px;
+}
+
+.gantt-shortcuts__kbd {
+  display: inline-block;
+  min-width: 28px;
+  padding: 2px 8px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  background: rgba(var(--v-theme-on-surface), 0.08);
+  color: rgb(var(--v-theme-on-surface));
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.15);
+  border-radius: 4px;
+}
+
+.gantt-shortcuts__label {
+  color: rgb(var(--v-theme-on-surface));
 }
 </style>

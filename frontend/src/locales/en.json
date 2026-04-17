@@ -161,6 +161,20 @@
         "empty": "No results for \"{query}\"",
         "emptyHint": "Matches unit, property, and guest names",
         "clear": "Clear search"
+      },
+      "shortcuts": {
+        "title": "Keyboard shortcuts",
+        "caption": "Move around the calendar faster",
+        "helpOpen": "Keyboard shortcuts",
+        "close": "Close",
+        "keys": {
+          "search": "Open search",
+          "today": "Jump to today",
+          "panPrev": "Previous period",
+          "panNext": "Next period",
+          "clear": "Close or clear",
+          "help": "Show help"
+        }
       }
     }
   },
