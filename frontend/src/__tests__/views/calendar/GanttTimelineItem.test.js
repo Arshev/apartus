@@ -225,4 +225,179 @@ describe('GanttTimelineItem', () => {
       expect(wrapper.find('.gantt-item__overdue-label').exists()).toBe(false)
     })
   })
+
+  // --- FT-027 Reservation Bar Density ---
+  describe('revenue chip + nights indicator (FT-027)', () => {
+    // Date helpers — duplicated from the overdue block for scope isolation.
+    const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    const today = new Date()
+    const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1)
+    const future = new Date(today); future.setDate(today.getDate() + 10)
+
+    // Booking fixture with enriched _start/_end Date objects (Row normally
+    // adds these; we inject directly for isolated Item tests).
+    const enrichedBase = {
+      ...BASE,
+      _start: new Date('2026-04-15'),
+      _end: new Date('2026-04-20'),
+    }
+
+    describe('REQ-03 thresholds', () => {
+      it('width < 30: no revenue, no nights', () => {
+        const wrapper = setup({ booking: enrichedBase, width: 20 })
+        expect(wrapper.find('.gantt-item__revenue').exists()).toBe(false)
+        expect(wrapper.find('.gantt-item__nights').exists()).toBe(false)
+      })
+
+      it('width 80 (label shown, revenue not yet)', () => {
+        const wrapper = setup({ booking: enrichedBase, width: 80 })
+        expect(wrapper.find('.gantt-item__label').exists()).toBe(true)
+        expect(wrapper.find('.gantt-item__revenue').exists()).toBe(false)
+        expect(wrapper.find('.gantt-item__nights').exists()).toBe(false)
+      })
+
+      it('width 140: revenue appears, nights still hidden', () => {
+        const wrapper = setup({ booking: enrichedBase, width: 140 })
+        expect(wrapper.find('.gantt-item__revenue').exists()).toBe(true)
+        expect(wrapper.find('.gantt-item__nights').exists()).toBe(false)
+      })
+
+      it('width 179 (just under nights threshold): revenue yes, nights no', () => {
+        const wrapper = setup({ booking: enrichedBase, width: 179 })
+        expect(wrapper.find('.gantt-item__revenue').exists()).toBe(true)
+        expect(wrapper.find('.gantt-item__nights').exists()).toBe(false)
+      })
+
+      it('width 180: both revenue and nights visible', () => {
+        const wrapper = setup({ booking: enrichedBase, width: 180 })
+        expect(wrapper.find('.gantt-item__revenue').exists()).toBe(true)
+        expect(wrapper.find('.gantt-item__nights').exists()).toBe(true)
+      })
+    })
+
+    describe('REQ-01 revenue formatting', () => {
+      it('uses currency prop for formatting (RUB default)', () => {
+        const wrapper = setup({ booking: enrichedBase, width: 200 })
+        // formatMoney(50000, 'RUB') → "500.00 ₽"
+        expect(wrapper.find('.gantt-item__revenue').text()).toBe('500.00 ₽')
+      })
+
+      it('uses non-RUB currency from prop', () => {
+        const wrapper = setup({ booking: enrichedBase, width: 200, currency: 'USD' })
+        expect(wrapper.find('.gantt-item__revenue').text()).toBe('$500.00')
+      })
+
+      it('applies text-tabular class for tabular-nums', () => {
+        const wrapper = setup({ booking: enrichedBase, width: 200 })
+        expect(wrapper.find('.gantt-item__revenue').classes()).toContain('text-tabular')
+      })
+    })
+
+    describe('REQ-02 nights label', () => {
+      it('computes diff between _start and _end', () => {
+        const wrapper = setup({ booking: enrichedBase, width: 200 })
+        // 2026-04-20 − 2026-04-15 = 5 nights
+        expect(wrapper.vm.nights).toBe(5)
+        expect(wrapper.find('.gantt-item__nights').text()).toBe('5 н')
+      })
+
+      it('hidden when nights is 0 (single-day booking edge)', () => {
+        const booking = {
+          ...enrichedBase,
+          _start: new Date('2026-04-15'),
+          _end: new Date('2026-04-15'),
+        }
+        const wrapper = setup({ booking, width: 200 })
+        expect(wrapper.vm.nights).toBe(0)
+        expect(wrapper.find('.gantt-item__nights').exists()).toBe(false)
+      })
+
+      it('hidden when _start/_end missing (blocking reservation or partial data)', () => {
+        const booking = { ...BASE } // no _start, _end
+        const wrapper = setup({ booking, width: 200 })
+        expect(wrapper.vm.nights).toBe(0)
+        expect(wrapper.find('.gantt-item__nights').exists()).toBe(false)
+      })
+    })
+
+    describe('FM-01 zero / null price suppression', () => {
+      it('hides revenue when total_price_cents is 0 (blocking reservation)', () => {
+        const booking = { ...enrichedBase, total_price_cents: 0 }
+        const wrapper = setup({ booking, width: 200 })
+        expect(wrapper.find('.gantt-item__revenue').exists()).toBe(false)
+      })
+
+      it('hides revenue when total_price_cents is null', () => {
+        const booking = { ...enrichedBase, total_price_cents: null }
+        const wrapper = setup({ booking, width: 200 })
+        expect(wrapper.find('.gantt-item__revenue').exists()).toBe(false)
+      })
+
+      it('still shows nights for zero-price blocking (nights semantics independent)', () => {
+        const booking = { ...enrichedBase, total_price_cents: 0 }
+        const wrapper = setup({ booking, width: 200 })
+        expect(wrapper.find('.gantt-item__nights').exists()).toBe(true)
+      })
+    })
+
+    describe('REQ-03 mode overrides', () => {
+      it('overdue mode + overdue booking: hides revenue (overdue-label claims right slot)', () => {
+        const booking = { ...enrichedBase, status: 'checked_in', check_out: iso(yesterday) }
+        const wrapper = setup({ booking, width: 200, specialMode: 'overdue' })
+        expect(wrapper.find('.gantt-item__overdue-label').exists()).toBe(true)
+        expect(wrapper.find('.gantt-item__revenue').exists()).toBe(false)
+        expect(wrapper.find('.gantt-item__nights').exists()).toBe(false)
+      })
+
+      it('overdue mode + non-overdue (dimmed): hides revenue + nights (illegible at 0.35 opacity)', () => {
+        const booking = { ...enrichedBase, status: 'confirmed', check_out: iso(future) }
+        const wrapper = setup({ booking, width: 200, specialMode: 'overdue' })
+        expect(wrapper.vm.itemClasses).toContain('gantt-item--dimmed')
+        expect(wrapper.find('.gantt-item__revenue').exists()).toBe(false)
+        expect(wrapper.find('.gantt-item__nights').exists()).toBe(false)
+      })
+
+      it('handover mode + matching booking: shows revenue + nights (not dimmed)', () => {
+        // Check-in today booking — matches handover
+        const booking = { ...enrichedBase, check_in: iso(new Date()), status: 'confirmed' }
+        const wrapper = setup({ booking, width: 200, specialMode: 'handover' })
+        expect(wrapper.vm.handoverType).not.toBeNull()
+        expect(wrapper.find('.gantt-item__revenue').exists()).toBe(true)
+        expect(wrapper.find('.gantt-item__nights').exists()).toBe(true)
+      })
+
+      it('handover mode + non-matching (dimmed): hides revenue + nights', () => {
+        // Far-future check-in, won't match any handover bracket
+        const booking = { ...enrichedBase, check_in: '2030-01-01', status: 'confirmed' }
+        const wrapper = setup({ booking, width: 200, specialMode: 'handover' })
+        expect(wrapper.vm.itemClasses).toContain('gantt-item--dimmed')
+        expect(wrapper.find('.gantt-item__revenue').exists()).toBe(false)
+        expect(wrapper.find('.gantt-item__nights').exists()).toBe(false)
+      })
+
+      it('idle / heatmap mode: revenue + nights unchanged (not dimmed)', () => {
+        const wrapper1 = setup({ booking: enrichedBase, width: 200, specialMode: 'idle' })
+        expect(wrapper1.find('.gantt-item__revenue').exists()).toBe(true)
+        expect(wrapper1.find('.gantt-item__nights').exists()).toBe(true)
+
+        const wrapper2 = setup({ booking: enrichedBase, width: 200, specialMode: 'heatmap' })
+        expect(wrapper2.find('.gantt-item__revenue').exists()).toBe(true)
+        expect(wrapper2.find('.gantt-item__nights').exists()).toBe(true)
+      })
+    })
+
+    describe('REQ-09 pointer-events / click propagation', () => {
+      it('click on revenue span still triggers show-booking (propagates to bar)', async () => {
+        const wrapper = setup({ booking: enrichedBase, width: 200 })
+        const revenue = wrapper.find('.gantt-item__revenue')
+        expect(revenue.exists()).toBe(true)
+        // Click event bubbles from span to parent .gantt-item — since the span
+        // has pointer-events: none, the click effectively lands on the bar.
+        // In JSDOM we just assert the bar still handles the click after we
+        // click on it directly (with revenue span present).
+        await wrapper.find('.gantt-item').trigger('click')
+        expect(wrapper.emitted('show-booking')).toEqual([[BASE.id]])
+      })
+    })
+  })
 })

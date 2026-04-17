@@ -131,6 +131,14 @@ Apartus frontend — это одно приложение, SPA.
 - `SUPPORTED_SPECIAL_MODES` extended: `['', 'handover', 'overdue', 'idle', 'heatmap']`.
 - **FT-020 NS-02 closed** — все 4 special modes delivered (handover FT-021, overdue FT-022, idle FT-023, heatmap FT-024).
 
+### Reservation Bar Density (FT-027)
+
+- `GanttTimelineItem` теперь несёт прогрессивно раскрываемую информацию: `guest_name` + **revenue chip** (right-aligned, tabular) + **nights indicator** (`{n} н` / `{n} n`).
+- Width thresholds: 140px → revenue, 180px → nights (REQ-03).
+- Mode overrides: overdue mode (overdue booking) → hide revenue (красный `+Nд` claims right slot); dimmed non-matching bars в handover/overdue → hide revenue + nights (unreadable at 0.35 opacity).
+- Hover affordance — `outline: 2px solid rgba(var(--v-theme-on-surface), 0.3)` instead of black `box-shadow`. Theme-aware (FT-026 OKLCH palette).
+- Currency resolved once per row в `GanttTimelineRow` через `authStore.organization.currency`, прокидывается в Item как prop (no per-Item store lookup).
+
 ### Search Bar (FT-025)
 
 Collapsible search в Gantt toolbar для быстрого фильтра по guest / unit / property.

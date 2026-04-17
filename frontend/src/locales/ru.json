@@ -147,6 +147,7 @@
       },
       "overdueLabel": "+{n}д",
       "idleLabel": "{n}д",
+      "nightsLabel": "{n} н",
       "handoverMarkers": {
         "checkinToday": "Заезд сегодня",
         "checkinTomorrow": "Заезд завтра",

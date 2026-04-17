@@ -147,6 +147,7 @@
       },
       "overdueLabel": "+{n}d",
       "idleLabel": "{n}d",
+      "nightsLabel": "{n} n",
       "handoverMarkers": {
         "checkinToday": "Check-in today",
         "checkinTomorrow": "Check-in tomorrow",
