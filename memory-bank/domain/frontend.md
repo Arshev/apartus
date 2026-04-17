@@ -30,12 +30,13 @@ Apartus frontend — это одно приложение, SPA.
 ## Stack
 
 - Vue 3 (Composition API, **чистый JavaScript без TypeScript** — см. [`../adr/ADR-002-no-typescript-frontend.md`](../adr/ADR-002-no-typescript-frontend.md))
-- Vuetify 3 — canonical UI kit
+- Vuetify 4 — canonical UI kit
 - Vite — build/dev server
 - Pinia — state management
 - Vue Router 4 — routing
 - Axios — HTTP client (см. [`../adr/ADR-006-axios-api-client.md`](../adr/ADR-006-axios-api-client.md))
 - Vitest + jsdom — тесты
+- **Typography (FT-026):** Geologica (display) + Geist (body) — оба OFL 1.1, self-hosted в `public/fonts/`, Cyrillic-ready. OKLCH-derived palette. См. [`../engineering/design-style-guide.md`](../engineering/design-style-guide.md) и [`/.impeccable.md`](../../.impeccable.md).
 
 ## Layout
 

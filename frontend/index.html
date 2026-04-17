@@ -4,7 +4,15 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+
+    <!-- FT-026: Preload critical font weights (Cyrillic + Latin) for first paint.
+         Geologica 500 (headings) + Geist 400 (body) cover ~90% of visible text.
+         Other weights/subsets load on-demand per @font-face unicode-range. -->
+    <link rel="preload" href="/fonts/geologica/geologica-cyrillic.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/geologica/geologica-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/geist/geist-400.woff2" as="font" type="font/woff2" crossorigin />
+
+    <title>Apartus</title>
   </head>
   <body>
     <div id="app"></div>
