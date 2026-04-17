@@ -100,7 +100,8 @@
     "unitColumn": "Unit",
     "emptyState": {
       "title": "No units",
-      "text": "Add properties and units to display the calendar."
+      "text": "Add properties and units to display the calendar.",
+      "cta": "Add property"
     },
     "messages": {
       "loadError": "Failed to load calendar data"
@@ -157,7 +158,9 @@
       "search": {
         "open": "Search guest or unit",
         "placeholder": "Search…",
-        "empty": "No results for \"{query}\""
+        "empty": "No results for \"{query}\"",
+        "emptyHint": "Matches unit, property, and guest names",
+        "clear": "Clear search"
       }
     }
   },

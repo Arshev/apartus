@@ -122,20 +122,50 @@
       @context-menu="onContextMenu"
     />
 
-    <!-- FT-025: empty state for search (query non-empty but no matches).
-         Separate from no-data state to keep the distinct UX: here the user
-         has data but their filter doesn't hit anything. -->
+    <!-- FT-025 / FT-028: empty state for search (query non-empty but no
+         matches). Teaching UX — subtext explains what search matches, inline
+         Clear button returns the view to full listing. -->
     <v-empty-state
       v-else-if="!loading && debouncedQuery && units.length"
       icon="mdi-magnify-close"
       :title="$t('calendar.gantt.search.empty', { query: debouncedQuery })"
+      :text="$t('calendar.gantt.search.emptyHint')"
       data-testid="search-empty-state"
-    />
+    >
+      <template #actions>
+        <v-btn
+          variant="text"
+          color="primary"
+          prepend-icon="mdi-close"
+          data-testid="search-empty-clear"
+          :aria-label="$t('calendar.gantt.search.clear')"
+          @click="onSearchEscape"
+        >
+          {{ $t('calendar.gantt.search.clear') }}
+        </v-btn>
+      </template>
+    </v-empty-state>
 
-    <v-empty-state v-else-if="!loading" icon="mdi-calendar-blank"
+    <!-- FT-028: no-data empty state with inline CTA to add first property. -->
+    <v-empty-state
+      v-else-if="!loading"
+      icon="mdi-calendar-blank"
       :title="$t('calendar.emptyState.title')"
       :text="$t('calendar.emptyState.text')"
-    />
+      data-testid="calendar-empty-state"
+    >
+      <template #actions>
+        <v-btn
+          variant="tonal"
+          color="primary"
+          prepend-icon="mdi-plus"
+          data-testid="calendar-empty-cta"
+          @click="onEmptyStateCta"
+        >
+          {{ $t('calendar.emptyState.cta') }}
+        </v-btn>
+      </template>
+    </v-empty-state>
 
     <GanttTooltip :booking="tooltip.booking" :visible="tooltip.visible" :x="tooltip.x" :y="tooltip.y" />
 
@@ -256,6 +286,12 @@ function onOpenSearch() {
   // только по Escape (явное действие) — случайный blur (например клик по
   // бару календаря) не закрывает поиск, иначе activity-фильтр терялся бы
   // при первом же взаимодействии с календарём.
+}
+
+// FT-028: no-data empty state CTA — route to properties/new for onboarding.
+// Smart dispatch (properties vs units vs reservations) deferred per NS-05.
+function onEmptyStateCta() {
+  router.push('/properties/new')
 }
 
 async function onSearchEscape() {
@@ -457,7 +493,7 @@ defineExpose({
   searchQuery, debouncedQuery, searchOpen, filteredUnits, filteredReservations,
   loadData, goToday, onJumpDate, onShowBooking, onShowTooltip, onHideTooltip, onContextMenu,
   contextEdit, contextCheckIn, contextCheckOut, contextCancel, toggleHandover, toggleOverdue, toggleIdle, toggleHeatmap, setSpecialMode,
-  onOpenSearch, onSearchEscape,
+  onOpenSearch, onSearchEscape, onEmptyStateCta,
   display, MODE_BUTTONS,
 })
 </script>

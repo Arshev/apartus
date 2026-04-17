@@ -226,6 +226,33 @@ test.describe('Gantt Calendar (CHK-07)', () => {
     await page.locator('[data-testid="search-input"] input').press('Escape')
   })
 
+  // FT-028 Empty state UX
+  test('search empty state shows hint + Clear button that restores view (FT-028, SC-01,02)', async ({ page }) => {
+    await page.waitForSelector('.gantt-item', { timeout: 10000 })
+
+    // Open search + type a query that won't match.
+    await page.locator('[data-testid="search-btn"]').click()
+    await page.waitForSelector('[data-testid="search-input"]', { timeout: 5000 })
+    await page.locator('[data-testid="search-input"] input').fill('zzzzzz-notreal')
+    await page.waitForSelector('[data-testid="search-empty-state"]', { timeout: 2000 })
+
+    // Hint text present in the empty state.
+    const emptyText = await page.locator('[data-testid="search-empty-state"]').textContent()
+    expect(emptyText).toMatch(/юнитов.*объектов.*гостям/)
+
+    // Clear button visible and triggers restore.
+    const clearBtn = page.locator('[data-testid="search-empty-clear"]')
+    await expect(clearBtn).toBeVisible()
+    await clearBtn.click()
+
+    // Empty state gone; bars restored.
+    await page.waitForFunction(
+      () => document.querySelectorAll('[data-testid="search-empty-state"]').length === 0,
+      { timeout: 2000 }
+    )
+    await page.waitForSelector('.gantt-item', { timeout: 5000 })
+  })
+
   // FT-027 Reservation Bar Density
   test('revenue chip rendered on wide bars, hidden on narrow (FT-027, SC-01,03)', async ({ page }) => {
     await page.waitForSelector('.gantt-item', { timeout: 10000 })

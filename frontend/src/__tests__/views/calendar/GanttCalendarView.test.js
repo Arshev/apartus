@@ -709,4 +709,69 @@ describe('GanttCalendarView', () => {
       expect(wrapper.vm.rangeDays).toBe(14)
     })
   })
+
+  // --- FT-028 Empty state UX ---
+  describe('empty state UX (FT-028)', () => {
+    it('search empty state renders subtext hint (REQ-01)', async () => {
+      allUnitsApi.list.mockResolvedValue([{ id: 1, name: 'U1', property_name: 'P1' }])
+      reservationsApi.list.mockResolvedValue([])
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+
+      wrapper.vm.searchQuery = 'zzzzz'
+      wrapper.vm.debouncedQuery = 'zzzzz' // bypass debounce for determinism
+      await wrapper.vm.$nextTick()
+
+      const html = wrapper.html()
+      expect(html).toContain('zzzzz')
+      expect(html).toContain('По названиям юнитов, объектов и гостям')
+    })
+
+    it('search empty state Clear button triggers onSearchEscape (REQ-02)', async () => {
+      allUnitsApi.list.mockResolvedValue([{ id: 1, name: 'U1', property_name: 'P1' }])
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+
+      wrapper.vm.searchQuery = 'zzzzz'
+      wrapper.vm.debouncedQuery = 'zzzzz'
+      wrapper.vm.searchOpen = true
+      await wrapper.vm.$nextTick()
+
+      const clearBtn = wrapper.find('[data-testid="search-empty-clear"]')
+      expect(clearBtn.exists()).toBe(true)
+      await clearBtn.trigger('click')
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+
+      expect(wrapper.vm.searchQuery).toBe('')
+      expect(wrapper.vm.debouncedQuery).toBe('')
+      expect(wrapper.vm.searchOpen).toBe(false)
+    })
+
+    it('no-data empty state shows CTA button (REQ-03)', async () => {
+      allUnitsApi.list.mockResolvedValue([]) // empty org
+      reservationsApi.list.mockResolvedValue([])
+      const wrapper = setup()
+      // Drain mount + loadData cycle (Promise.all + 2 watchers).
+      for (let i = 0; i < 6; i += 1) await wrapper.vm.$nextTick()
+
+      const cta = wrapper.find('[data-testid="calendar-empty-cta"]')
+      expect(cta.exists()).toBe(true)
+      expect(cta.text()).toContain('Добавить объект')
+    })
+
+    it('onEmptyStateCta navigates to /properties/new', async () => {
+      allUnitsApi.list.mockResolvedValue([])
+      const wrapper = setup()
+      for (let i = 0; i < 6; i += 1) await wrapper.vm.$nextTick()
+
+      // onEmptyStateCta uses the router from useRouter(). In test mount we
+      // rely on the helper's global router — simply verify handler calls
+      // router.push with the expected path by spying on the app router.
+      const pushSpy = vi.fn()
+      wrapper.vm.$router.push = pushSpy
+
+      wrapper.vm.onEmptyStateCta()
+      expect(pushSpy).toHaveBeenCalledWith('/properties/new')
+    })
+  })
 })
