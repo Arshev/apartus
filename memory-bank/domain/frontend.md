@@ -129,6 +129,17 @@ Apartus frontend — это одно приложение, SPA.
 - Visual (Row-level): absolute-positioned day-cell layer (`<div class="gantt-row__heat-cell gantt-row__heat-cell--{status}">`) под items. CSS tint через `--v-theme-error` (0.20 busy) / `--v-theme-success` (0.15 free). `pointer-events: none`, z-index 0 — click-through to bars preserved.
 - `SUPPORTED_SPECIAL_MODES` extended: `['', 'handover', 'overdue', 'idle', 'heatmap']`.
 - **FT-020 NS-02 closed** — все 4 special modes delivered (handover FT-021, overdue FT-022, idle FT-023, heatmap FT-024).
+
+### Search Bar (FT-025)
+
+Collapsible search в Gantt toolbar для быстрого фильтра по guest / unit / property.
+
+- Toolbar `v-btn icon="mdi-magnify"` → click → inline `v-text-field` (density compact, 240px). Только Escape закрывает bar и очищает query (blur не закрывает — иначе клик по календарю сбрасывал бы активный фильтр).
+- Client-side filter: `utils/search.js#filterUnitsAndReservations(units, reservations, query)` — pure. Case-insensitive substring match на `unit.name`, `unit.property_name`, `reservation.guest_name`. Unit kept если matches на любом из 3 полей (fields matched independently, не concatenated). Matched unit показывает ВСЕ свои bookings (полный occupancy context).
+- Debounce 200ms trailing-edge через `utils/debounce.js` (vanilla, no lodash). `onBeforeUnmount` → `cancel()`.
+- Stacks с special modes — search применяется первым, mode оперирует на filtered subset.
+- Persistence: `localStorage('apartus-calendar-view').searchQuery`. Restore path — `loadStoredView()` вызывается синхронно в `<script setup>` (НЕ в `onMounted`) чтобы избежать flicker; обе refs `searchQuery` + `debouncedQuery` set atomically bypass debounce. Auto-expand bar если restored query non-empty.
+- Empty state: `v-empty-state` с mdi-magnify-close заменяет `<GanttTimeline>` когда query non-empty и no matches; distinct от no-data empty state.
 - Language switcher: Settings → General → v-select ru/en. Сохраняется в `organization.settings.locale` через PATCH `/organization`.
 - При boot: `fetchCurrentUser()` читает `organization.settings.locale` и устанавливает `i18n.global.locale.value`.
 - Fallback: отсутствующий ключ в en.json → показывается русский текст. Невалидный locale → ru.

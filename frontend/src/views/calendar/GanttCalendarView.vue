@@ -50,6 +50,35 @@
         {{ $t('calendar.gantt.modes.heatmap') }}
       </v-btn>
 
+      <!-- FT-025: collapsible search. Icon-only when closed and empty;
+           expands to input on click. Stays expanded while query is non-empty
+           (visual indicator of active filter). Escape clears + collapses. -->
+      <template v-if="searchOpen">
+        <v-text-field
+          v-model="searchQuery"
+          :placeholder="$t('calendar.gantt.search.placeholder')"
+          density="compact"
+          hide-details
+          clearable
+          autofocus
+          :maxlength="100"
+          prepend-inner-icon="mdi-magnify"
+          style="max-width: 240px"
+          data-testid="search-input"
+          @keydown.esc="onSearchEscape"
+        />
+      </template>
+      <v-btn
+        v-else
+        ref="searchBtnEl"
+        icon="mdi-magnify"
+        variant="text"
+        :title="$t('calendar.gantt.search.open')"
+        :aria-label="$t('calendar.gantt.search.open')"
+        data-testid="search-btn"
+        @click="onOpenSearch"
+      />
+
       <v-btn variant="text" prepend-icon="mdi-calendar-today" @click="goToday" data-testid="today-btn">
         {{ $t('calendar.gantt.toolbar.today') }}
       </v-btn>
@@ -68,10 +97,10 @@
     <v-alert v-if="error" type="error" closable class="mb-2" @click:close="error = null">{{ error }}</v-alert>
 
     <GanttTimeline
-      v-if="units.length"
+      v-if="filteredUnits.length"
       ref="timelineEl"
-      :units="units"
-      :reservations="reservations"
+      :units="filteredUnits"
+      :reservations="filteredReservations"
       :view-start="viewStart"
       :view-end="viewEnd"
       :special-mode="specialMode"
@@ -79,6 +108,16 @@
       @show-tooltip="onShowTooltip"
       @hide-tooltip="onHideTooltip"
       @context-menu="onContextMenu"
+    />
+
+    <!-- FT-025: empty state for search (query non-empty but no matches).
+         Separate from no-data state to keep the distinct UX: here the user
+         has data but their filter doesn't hit anything. -->
+    <v-empty-state
+      v-else-if="!loading && debouncedQuery && units.length"
+      icon="mdi-magnify-close"
+      :title="$t('calendar.gantt.search.empty', { query: debouncedQuery })"
+      data-testid="search-empty-state"
     />
 
     <v-empty-state v-else-if="!loading" icon="mdi-calendar-blank"
@@ -103,7 +142,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import GanttTimeline from './GanttTimeline.vue'
@@ -111,6 +150,13 @@ import GanttTooltip from './GanttTooltip.vue'
 import * as reservationsApi from '../../api/reservations'
 import * as allUnitsApi from '../../api/allUnits'
 import { addDays, startOfDay, formatIsoDate, parseIsoDate } from '../../utils/date'
+import { debounce } from '../../utils/debounce'
+import { filterUnitsAndReservations } from '../../utils/search'
+
+// FT-025 REQ-02: 200ms trailing-edge — Material guideline for search input
+// responsiveness. Tuned per ASM-05 perf budget (50 units × 10 reservations =
+// 500 items × 3 substring checks per keystroke is imperceptible under 200ms).
+const SEARCH_DEBOUNCE_MS = 200
 
 const STORAGE_KEY = 'apartus-calendar-view'
 const DEFAULT_RANGE_DAYS = 14
@@ -129,6 +175,15 @@ const loading = ref(false)
 const error = ref(null)
 const timelineEl = ref(null)
 
+// FT-025: search state.
+// searchQuery — raw v-model for the text field (updates on every keystroke).
+// debouncedQuery — the value actually applied to filtering (200ms trailing-edge).
+// searchOpen — controls collapsed-icon vs expanded-input toolbar UI.
+const searchQuery = ref('')
+const debouncedQuery = ref('')
+const searchOpen = ref(false)
+const searchBtnEl = ref(null)
+
 // FT-022: единый helper — mutual exclusion гарантируется одним местом.
 // FT-021 toggleHandover остаётся экспортированным shim'ом для обратной
 // совместимости (ER-01 регрессия тестов).
@@ -143,6 +198,47 @@ function toggleHeatmap() { setSpecialMode('heatmap') }
 
 const viewStart = computed(() => anchorDate.value)
 const viewEnd = computed(() => addDays(anchorDate.value, rangeDays.value - 1))
+
+// FT-025: apply search filter BEFORE passing to <GanttTimeline>. Special modes
+// then operate on the filtered subset (REQ-07 stacks with modes).
+const filtered = computed(() =>
+  filterUnitsAndReservations(units.value, reservations.value, debouncedQuery.value),
+)
+const filteredUnits = computed(() => filtered.value.units)
+const filteredReservations = computed(() => filtered.value.reservations)
+
+// Debounced setter: on every keystroke update debouncedQuery after 200ms idle.
+const debouncedSetQuery = debounce((q) => {
+  debouncedQuery.value = q
+}, SEARCH_DEBOUNCE_MS)
+
+// Vuetify's `clearable` X-button emits `null` (not `''`) when clicked. Coerce
+// here so both refs stay typed as strings and persistence serializes a string.
+watch(searchQuery, (q) => {
+  if (q === null || q === undefined) {
+    searchQuery.value = ''
+    return // the re-assignment above will re-fire this watcher with ''
+  }
+  debouncedSetQuery(q)
+})
+
+function onOpenSearch() {
+  searchOpen.value = true
+  // Autofocus на v-text-field открывает input focused. Collapse происходит
+  // только по Escape (явное действие) — случайный blur (например клик по
+  // бару календаря) не закрывает поиск, иначе activity-фильтр терялся бы
+  // при первом же взаимодействии с календарём.
+}
+
+async function onSearchEscape() {
+  // Atomic: clear + flush debounce + collapse + refocus icon button.
+  searchQuery.value = ''
+  debouncedSetQuery.cancel()
+  debouncedQuery.value = ''
+  searchOpen.value = false
+  await nextTick()
+  if (searchBtnEl.value?.$el?.focus) searchBtnEl.value.$el.focus()
+}
 
 // Tooltip state
 const tooltip = ref({ booking: null, visible: false, x: 0, y: 0 })
@@ -255,16 +351,44 @@ function loadStoredView() {
     if (typeof parsed.specialMode === 'string' && SUPPORTED_SPECIAL_MODES.includes(parsed.specialMode)) {
       specialMode.value = parsed.specialMode
     }
-  } catch {
-    // Persistence is best-effort; corrupt JSON or unavailable storage falls back to defaults.
+    // FT-025: restore search. Set BOTH searchQuery and debouncedQuery sync —
+    // bypassing the debounce wrapper — so the first render already shows the
+    // filtered DOM (no flicker). Auto-expand bar when there's a stored query.
+    if (typeof parsed.searchQuery === 'string' && parsed.searchQuery.length > 0) {
+      searchQuery.value = parsed.searchQuery
+      debouncedQuery.value = parsed.searchQuery
+      searchOpen.value = true
+    }
+  } catch (err) {
+    // Persistence is best-effort; corrupt JSON or unavailable storage falls
+    // back to defaults. Log in dev so regressions are debuggable; silent in
+    // production to avoid noise in user consoles (Safari private mode, etc).
+    if (import.meta.env.DEV) {
+      console.warn('[gantt] loadStoredView: ignoring persisted state', err)
+    }
   }
 }
 
+// FT-025 ER-03: call loadStoredView synchronously in <script setup> so the
+// first render reflects restored state. Moving it out of onMounted prevents
+// a 1-frame flicker where the default (empty) filter would be applied.
+loadStoredView()
+
 function persistView() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ rangeDays: rangeDays.value, specialMode: specialMode.value }))
-  } catch {
-    // Ignore — best-effort.
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        rangeDays: rangeDays.value,
+        specialMode: specialMode.value,
+        searchQuery: searchQuery.value,
+      }),
+    )
+  } catch (err) {
+    // Quota exhaustion / storage disabled — best-effort only.
+    if (import.meta.env.DEV) {
+      console.warn('[gantt] persistView: could not write state', err)
+    }
   }
 }
 
@@ -273,6 +397,7 @@ watch(rangeDays, () => {
   loadData()
 })
 watch(specialMode, () => persistView())
+watch(searchQuery, () => persistView())
 watch(anchorDate, () => loadData())
 
 // Refetch on tab focus (visibilitychange).
@@ -281,9 +406,16 @@ function onVisibilityChange() {
 }
 
 onMounted(() => {
-  loadStoredView()
+  // loadStoredView is invoked synchronously in setup above (FT-025 ER-03)
+  // so the first render already reflects restored state.
   loadData()
   document.addEventListener('visibilitychange', onVisibilityChange)
+})
+
+onBeforeUnmount(() => {
+  // FT-025 FM-08: cancel pending debounced setter so it doesn't fire after
+  // the component is torn down (would trigger a Vue warning and stale state).
+  debouncedSetQuery.cancel()
 })
 
 onUnmounted(() => {
@@ -293,7 +425,10 @@ onUnmounted(() => {
 defineExpose({
   rangeDays, anchorDate, specialMode, viewStart, viewEnd, reservations, units, loading, error,
   tooltip, contextMenu, snackbar, jumpDate, datePickerOpen, timelineEl,
+  // FT-025 search state (exposed for tests + future keyboard-shortcut integration).
+  searchQuery, debouncedQuery, searchOpen, filteredUnits, filteredReservations,
   loadData, goToday, onJumpDate, onShowBooking, onShowTooltip, onHideTooltip, onContextMenu,
   contextEdit, contextCheckIn, contextCheckOut, contextCancel, toggleHandover, toggleOverdue, toggleIdle, toggleHeatmap, setSpecialMode,
+  onOpenSearch, onSearchEscape,
 })
 </script>
