@@ -6,14 +6,18 @@
         variant="text"
         size="small"
         density="compact"
-        :icon="sidebarCollapsed ? 'mdi-chevron-right' : 'mdi-chevron-left'"
         :title="`${sidebarCollapsed ? $t('calendar.gantt.sidebar.toggleExpand') : $t('calendar.gantt.sidebar.toggleCollapse')} (S)`"
         :aria-label="sidebarCollapsed ? $t('calendar.gantt.sidebar.toggleExpand') : $t('calendar.gantt.sidebar.toggleCollapse')"
         :aria-expanded="!sidebarCollapsed"
         aria-controls="gantt-sidebar"
         data-testid="sidebar-toggle"
         @click="$emit('toggle-sidebar')"
-      />
+      >
+        <v-icon>{{ sidebarCollapsed ? 'mdi-chevron-right' : 'mdi-chevron-left' }}</v-icon>
+        <!-- FT-034: inline shortcut badge. Hidden when sidebar is collapsed
+             (48px corner is too tight for chevron + badge). -->
+        <kbd v-if="!sidebarCollapsed" aria-hidden="true" class="gantt-timeline__kbd" data-testid="kbd-sidebar">S</kbd>
+      </v-btn>
       <span v-if="!sidebarCollapsed" class="gantt-timeline__corner-label">{{ $t('calendar.unitColumn') }}</span>
     </div>
 
@@ -270,6 +274,28 @@ defineExpose({
   font-weight: 600;
   font-size: 12px;
   white-space: nowrap;
+}
+
+/* FT-034: inline shortcut badge on sidebar toggle button.
+   Mirrors `.gantt-toolbar__kbd` styling in GanttCalendarView.vue. */
+.gantt-timeline__kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  padding: 0 4px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  background: rgba(var(--v-theme-on-surface), 0.08);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.15);
+  border-radius: 3px;
+  flex-shrink: 0;
+  pointer-events: none;
 }
 
 .gantt-timeline__sidebar {

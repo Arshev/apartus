@@ -945,4 +945,41 @@ describe('GanttCalendarView', () => {
       expect(wrapper.vm.shortcutRows.map((r) => r.key)).toEqual(['/', 'T', '[', ']', 'S', 'D', 'Esc', '?'])
     })
   })
+
+  // --- FT-034 Shortcut badges ---
+  describe('toolbar shortcut badges (FT-034)', () => {
+    it('search button renders inline / badge', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      const badge = wrapper.find('[data-testid="kbd-search"]')
+      expect(badge.exists()).toBe(true)
+      expect(badge.text()).toBe('/')
+      expect(badge.attributes('aria-hidden')).toBe('true')
+    })
+
+    it('today button renders inline T badge', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      const badge = wrapper.find('[data-testid="kbd-today"]')
+      expect(badge.exists()).toBe(true)
+      expect(badge.text()).toBe('T')
+    })
+
+    it('density button renders inline D badge', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      const badge = wrapper.find('[data-testid="kbd-density"]')
+      expect(badge.exists()).toBe(true)
+      expect(badge.text()).toBe('D')
+    })
+
+    it('search badge hidden when search is open (button itself replaced)', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      wrapper.vm.onOpenSearch()
+      await wrapper.vm.$nextTick()
+      // search-btn unmounted when input shown
+      expect(wrapper.find('[data-testid="kbd-search"]').exists()).toBe(false)
+    })
+  })
 })
