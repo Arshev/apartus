@@ -165,6 +165,38 @@ describe('GanttTimeline', () => {
     })
   })
 
+  // FT-034 sidebar toggle badge
+  describe('sidebar toggle badge (FT-034)', () => {
+    it('renders kbd S badge when sidebar is expanded', () => {
+      const wrapper = mountWithVuetify(GanttTimeline, {
+        props: {
+          units: [{ id: 1, name: 'U1', property_name: 'P1' }],
+          reservations: [],
+          viewStart: new Date('2026-04-15'),
+          viewEnd: new Date('2026-04-28'),
+          sidebarCollapsed: false,
+        },
+      })
+      const badge = wrapper.find('[data-testid="kbd-sidebar"]')
+      expect(badge.exists()).toBe(true)
+      expect(badge.text()).toBe('S')
+      expect(badge.attributes('aria-hidden')).toBe('true')
+    })
+
+    it('hides kbd badge when sidebar is collapsed (no space in 48px corner)', () => {
+      const wrapper = mountWithVuetify(GanttTimeline, {
+        props: {
+          units: [{ id: 1, name: 'U1', property_name: 'P1' }],
+          reservations: [],
+          viewStart: new Date('2026-04-15'),
+          viewEnd: new Date('2026-04-28'),
+          sidebarCollapsed: true,
+        },
+      })
+      expect(wrapper.find('[data-testid="kbd-sidebar"]').exists()).toBe(false)
+    })
+  })
+
   it('exposes scrollToToday and scrollToDate methods', () => {
     const wrapper = setup('2026-04-15', '2026-04-28')
     expect(typeof wrapper.vm.scrollToToday).toBe('function')

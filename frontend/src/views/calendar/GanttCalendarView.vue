@@ -83,13 +83,15 @@
         <v-btn
           v-else
           ref="searchBtnEl"
-          icon="mdi-magnify"
           variant="text"
           :title="`${$t('calendar.gantt.search.open')} (/)`"
           :aria-label="$t('calendar.gantt.search.open')"
           data-testid="search-btn"
           @click="onOpenSearch"
-        />
+        >
+          <v-icon>mdi-magnify</v-icon>
+          <kbd aria-hidden="true" class="gantt-toolbar__kbd" data-testid="kbd-search">/</kbd>
+        </v-btn>
 
         <v-btn
           variant="text"
@@ -99,6 +101,7 @@
           data-testid="today-btn"
         >
           {{ $t('calendar.gantt.toolbar.today') }}
+          <kbd aria-hidden="true" class="gantt-toolbar__kbd" data-testid="kbd-today">T</kbd>
         </v-btn>
 
         <v-menu v-model="datePickerOpen" :close-on-content-click="false" location="bottom end">
@@ -111,16 +114,19 @@
         <v-btn icon="mdi-refresh" variant="text" :loading="loading" @click="loadData" :title="$t('calendar.gantt.toolbar.refresh')" data-testid="refresh-btn" />
 
         <!-- FT-033: density toggle. Tonal variant when compact (active state);
-             text variant otherwise. Same active-pattern as mode buttons (FT-026). -->
+             text variant otherwise. Same active-pattern as mode buttons (FT-026).
+             FT-034: inline kbd badge peripherally advertises the D shortcut. -->
         <v-btn
-          icon="mdi-format-line-spacing"
           :variant="density === 'compact' ? 'tonal' : 'text'"
           :title="`${$t('calendar.gantt.density.toggle')} (D)`"
           :aria-label="$t('calendar.gantt.density.toggle')"
           :aria-pressed="density === 'compact'"
           data-testid="density-btn"
           @click="toggleDensity"
-        />
+        >
+          <v-icon>mdi-format-line-spacing</v-icon>
+          <kbd aria-hidden="true" class="gantt-toolbar__kbd" data-testid="kbd-density">D</kbd>
+        </v-btn>
       </div>
     </div>
 
@@ -696,6 +702,28 @@ defineExpose({
   color: rgb(var(--v-theme-on-surface));
   border: 1px solid rgba(var(--v-theme-on-surface), 0.15);
   border-radius: 4px;
+}
+
+/* FT-034: inline shortcut badges on toolbar buttons. Smaller + muted vs
+   the help-dialog kbd style. Sits after icon / label inside the button. */
+.gantt-toolbar__kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  padding: 0 4px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  background: rgba(var(--v-theme-on-surface), 0.08);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.15);
+  border-radius: 3px;
+  flex-shrink: 0;
+  pointer-events: none;
 }
 
 .gantt-shortcuts__label {
