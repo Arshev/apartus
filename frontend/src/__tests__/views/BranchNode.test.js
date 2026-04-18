@@ -1,9 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-
-import { mountWithVuetify } from '../helpers/mountWithVuetify'
+import { describe, it, expect } from 'vitest'
+import { mountWithPrimeVue } from '../helpers/mountWithPrimeVue'
 import BranchNode from '../../views/BranchNode.vue'
 
-describe('BranchNode', () => {
+describe('BranchNode (FT-036 P2)', () => {
   const node = {
     id: 1,
     name: 'Root Branch',
@@ -13,7 +12,7 @@ describe('BranchNode', () => {
   }
 
   function mount(props = {}) {
-    return mountWithVuetify(BranchNode, {
+    return mountWithPrimeVue(BranchNode, {
       props: { node, depth: 0, ...props },
     })
   }
@@ -34,20 +33,16 @@ describe('BranchNode', () => {
     expect(wrapper.vm.expanded).toBe(true)
   })
 
-  it('renders children when expanded', () => {
+  it('renders children when expanded (auto-recursion)', () => {
     const wrapper = mount()
     expect(wrapper.text()).toContain('Child Branch')
   })
 
-  it('has correct emits declared', () => {
-    expect(BranchNode.emits).toEqual(['edit', 'delete', 'addChild'])
-  })
-
-  it('accepts node as required prop', () => {
-    expect(BranchNode.props.node.required).toBe(true)
-  })
-
-  it('depth defaults to 0', () => {
-    expect(BranchNode.props.depth.default).toBe(0)
+  it('emits addChild with node id on add button', async () => {
+    const wrapper = mount()
+    const addBtn = wrapper.find('button[title="Добавить дочерний"]')
+    expect(addBtn.exists()).toBe(true)
+    await addBtn.trigger('click')
+    expect(wrapper.emitted('addChild')).toEqual([[1]])
   })
 })

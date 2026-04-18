@@ -7,7 +7,7 @@ derived_from:
   - ./feature.md
   - ./phase-1-layout-auth.md
 status: active
-delivery_status: planned
+delivery_status: done
 audience: humans_and_agents
 must_not_define:
   - implementation_sequence

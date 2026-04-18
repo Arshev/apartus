@@ -1,18 +1,49 @@
 <template>
-  <div :style="{ paddingLeft: `${depth * 24}px` }" class="d-flex align-center py-1">
-    <v-icon v-if="node.children.length" size="small" class="mr-1" @click="expanded = !expanded">
-      {{ expanded ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
-    </v-icon>
-    <v-icon v-else size="small" class="mr-1">mdi-minus</v-icon>
-    <v-icon size="small" class="mr-2">mdi-source-branch</v-icon>
-    <span class="text-body-1">{{ node.name }}</span>
-    <v-spacer />
-    <v-btn icon="mdi-plus" variant="text" size="x-small" :title="$t('branches.addChildTitle')" @click="$emit('addChild', node.id)" />
-    <v-btn icon="mdi-pencil" variant="text" size="x-small" @click="$emit('edit', node)" />
-    <v-btn icon="mdi-delete" variant="text" size="x-small" color="error" @click="$emit('delete', node)" />
+  <div
+    :style="{ paddingLeft: `${depth * 24}px` }"
+    class="flex items-center gap-1 py-1"
+  >
+    <button
+      v-if="node.children.length"
+      type="button"
+      class="inline-flex items-center justify-center w-6 h-6 rounded hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
+      :aria-label="expanded ? $t('common.close') : $t('common.add')"
+      @click="expanded = !expanded"
+    >
+      <i :class="['pi', expanded ? 'pi-chevron-down' : 'pi-chevron-right', 'text-xs']" aria-hidden="true" />
+    </button>
+    <span v-else class="inline-block w-6" />
+    <i class="pi pi-sitemap text-surface-500 mr-1" aria-hidden="true" />
+    <span class="flex-1 text-surface-900 dark:text-surface-100">{{ node.name }}</span>
+    <div class="flex gap-0.5">
+      <button
+        type="button"
+        class="inline-flex items-center justify-center w-7 h-7 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
+        :title="$t('branches.addChildTitle')"
+        @click="$emit('addChild', node.id)"
+      >
+        <i class="pi pi-plus text-xs" aria-hidden="true" />
+      </button>
+      <button
+        type="button"
+        class="inline-flex items-center justify-center w-7 h-7 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
+        :title="$t('common.edit')"
+        @click="$emit('edit', node)"
+      >
+        <i class="pi pi-pencil text-xs" aria-hidden="true" />
+      </button>
+      <button
+        type="button"
+        class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+        :title="$t('common.delete')"
+        @click="$emit('delete', node)"
+      >
+        <i class="pi pi-trash text-xs" aria-hidden="true" />
+      </button>
+    </div>
   </div>
   <div v-if="expanded && node.children.length">
-    <branch-node
+    <BranchNode
       v-for="child in node.children"
       :key="child.id"
       :node="child"
@@ -24,16 +55,21 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'BranchNode',
-  props: {
-    node: { type: Object, required: true },
-    depth: { type: Number, default: 0 },
-  },
-  emits: ['edit', 'delete', 'addChild'],
-  data() {
-    return { expanded: true }
-  },
-}
+<script setup>
+// FT-036 P2: Vue 3.3+ auto-recursion via filename — component references
+// itself as <BranchNode> without explicit import.
+import { ref } from 'vue'
+
+defineOptions({ name: 'BranchNode' })
+
+defineProps({
+  node: { type: Object, required: true },
+  depth: { type: Number, default: 0 },
+})
+
+defineEmits(['edit', 'delete', 'addChild'])
+
+const expanded = ref(true)
+
+defineExpose({ expanded })
 </script>
