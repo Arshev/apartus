@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { mountWithVuetify } from '../helpers/mountWithVuetify'
+import { mountWithPrimeVue } from '../helpers/mountWithPrimeVue'
 import ReservationFormSection from '../../components/ReservationFormSection.vue'
 
 describe('ReservationFormSection', () => {
   it('renders title in h2 with provided id', () => {
-    const wrapper = mountWithVuetify(ReservationFormSection, {
+    const wrapper = mountWithPrimeVue(ReservationFormSection, {
       props: { title: 'Юнит и даты', id: 'section-unit' },
       slots: { default: '<p>content</p>' },
     })
@@ -15,7 +15,7 @@ describe('ReservationFormSection', () => {
   })
 
   it('section has aria-labelledby matching heading id', () => {
-    const wrapper = mountWithVuetify(ReservationFormSection, {
+    const wrapper = mountWithPrimeVue(ReservationFormSection, {
       props: { title: 'Гость', id: 'section-guest' },
       slots: { default: '<span>x</span>' },
     })
@@ -23,7 +23,7 @@ describe('ReservationFormSection', () => {
   })
 
   it('renders slot content', () => {
-    const wrapper = mountWithVuetify(ReservationFormSection, {
+    const wrapper = mountWithPrimeVue(ReservationFormSection, {
       props: { title: 'X', id: 'x' },
       slots: { default: '<div class="slot-content">hi</div>' },
     })
@@ -31,7 +31,7 @@ describe('ReservationFormSection', () => {
   })
 
   it('auto-generates id when not provided', () => {
-    const wrapper = mountWithVuetify(ReservationFormSection, {
+    const wrapper = mountWithPrimeVue(ReservationFormSection, {
       props: { title: 'Заметки' },
       slots: { default: ' ' },
     })

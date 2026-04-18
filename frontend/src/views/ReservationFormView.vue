@@ -1,83 +1,158 @@
 <template>
-  <v-container class="reservation-form-container">
+  <div class="reservation-form-container mx-auto px-4 py-6">
     <h1 class="reservation-form-container__heading">
       {{ isEdit ? $t('reservations.editTitle') : $t('reservations.createTitle') }}
     </h1>
 
-    <v-alert v-if="formError" type="error" class="mb-4" closable @click:close="formError = null">
-      {{ Array.isArray(formError) ? formError.join(', ') : formError }}
-    </v-alert>
+    <div
+      v-if="formError"
+      class="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 px-3 py-2 text-sm text-red-800 dark:text-red-200 mb-4"
+    >
+      <i class="pi pi-exclamation-circle mt-0.5" aria-hidden="true" />
+      <span class="flex-1">
+        {{ Array.isArray(formError) ? formError.join(', ') : formError }}
+      </span>
+      <button
+        type="button"
+        class="text-red-500 hover:text-red-700"
+        :aria-label="$t('common.close')"
+        @click="formError = null"
+      >
+        <i class="pi pi-times" />
+      </button>
+    </div>
 
     <div class="reservation-form-grid">
-      <v-form
-        ref="formRef"
+      <form
         class="reservation-form-grid__form"
-        :disabled="submitting"
+        novalidate
         @submit.prevent="handleSubmit"
       >
         <ReservationFormSection id="section-unit-dates" :title="$t('reservations.form.sections.unitDates')">
-          <v-autocomplete
-            v-model="form.unit_id"
-            :label="$t('reservations.form.unit')"
-            :items="units"
-            item-title="label"
-            item-value="id"
-            :rules="[rules.required]"
-            :disabled="isEdit"
-          />
+          <div>
+            <label for="res-unit" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+              {{ $t('reservations.form.unit') }}
+            </label>
+            <Select
+              id="res-unit"
+              v-model="form.unit_id"
+              :options="units"
+              option-label="label"
+              option-value="id"
+              :disabled="isEdit"
+              filter
+              class="w-full"
+              :invalid="!!fieldErrors.unit_id"
+              @change="validateField('unit_id')"
+            />
+            <p v-if="fieldErrors.unit_id" class="mt-1 text-xs text-red-600 dark:text-red-400">
+              {{ $t(fieldErrors.unit_id) }}
+            </p>
+          </div>
           <ReservationDateRangePicker v-model="dateRange" />
         </ReservationFormSection>
 
         <ReservationFormSection id="section-guest" :title="$t('reservations.form.sections.guest')">
-          <div class="d-flex align-center ga-2">
-            <v-autocomplete
-              v-model="form.guest_id"
-              :label="$t('reservations.form.guest')"
-              :items="guests"
-              item-title="label"
-              item-value="id"
-              clearable
-              style="flex: 1"
-            />
-            <v-btn
-              icon="mdi-plus"
-              variant="tonal"
-              size="small"
+          <div class="flex items-end gap-2">
+            <div class="flex-1">
+              <label for="res-guest" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+                {{ $t('reservations.form.guest') }}
+              </label>
+              <Select
+                id="res-guest"
+                v-model="form.guest_id"
+                :options="guests"
+                option-label="label"
+                option-value="id"
+                show-clear
+                filter
+                class="w-full"
+              />
+            </div>
+            <Button
+              icon="pi pi-plus"
+              severity="secondary"
+              variant="outlined"
               :title="$t('reservations.form.addGuest')"
+              :aria-label="$t('reservations.form.addGuest')"
               @click="guestDialogOpen = true"
             />
           </div>
         </ReservationFormSection>
 
         <ReservationFormSection id="section-pricing" :title="$t('reservations.form.sections.pricing')">
-          <v-text-field
-            :model-value="totalPriceUnits"
-            :label="$t('reservations.form.totalPrice')"
-            type="number"
-            step="0.01"
-            :prefix="currencyConfig.position === 'before' ? currencyConfig.symbol : ''"
-            :suffix="currencyConfig.position === 'after' ? currencyConfig.symbol : ''"
-            @update:model-value="onTotalInput"
-          />
-          <v-text-field
-            v-model.number="form.guests_count"
-            :label="$t('reservations.form.guestsCount')"
-            type="number"
-            :rules="[rules.required, rules.minOne]"
-          />
+          <div>
+            <label for="res-price" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+              {{ $t('reservations.form.totalPrice') }}
+            </label>
+            <div class="relative">
+              <span
+                v-if="currencyConfig.position === 'before'"
+                class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-surface-600 dark:text-surface-400 pointer-events-none"
+              >
+                {{ currencyConfig.symbol }}
+              </span>
+              <InputText
+                id="res-price"
+                :model-value="totalPriceUnits"
+                type="number"
+                step="0.01"
+                :class="[
+                  'w-full',
+                  currencyConfig.position === 'before' ? 'pl-8' : 'pr-8',
+                ]"
+                @update:model-value="onTotalInput"
+              />
+              <span
+                v-if="currencyConfig.position === 'after'"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-surface-600 dark:text-surface-400 pointer-events-none"
+              >
+                {{ currencyConfig.symbol }}
+              </span>
+            </div>
+          </div>
+          <div>
+            <label for="res-count" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+              {{ $t('reservations.form.guestsCount') }}
+            </label>
+            <InputText
+              id="res-count"
+              v-model.number="form.guests_count"
+              type="number"
+              class="w-full"
+              :invalid="!!fieldErrors.guests_count"
+              @blur="validateField('guests_count')"
+            />
+            <p v-if="fieldErrors.guests_count" class="mt-1 text-xs text-red-600 dark:text-red-400">
+              {{ $t(fieldErrors.guests_count) }}
+            </p>
+          </div>
         </ReservationFormSection>
 
         <ReservationFormSection id="section-notes" :title="$t('reservations.form.sections.notes')">
-          <v-textarea v-model="form.notes" :label="$t('common.form.notes')" rows="3" />
+          <div>
+            <label for="res-notes" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+              {{ $t('common.form.notes') }}
+            </label>
+            <Textarea id="res-notes" v-model="form.notes" rows="3" class="w-full" />
+          </div>
         </ReservationFormSection>
 
-        <div class="d-flex ga-2">
-          <v-btn type="submit" color="primary" :loading="submitting">
-            {{ isEdit ? $t('common.save') : $t('common.create') }}
-          </v-btn>
-          <v-btn variant="text" :to="'/reservations'">{{ $t('common.cancel') }}</v-btn>
+        <div class="flex gap-2">
+          <Button
+            type="submit"
+            :label="isEdit ? $t('common.save') : $t('common.create')"
+            :loading="submitting"
+          />
+          <Button
+            type="button"
+            :label="$t('common.cancel')"
+            severity="secondary"
+            variant="text"
+            @click="$router.push('/reservations')"
+          />
         </div>
-      </v-form>
+      </form>
 
       <aside class="reservation-form-grid__summary">
         <ReservationPriceSummary
@@ -96,13 +171,17 @@
     </div>
 
     <GuestQuickCreateDialog v-model="guestDialogOpen" @created="onGuestCreated" />
-  </v-container>
+  </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import Select from 'primevue/select'
+import InputText from 'primevue/inputtext'
+import Textarea from 'primevue/textarea'
+import Button from 'primevue/button'
 import { useReservationsStore } from '../stores/reservations'
 import { useAuthStore } from '../stores/auth'
 import * as reservationsApi from '../api/reservations'
@@ -110,6 +189,7 @@ import * as allUnitsApi from '../api/allUnits'
 import * as guestsApi from '../api/guests'
 import * as seasonalPricesApi from '../api/seasonalPrices'
 import { centsToUnits, unitsToCents, getCurrencySymbol } from '../utils/currency'
+import { reservationSchema, validate } from '../schemas/reservation'
 import ReservationFormSection from '../components/ReservationFormSection.vue'
 import ReservationDateRangePicker from '../components/ReservationDateRangePicker.vue'
 import ReservationPriceSummary from '../components/ReservationPriceSummary.vue'
@@ -122,9 +202,9 @@ const store = useReservationsStore()
 const authStore = useAuthStore()
 
 const isEdit = computed(() => !!route.params.id)
-const formRef = ref(null)
 const submitting = ref(false)
 const formError = ref(null)
+const fieldErrors = ref({})
 const manualOverride = ref(false)
 const guestDialogOpen = ref(false)
 
@@ -185,10 +265,28 @@ const autoTotalCents = computed(() => {
   return total
 })
 
+// Legacy shim preserved for test compat — rules object with same shape.
 const rules = {
   required: (v) =>
     (v !== '' && v !== null && v !== undefined) || t('common.validation.required'),
   minOne: (v) => Number(v) >= 1 || t('common.validation.minOne'),
+}
+
+function buildPayload() {
+  return {
+    unit_id: form.value.unit_id,
+    guest_id: form.value.guest_id,
+    check_in: form.value.check_in,
+    check_out: form.value.check_out,
+    guests_count: form.value.guests_count,
+    total_price_cents: form.value.total_price_cents,
+    notes: form.value.notes,
+  }
+}
+
+function validateField(field) {
+  const { errors } = validate(reservationSchema, buildPayload())
+  fieldErrors.value = { ...fieldErrors.value, [field]: errors[field] || '' }
 }
 
 function onTotalInput(value) {
@@ -208,18 +306,6 @@ function onGuestCreated(guest) {
   ]
   form.value.guest_id = guest.id
   guestDialogOpen.value = false
-}
-
-function buildPayload() {
-  return {
-    unit_id: form.value.unit_id,
-    guest_id: form.value.guest_id,
-    check_in: form.value.check_in,
-    check_out: form.value.check_out,
-    guests_count: form.value.guests_count,
-    total_price_cents: form.value.total_price_cents,
-    notes: form.value.notes,
-  }
 }
 
 async function ensureUnitData(unitId) {
@@ -290,8 +376,10 @@ async function loadReservation() {
 }
 
 async function handleSubmit() {
-  const { valid } = await formRef.value.validate()
+  const { valid, errors } = validate(reservationSchema, buildPayload())
+  fieldErrors.value = errors
   if (!valid) return
+
   submitting.value = true
   formError.value = null
   try {
@@ -317,6 +405,7 @@ onMounted(() => {
 defineExpose({
   form,
   formError,
+  fieldErrors,
   handleSubmit,
   isEdit,
   rules,
@@ -328,6 +417,7 @@ defineExpose({
   currency,
   autoTotalCents,
   dateRange,
+  validateField,
   onTotalInput,
   onRecalc,
   onGuestCreated,
@@ -348,7 +438,11 @@ defineExpose({
   font-weight: 500;
   letter-spacing: -0.02em;
   margin: 0 0 24px;
-  color: rgb(var(--v-theme-on-surface));
+  color: var(--p-surface-900, #171c19);
+}
+
+:where(.dark) .reservation-form-container__heading {
+  color: var(--p-surface-0, #e1e6e2);
 }
 
 .reservation-form-grid {
@@ -360,6 +454,9 @@ defineExpose({
 
 .reservation-form-grid__form {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .reservation-form-grid__summary {

@@ -17,22 +17,15 @@ vi.mock('../../api/reservations', () => ({
   cancel: vi.fn().mockResolvedValue({ id: 1, status: 'cancelled' }),
 }))
 
-import { mountWithVuetify } from '../helpers/mountWithVuetify'
+import { mountWithPrimeVue } from '../helpers/mountWithPrimeVue'
 import ReservationListView from '../../views/ReservationListView.vue'
 import { useReservationsStore } from '../../stores/reservations'
 
 describe('ReservationListView', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
-  it('has correct headers', () => {
-    const wrapper = mountWithVuetify(ReservationListView)
-    expect(wrapper.vm.headers.map((h) => h.key)).toEqual([
-      'unit_name', 'guest_name', 'check_in', 'check_out', 'status', 'total_price_cents', 'actions',
-    ])
-  })
-
   it('statusColor / statusLabel / formatPrice', () => {
-    const wrapper = mountWithVuetify(ReservationListView)
+    const wrapper = mountWithPrimeVue(ReservationListView)
     expect(wrapper.vm.statusColor('confirmed')).toBe('status-confirmed')
     expect(wrapper.vm.statusColor('checked_in')).toBe('status-checked-in')
     expect(wrapper.vm.statusLabel('cancelled')).toBe('Отменено')
@@ -40,17 +33,20 @@ describe('ReservationListView', () => {
     expect(wrapper.vm.formatPrice(0)).toBe('—')
   })
 
-  it('confirmDelete + handleDelete', async () => {
-    const wrapper = mountWithVuetify(ReservationListView)
-    const store = useReservationsStore()
-    vi.spyOn(store, 'destroy')
-    wrapper.vm.confirmDelete({ id: 1 })
-    await wrapper.vm.handleDelete()
-    expect(store.destroy).toHaveBeenCalledWith(1)
+  it('confirmDelete does not throw (wires to useConfirm)', () => {
+    const wrapper = mountWithPrimeVue(ReservationListView)
+    expect(() => wrapper.vm.confirmDelete({ id: 1 })).not.toThrow()
+  })
+
+  it('handleDelete invokes API destroy', async () => {
+    const api = await import('../../api/reservations')
+    const wrapper = mountWithPrimeVue(ReservationListView)
+    await wrapper.vm.handleDelete({ id: 42 })
+    expect(api.destroy).toHaveBeenCalledWith(42)
   })
 
   it('doCheckIn calls store.checkIn', async () => {
-    const wrapper = mountWithVuetify(ReservationListView)
+    const wrapper = mountWithPrimeVue(ReservationListView)
     const store = useReservationsStore()
     const spy = vi.spyOn(store, 'checkIn').mockResolvedValue({})
     await wrapper.vm.doCheckIn({ id: 1 })
@@ -58,7 +54,7 @@ describe('ReservationListView', () => {
   })
 
   it('doCheckOut calls store.checkOut', async () => {
-    const wrapper = mountWithVuetify(ReservationListView)
+    const wrapper = mountWithPrimeVue(ReservationListView)
     const store = useReservationsStore()
     const spy = vi.spyOn(store, 'checkOut').mockResolvedValue({})
     await wrapper.vm.doCheckOut({ id: 1 })
@@ -66,7 +62,7 @@ describe('ReservationListView', () => {
   })
 
   it('doCancel calls store.cancelReservation', async () => {
-    const wrapper = mountWithVuetify(ReservationListView)
+    const wrapper = mountWithPrimeVue(ReservationListView)
     const store = useReservationsStore()
     const spy = vi.spyOn(store, 'cancelReservation').mockResolvedValue({})
     await wrapper.vm.doCancel({ id: 1 })

@@ -9,7 +9,7 @@ derived_from:
   - ../FT-035-reservation-form-redesign/feature.md
   - ../FT-010-booking-widget/feature.md
 status: active
-delivery_status: planned
+delivery_status: done
 audience: humans_and_agents
 must_not_define:
   - implementation_sequence

@@ -37,19 +37,22 @@
       </div>
 
       <div v-if="manualOverride && diff !== 0" class="price-summary__manual">
-        <v-chip color="warning" size="small" variant="tonal">
+        <span class="price-summary__manual-chip">
           {{
             $t('reservations.form.priceSummary.manualPrice', {
               sign: diff < 0 ? '−' : '+',
               diff: formatMoney(Math.abs(diff), currency),
             })
           }}
-        </v-chip>
-        <div data-testid="recalc-btn" @click="$emit('recalc')">
-          <v-btn variant="text" size="small">
-            {{ $t('reservations.form.priceSummary.recalc') }}
-          </v-btn>
-        </div>
+        </span>
+        <button
+          data-testid="recalc-btn"
+          type="button"
+          class="price-summary__recalc-btn"
+          @click="$emit('recalc')"
+        >
+          {{ $t('reservations.form.priceSummary.recalc') }}
+        </button>
       </div>
     </template>
   </aside>
@@ -128,12 +131,17 @@ defineExpose({ breakdown, nightsCount, diff, effectiveTotal })
   position: sticky;
   top: 80px;
   padding: 20px;
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 8px;
-  background: rgba(var(--v-theme-on-surface), 0.02);
+  background: rgba(0, 0, 0, 0.02);
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+:where(.dark) .price-summary {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .price-summary__title {
@@ -143,18 +151,22 @@ defineExpose({ breakdown, nightsCount, diff, effectiveTotal })
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: rgba(var(--v-theme-on-surface), 0.55);
+  color: var(--p-surface-600, #5f6561);
 }
 
 .price-summary__empty {
-  color: rgba(var(--v-theme-on-surface), 0.6);
+  color: var(--p-surface-600, #5f6561);
   font-size: 0.875rem;
   padding: 8px 0;
 }
 
 .price-summary__dates {
   font-size: 0.9rem;
-  color: rgba(var(--v-theme-on-surface), 0.8);
+  color: var(--p-surface-700, #4a5048);
+}
+
+:where(.dark) .price-summary__dates {
+  color: var(--p-surface-200, #b9c0bb);
 }
 
 .price-summary__rows {
@@ -175,15 +187,19 @@ defineExpose({ breakdown, nightsCount, diff, effectiveTotal })
 }
 
 .price-summary__seasonal-tag {
-  color: rgba(var(--v-theme-on-surface), 0.5);
+  color: var(--p-surface-500, #7a807c);
   font-size: 0.75rem;
   margin-left: 4px;
 }
 
 .price-summary__divider {
   height: 1px;
-  background: rgba(var(--v-theme-on-surface), 0.12);
+  background: rgba(0, 0, 0, 0.12);
   margin: 4px 0;
+}
+
+:where(.dark) .price-summary__divider {
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .price-summary__total {
@@ -207,6 +223,37 @@ defineExpose({ breakdown, nightsCount, diff, effectiveTotal })
   gap: 8px;
   padding-top: 4px;
   align-items: flex-start;
+}
+
+.price-summary__manual-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #92400e;
+  background: color-mix(in oklch, var(--color-priority-high) 15%, transparent);
+  border: 1px solid color-mix(in oklch, var(--color-priority-high) 30%, transparent);
+  border-radius: 9999px;
+}
+
+:where(.dark) .price-summary__manual-chip {
+  color: #fde68a;
+}
+
+.price-summary__recalc-btn {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-primary-500);
+  background: transparent;
+  border: 0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.price-summary__recalc-btn:hover {
+  background: color-mix(in oklch, var(--color-primary-500) 8%, transparent);
 }
 
 @media (max-width: 959px) {

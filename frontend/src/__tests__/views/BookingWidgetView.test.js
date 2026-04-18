@@ -12,7 +12,7 @@ vi.mock('../../utils/currency', () => ({
   formatMoney: vi.fn((cents) => `${(cents / 100).toFixed(0)} ₽`),
 }))
 
-import { mountWithVuetifyAsync } from '../helpers/mountWithVuetify'
+import { mountWithPrimeVueAsync } from '../helpers/mountWithPrimeVue'
 import BookingWidgetView from '../../views/BookingWidgetView.vue'
 import * as publicBookingApi from '../../api/publicBooking'
 
@@ -20,7 +20,7 @@ describe('BookingWidgetView', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
   async function mount() {
-    return mountWithVuetifyAsync(BookingWidgetView, {
+    return mountWithPrimeVueAsync(BookingWidgetView, {
       routes: [{ path: '/book/:slug', component: BookingWidgetView }],
       initialRoute: '/book/test-org',
     })

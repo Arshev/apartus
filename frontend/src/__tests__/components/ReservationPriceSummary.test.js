@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { mountWithVuetify } from '../helpers/mountWithVuetify'
+import { mountWithPrimeVue } from '../helpers/mountWithPrimeVue'
 import ReservationPriceSummary from '../../components/ReservationPriceSummary.vue'
 
 const baseProps = {
@@ -16,21 +16,21 @@ const baseProps = {
 
 describe('ReservationPriceSummary', () => {
   it('shows empty state when unitId null', () => {
-    const wrapper = mountWithVuetify(ReservationPriceSummary, {
+    const wrapper = mountWithPrimeVue(ReservationPriceSummary, {
       props: { ...baseProps, unitId: null },
     })
     expect(wrapper.text()).toContain('Выберите юнит и даты')
   })
 
   it('shows empty state when dates missing', () => {
-    const wrapper = mountWithVuetify(ReservationPriceSummary, {
+    const wrapper = mountWithPrimeVue(ReservationPriceSummary, {
       props: { ...baseProps, checkIn: '', checkOut: '' },
     })
     expect(wrapper.text()).toContain('Выберите юнит и даты')
   })
 
   it('breakdown shows single base bucket when no seasonals apply', () => {
-    const wrapper = mountWithVuetify(ReservationPriceSummary, {
+    const wrapper = mountWithPrimeVue(ReservationPriceSummary, {
       props: baseProps,
     })
     expect(wrapper.vm.breakdown).toHaveLength(1)
@@ -42,7 +42,7 @@ describe('ReservationPriceSummary', () => {
   })
 
   it('breakdown shows 2 buckets when seasonal straddles range', () => {
-    const wrapper = mountWithVuetify(ReservationPriceSummary, {
+    const wrapper = mountWithPrimeVue(ReservationPriceSummary, {
       props: {
         ...baseProps,
         checkIn: '2026-04-29',
@@ -61,7 +61,7 @@ describe('ReservationPriceSummary', () => {
   })
 
   it('shows manual override chip when manualOverride true и суммы отличаются', () => {
-    const wrapper = mountWithVuetify(ReservationPriceSummary, {
+    const wrapper = mountWithPrimeVue(ReservationPriceSummary, {
       props: {
         ...baseProps,
         manualOverride: true,
@@ -73,7 +73,7 @@ describe('ReservationPriceSummary', () => {
   })
 
   it('does not show manual chip when manualOverride true but sums equal', () => {
-    const wrapper = mountWithVuetify(ReservationPriceSummary, {
+    const wrapper = mountWithPrimeVue(ReservationPriceSummary, {
       props: {
         ...baseProps,
         manualOverride: true,
@@ -85,7 +85,7 @@ describe('ReservationPriceSummary', () => {
   })
 
   it('emits recalc when button clicked', async () => {
-    const wrapper = mountWithVuetify(ReservationPriceSummary, {
+    const wrapper = mountWithPrimeVue(ReservationPriceSummary, {
       props: {
         ...baseProps,
         manualOverride: true,
@@ -98,19 +98,19 @@ describe('ReservationPriceSummary', () => {
   })
 
   it('breakdown is empty when checkOut <= checkIn', () => {
-    const wrapper = mountWithVuetify(ReservationPriceSummary, {
+    const wrapper = mountWithPrimeVue(ReservationPriceSummary, {
       props: { ...baseProps, checkIn: '2026-04-15', checkOut: '2026-04-15' },
     })
     expect(wrapper.vm.breakdown).toHaveLength(0)
   })
 
   it('root region has aria-live="polite"', () => {
-    const wrapper = mountWithVuetify(ReservationPriceSummary, { props: baseProps })
+    const wrapper = mountWithPrimeVue(ReservationPriceSummary, { props: baseProps })
     expect(wrapper.find('[aria-live="polite"]').exists()).toBe(true)
   })
 
   it('effectiveTotal uses autoTotal when no manual override', () => {
-    const wrapper = mountWithVuetify(ReservationPriceSummary, {
+    const wrapper = mountWithPrimeVue(ReservationPriceSummary, {
       props: {
         ...baseProps,
         manualOverride: false,
@@ -122,7 +122,7 @@ describe('ReservationPriceSummary', () => {
   })
 
   it('effectiveTotal uses manualTotal when override active', () => {
-    const wrapper = mountWithVuetify(ReservationPriceSummary, {
+    const wrapper = mountWithPrimeVue(ReservationPriceSummary, {
       props: {
         ...baseProps,
         manualOverride: true,

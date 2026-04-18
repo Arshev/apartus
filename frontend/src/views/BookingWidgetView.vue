@@ -1,62 +1,132 @@
 <template>
-  <v-app>
-    <v-container class="pa-4" style="max-width: 600px">
-      <h2 class="text-h5 mb-4">{{ $t('bookingWidget.title', { orgName }) }}</h2>
+  <div class="min-h-screen bg-surface-50 dark:bg-surface-950">
+    <div class="max-w-xl mx-auto px-4 py-8">
+      <h2 class="text-2xl font-display font-medium tracking-tight mb-6 text-surface-950 dark:text-surface-50">
+        {{ $t('bookingWidget.title', { orgName }) }}
+      </h2>
 
-      <v-text-field v-model="checkIn" :label="$t('bookingWidget.form.checkIn')" type="date" class="mb-2" />
-      <v-text-field v-model="checkOut" :label="$t('bookingWidget.form.checkOut')" type="date" class="mb-2" />
-      <v-btn color="primary" :loading="searching" @click="search" class="mb-4">{{ $t('bookingWidget.searchButton') }}</v-btn>
+      <form class="space-y-4 mb-6" @submit.prevent="search">
+        <div>
+          <label for="bw-checkin" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+            {{ $t('bookingWidget.form.checkIn') }}
+          </label>
+          <InputText id="bw-checkin" v-model="checkIn" type="date" class="w-full" />
+        </div>
+        <div>
+          <label for="bw-checkout" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+            {{ $t('bookingWidget.form.checkOut') }}
+          </label>
+          <InputText id="bw-checkout" v-model="checkOut" type="date" class="w-full" />
+        </div>
+        <Button
+          type="submit"
+          :label="$t('bookingWidget.searchButton')"
+          :loading="searching"
+        />
+      </form>
 
-      <v-alert v-if="error" type="error" class="mb-4">{{ error }}</v-alert>
-
-      <div v-if="units.length">
-        <v-card v-for="unit in units" :key="unit.id" class="mb-3" variant="outlined">
-          <v-card-title>{{ unit.property_name }} — {{ unit.name }}</v-card-title>
-          <v-card-subtitle>{{ unit.unit_type }} · {{ $t('bookingWidget.guestsLabel', { n: unit.capacity }) }} · {{ formatPrice(unit.total_price_cents) }}</v-card-subtitle>
-          <v-card-actions>
-            <v-btn color="primary" size="small" @click="selectUnit(unit)">{{ $t('bookingWidget.bookButton') }}</v-btn>
-          </v-card-actions>
-        </v-card>
+      <div
+        v-if="error"
+        class="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 px-3 py-2 text-sm text-red-800 dark:text-red-200 mb-4"
+      >
+        <i class="pi pi-exclamation-circle mt-0.5" aria-hidden="true" />
+        <span>{{ error }}</span>
       </div>
 
-      <v-empty-state v-else-if="searched && !searching" icon="mdi-calendar-remove" :title="$t('bookingWidget.emptyState.title')" />
+      <div v-if="units.length" class="space-y-3">
+        <div
+          v-for="unit in units"
+          :key="unit.id"
+          class="rounded-lg border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 p-4"
+        >
+          <h3 class="font-display font-medium text-surface-900 dark:text-surface-100">
+            {{ unit.property_name }} — {{ unit.name }}
+          </h3>
+          <p class="text-sm text-surface-600 dark:text-surface-400 mt-1">
+            {{ unit.unit_type }} · {{ $t('bookingWidget.guestsLabel', { n: unit.capacity }) }}
+            · <span class="tabular-nums">{{ formatPrice(unit.total_price_cents) }}</span>
+          </p>
+          <div class="mt-3">
+            <Button
+              :label="$t('bookingWidget.bookButton')"
+              size="small"
+              @click="selectUnit(unit)"
+            />
+          </div>
+        </div>
+      </div>
 
-      <v-dialog v-model="bookingDialog" max-width="400">
-        <v-card>
-          <v-card-title>{{ $t('bookingWidget.dialog.bookingTitle') }}</v-card-title>
-          <v-card-text>
-            <p class="mb-2"><strong>{{ selectedUnit?.property_name }} — {{ selectedUnit?.name }}</strong></p>
-            <p class="mb-4">{{ checkIn }} → {{ checkOut }} · {{ formatPrice(selectedUnit?.total_price_cents) }}</p>
-            <v-text-field v-model="guestName" :label="$t('bookingWidget.form.guestName')" class="mb-2" />
-            <v-text-field v-model="guestEmail" :label="$t('bookingWidget.form.guestEmail')" type="email" class="mb-2" />
-            <v-text-field v-model="guestPhone" :label="$t('bookingWidget.form.guestPhone')" class="mb-2" />
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer />
-            <v-btn @click="bookingDialog = false">{{ $t('common.cancel') }}</v-btn>
-            <v-btn color="primary" :loading="booking" @click="confirmBooking">{{ $t('bookingWidget.confirmButton') }}</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+      <div
+        v-else-if="searched && !searching"
+        class="text-center py-12 border-2 border-dashed border-surface-200 dark:border-surface-700 rounded-xl"
+      >
+        <i class="pi pi-calendar-times text-4xl text-surface-400 mb-3" aria-hidden="true" />
+        <h3 class="text-base font-medium text-surface-900 dark:text-surface-100">
+          {{ $t('bookingWidget.emptyState.title') }}
+        </h3>
+      </div>
 
-      <v-dialog v-model="successDialog" max-width="400">
-        <v-card>
-          <v-card-title>{{ $t('bookingWidget.dialog.successTitle') }}</v-card-title>
-          <v-card-text>{{ $t('bookingWidget.dialog.successText') }}</v-card-text>
-          <v-card-actions>
-            <v-spacer />
-            <v-btn color="primary" @click="successDialog = false">{{ $t('common.ok') }}</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </v-container>
-  </v-app>
+      <Dialog
+        v-model:visible="bookingDialog"
+        :header="$t('bookingWidget.dialog.bookingTitle')"
+        modal
+        :style="{ width: '400px' }"
+      >
+        <div class="space-y-3">
+          <p class="text-sm text-surface-900 dark:text-surface-100">
+            <strong>{{ selectedUnit?.property_name }} — {{ selectedUnit?.name }}</strong>
+          </p>
+          <p class="text-sm text-surface-600 dark:text-surface-400">
+            {{ checkIn }} → {{ checkOut }} ·
+            <span class="tabular-nums">{{ formatPrice(selectedUnit?.total_price_cents) }}</span>
+          </p>
+          <div>
+            <label for="bw-name" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+              {{ $t('bookingWidget.form.guestName') }}
+            </label>
+            <InputText id="bw-name" v-model="guestName" class="w-full" />
+          </div>
+          <div>
+            <label for="bw-email" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+              {{ $t('bookingWidget.form.guestEmail') }}
+            </label>
+            <InputText id="bw-email" v-model="guestEmail" type="email" class="w-full" />
+          </div>
+          <div>
+            <label for="bw-phone" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+              {{ $t('bookingWidget.form.guestPhone') }}
+            </label>
+            <InputText id="bw-phone" v-model="guestPhone" class="w-full" />
+          </div>
+        </div>
+        <template #footer>
+          <Button :label="$t('common.cancel')" severity="secondary" variant="text" @click="bookingDialog = false" />
+          <Button :label="$t('bookingWidget.confirmButton')" :loading="booking" @click="confirmBooking" />
+        </template>
+      </Dialog>
+
+      <Dialog
+        v-model:visible="successDialog"
+        :header="$t('bookingWidget.dialog.successTitle')"
+        modal
+        :style="{ width: '400px' }"
+      >
+        <p class="text-sm">{{ $t('bookingWidget.dialog.successText') }}</p>
+        <template #footer>
+          <Button :label="$t('common.ok')" @click="successDialog = false" />
+        </template>
+      </Dialog>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Dialog from 'primevue/dialog'
 import * as publicBookingApi from '../api/publicBooking'
 import { formatMoney } from '../utils/currency'
 
@@ -95,7 +165,8 @@ async function search() {
     units.value = data.units
     orgName.value = data.organization
     orgCurrency.value = data.currency || 'RUB'
-  } catch (e) { console.error(e);
+  } catch (e) {
+    if (import.meta.env.DEV) console.error(e)
     error.value = t('bookingWidget.messages.loadError')
   } finally {
     searching.value = false

@@ -31,8 +31,12 @@ const resolvedId = computed(() => props.id || fallbackId)
   font-weight: 500;
   line-height: 1.3;
   margin: 0 0 16px;
-  color: rgb(var(--v-theme-on-surface));
+  color: var(--p-surface-900, #171c19);
   letter-spacing: -0.01em;
+}
+
+:where(.dark) .reservation-section__title {
+  color: var(--p-surface-0, #e1e6e2);
 }
 
 .reservation-section__body {

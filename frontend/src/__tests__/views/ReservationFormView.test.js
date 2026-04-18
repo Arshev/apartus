@@ -36,14 +36,14 @@ vi.mock('../../api/seasonalPrices', () => ({
   list: vi.fn().mockResolvedValue([]),
 }))
 
-import { mountWithVuetifyAsync } from '../helpers/mountWithVuetify'
+import { mountWithPrimeVueAsync } from '../helpers/mountWithPrimeVue'
 import ReservationFormView from '../../views/ReservationFormView.vue'
 
 describe('ReservationFormView', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
   async function mount(route = '/reservations/new') {
-    return mountWithVuetifyAsync(ReservationFormView, {
+    return mountWithPrimeVueAsync(ReservationFormView, {
       routes: [
         { path: '/reservations/new', component: ReservationFormView },
         { path: '/reservations/:id/edit', component: ReservationFormView },

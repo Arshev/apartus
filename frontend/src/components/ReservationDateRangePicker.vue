@@ -1,26 +1,29 @@
 <template>
-  <v-menu v-model="menuOpen" :close-on-content-click="false">
-    <template #activator="{ props: menuProps }">
-      <v-text-field
-        v-bind="menuProps"
-        :model-value="displayText"
-        :label="$t('reservations.form.dates')"
-        readonly
-        prepend-inner-icon="mdi-calendar-range"
-        :placeholder="$t('reservations.form.datesPlaceholder')"
-      />
-    </template>
-    <v-date-picker
+  <div class="reservation-date-picker">
+    <label :for="fieldId" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+      {{ $t('reservations.form.dates') }}
+    </label>
+    <DatePicker
+      :id="fieldId"
       :model-value="pickerValue"
-      multiple="range"
+      selection-mode="range"
+      :placeholder="$t('reservations.form.datesPlaceholder')"
+      :date-format="'dd M'"
+      show-icon
+      icon="pi pi-calendar"
+      class="w-full"
       @update:model-value="onRangeChange"
     />
-  </v-menu>
+    <p v-if="displayText" class="mt-1 text-xs text-surface-600 dark:text-surface-400">
+      {{ displayText }}
+    </p>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import DatePicker from 'primevue/datepicker'
 
 const props = defineProps({
   modelValue: {
@@ -31,19 +34,15 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const { t } = useI18n()
+const fieldId = `reservation-date-range-${Math.random().toString(36).slice(2, 8)}`
 const menuOpen = ref(false)
 
+// PrimeVue DatePicker range mode emits [start, end] (either may be null mid-pick).
 const pickerValue = computed(() => {
   const ci = props.modelValue?.checkIn
   const co = props.modelValue?.checkOut
   if (!ci || !co) return []
-  const start = new Date(ci + 'T00:00:00Z')
-  const end = new Date(co + 'T00:00:00Z')
-  const dates = []
-  for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
-    dates.push(new Date(d))
-  }
-  return dates
+  return [new Date(ci + 'T00:00:00Z'), new Date(co + 'T00:00:00Z')]
 })
 
 const nightsCount = computed(() => {
@@ -57,17 +56,9 @@ const nightsCount = computed(() => {
 
 const displayText = computed(() => {
   const { checkIn, checkOut } = props.modelValue || {}
-  if (!checkIn || !checkOut) return t('reservations.form.datesPlaceholder')
-  const fmt = (iso) => {
-    const d = new Date(iso + 'T00:00:00Z')
-    return d.toLocaleDateString(undefined, {
-      day: 'numeric',
-      month: 'short',
-      timeZone: 'UTC',
-    })
-  }
+  if (!checkIn || !checkOut) return ''
   const nights = nightsCount.value
-  return `${fmt(checkIn)} – ${fmt(checkOut)} · ${t('reservations.form.nightsCount', { count: nights }, nights)}`
+  return t('reservations.form.nightsCount', { count: nights }, nights)
 })
 
 function toIso(d) {
@@ -75,11 +66,13 @@ function toIso(d) {
 }
 
 function onRangeChange(dates) {
+  // PrimeVue range: [Date, Date|null] during pick, [Date, Date] when done.
   if (!Array.isArray(dates) || dates.length < 2) return
-  const sorted = [...dates].sort((a, b) => new Date(a) - new Date(b))
+  const [start, end] = dates
+  if (!start || !end) return // mid-pick, wait for second date
   emit('update:modelValue', {
-    checkIn: toIso(sorted[0]),
-    checkOut: toIso(sorted[sorted.length - 1]),
+    checkIn: toIso(start),
+    checkOut: toIso(end),
   })
   menuOpen.value = false
 }
@@ -88,5 +81,5 @@ defineExpose({ menuOpen, displayText, nightsCount, onRangeChange, pickerValue })
 </script>
 
 <style scoped>
-/* Component inherits Vuetify styles; no custom CSS required. */
+/* Component inherits PrimeVue + Tailwind styles. */
 </style>
