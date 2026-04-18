@@ -15,6 +15,8 @@ import { createPinia, setActivePinia } from 'pinia'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import { createVuetify } from 'vuetify'
 import PrimeVue, { primeVueConfig } from '../../plugins/primevue'
+import ConfirmationService from 'primevue/confirmationservice'
+import ToastService from 'primevue/toastservice'
 import i18n from '../../plugins/i18n'
 
 // FT-036 P1: include Vuetify plugin для hybrid views (AppTopbar,
@@ -85,6 +87,27 @@ export const PRIMEVUE_STUBS = {
     template: '<div data-stub="p-multiselect"></div>',
   },
   Tooltip: passthrough('p-tooltip'),
+  ConfirmDialog: passthrough('p-confirm-dialog'),
+  Toast: passthrough('p-toast'),
+  DataTable: {
+    name: 'DataTable',
+    props: ['value', 'loading', 'size', 'stripedRows', 'dataKey'],
+    // Simplified stub: don't iterate rows — tests check logic, not PrimeVue
+    // rendering. Actual iteration tests should use integration/e2e.
+    template: '<div data-stub="p-datatable"><slot /></div>',
+  },
+  Column: {
+    name: 'Column',
+    props: ['field', 'header', 'headerStyle'],
+    template: '<div data-stub="p-column" :data-field="field" />',
+  },
+  Tree: {
+    name: 'Tree',
+    props: ['value', 'selectionMode'],
+    template: `<div data-stub="p-tree">
+      <slot />
+    </div>`,
+  },
 }
 
 // FT-036 P1: Vuetify shell stubs — only components still used by hybrid
@@ -149,7 +172,7 @@ export async function mountWithPrimeVueAsync(component, options = {}) {
     slots,
     attachTo: document.body,
     global: {
-      plugins: [[PrimeVue, primeVueConfig], vuetify, pinia, router, i18n],
+      plugins: [[PrimeVue, primeVueConfig], ConfirmationService, ToastService, vuetify, pinia, router, i18n],
       stubs: { ...PRIMEVUE_STUBS, ...VUETIFY_SHELL_STUBS, ...(globalOpts.stubs || {}) },
       ...globalOpts,
     },
@@ -178,7 +201,7 @@ function _buildMount(component, options = {}) {
     slots,
     attachTo: document.body,
     global: {
-      plugins: [[PrimeVue, primeVueConfig], vuetify, pinia, router, i18n],
+      plugins: [[PrimeVue, primeVueConfig], ConfirmationService, ToastService, vuetify, pinia, router, i18n],
       stubs: { ...PRIMEVUE_STUBS, ...VUETIFY_SHELL_STUBS, ...(globalOpts.stubs || {}) },
       ...globalOpts,
     },

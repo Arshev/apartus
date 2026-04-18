@@ -1,106 +1,144 @@
 <template>
-  <v-container>
-    <div class="d-flex align-center mb-4">
-      <h1 class="text-h4">{{ $t('guests.title') }}</h1>
-      <v-spacer />
-      <v-btn color="primary" prepend-icon="mdi-plus" :to="'/guests/new'">{{ $t('guests.addButton') }}</v-btn>
+  <div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="flex items-center mb-6">
+      <h1 class="text-2xl font-display font-medium tracking-tight text-surface-950 dark:text-surface-50">
+        {{ $t('guests.title') }}
+      </h1>
+      <div class="flex-1" />
+      <RouterLink
+        to="/guests/new"
+        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors text-sm font-medium"
+      >
+        <i class="pi pi-plus" aria-hidden="true" />
+        {{ $t('guests.addButton') }}
+      </RouterLink>
     </div>
 
-    <v-alert v-if="store.error" type="error" class="mb-4" closable @click:close="store.error = null">
-      {{ Array.isArray(store.error) ? store.error.join(', ') : store.error }}
-      <template v-slot:append>
-        <v-btn variant="text" size="small" @click="store.fetchAll()">{{ $t('common.retry') }}</v-btn>
-      </template>
-    </v-alert>
+    <div
+      v-if="store.error"
+      class="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 px-3 py-2 text-sm text-red-800 dark:text-red-200 mb-4"
+    >
+      <i class="pi pi-exclamation-circle mt-0.5" aria-hidden="true" />
+      <span class="flex-1">
+        {{ Array.isArray(store.error) ? store.error.join(', ') : store.error }}
+      </span>
+      <Button
+        :label="$t('common.retry')"
+        severity="secondary"
+        variant="text"
+        size="small"
+        @click="store.fetchAll()"
+      />
+    </div>
 
-    <v-data-table
+    <DataTable
       v-if="store.items.length || store.loading"
-      :headers="headers"
-      :items="store.items"
+      :value="store.items"
       :loading="store.loading"
-      density="comfortable"
-      hover
+      size="small"
+      striped-rows
+      data-key="id"
+      class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden"
     >
-      <template v-slot:item.full_name="{ item }">
-        {{ item.first_name }} {{ item.last_name }}
-      </template>
-      <template v-slot:item.actions="{ item }">
-        <v-btn icon="mdi-pencil" variant="text" size="small" :to="`/guests/${item.id}/edit`" />
-        <v-btn icon="mdi-delete" variant="text" size="small" color="error" @click="confirmDelete(item)" />
-      </template>
-    </v-data-table>
+      <Column field="full_name" :header="$t('guests.columns.name')">
+        <template #body="{ data }">
+          {{ data.first_name }} {{ data.last_name }}
+        </template>
+      </Column>
+      <Column field="email" :header="$t('guests.columns.email')" />
+      <Column field="phone" :header="$t('guests.columns.phone')" />
+      <Column :header="''" header-style="width: 120px; text-align: right">
+        <template #body="{ data }">
+          <div class="flex justify-end gap-1">
+            <RouterLink
+              :to="`/guests/${data.id}/edit`"
+              class="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
+              :title="$t('common.edit')"
+            >
+              <i class="pi pi-pencil text-sm" aria-hidden="true" />
+            </RouterLink>
+            <button
+              type="button"
+              class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+              :title="$t('common.delete')"
+              @click="confirmDelete(data)"
+            >
+              <i class="pi pi-trash text-sm" aria-hidden="true" />
+            </button>
+          </div>
+        </template>
+      </Column>
+    </DataTable>
 
-    <v-empty-state
+    <!-- Empty state -->
+    <div
       v-else-if="!store.loading && !store.error"
-      icon="mdi-account-group-outline"
-      :title="$t('guests.emptyState.title')"
-      :text="$t('guests.emptyState.text')"
+      class="text-center py-16 border-2 border-dashed border-surface-200 dark:border-surface-700 rounded-xl"
     >
-      <template v-slot:actions>
-        <v-btn color="primary" prepend-icon="mdi-plus" :to="'/guests/new'">{{ $t('guests.addButton') }}</v-btn>
-      </template>
-    </v-empty-state>
-
-    <v-dialog v-model="deleteDialog" max-width="400">
-      <v-card>
-        <v-card-title>{{ $t('guests.dialog.deleteTitle') }}</v-card-title>
-        <v-card-text>
-          {{ $t('guests.dialog.deleteText', { firstName: deletingGuest?.first_name, lastName: deletingGuest?.last_name }) }}
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn @click="deleteDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="error" @click="handleDelete">{{ $t('common.delete') }}</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-snackbar v-model="snackbar" :timeout="3000" color="success">
-      {{ snackbarText }}
-    </v-snackbar>
-  </v-container>
+      <i class="pi pi-users text-4xl text-surface-400 mb-3" aria-hidden="true" />
+      <h2 class="text-lg font-display font-medium text-surface-900 dark:text-surface-100 mb-1">
+        {{ $t('guests.emptyState.title') }}
+      </h2>
+      <p class="text-sm text-surface-600 dark:text-surface-400 mb-4">
+        {{ $t('guests.emptyState.text') }}
+      </p>
+      <RouterLink
+        to="/guests/new"
+        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors text-sm font-medium"
+      >
+        <i class="pi pi-plus" aria-hidden="true" />
+        {{ $t('guests.addButton') }}
+      </RouterLink>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
+import { useConfirm } from 'primevue/useconfirm'
+import { useToast } from 'primevue/usetoast'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import Button from 'primevue/button'
 import { useGuestsStore } from '../stores/guests'
 
 const { t } = useI18n()
 const store = useGuestsStore()
-
-const headers = computed(() => [
-  { title: t('guests.columns.name'), key: 'full_name' },
-  { title: t('guests.columns.email'), key: 'email' },
-  { title: t('guests.columns.phone'), key: 'phone' },
-  { title: '', key: 'actions', sortable: false, align: 'end' },
-])
-
-const deleteDialog = ref(false)
-const deletingGuest = ref(null)
-const snackbar = ref(false)
-const snackbarText = ref('')
+const confirm = useConfirm()
+const toast = useToast()
 
 function confirmDelete(guest) {
-  deletingGuest.value = guest
-  deleteDialog.value = true
+  confirm.require({
+    message: t('guests.dialog.deleteText', {
+      firstName: guest.first_name,
+      lastName: guest.last_name,
+    }),
+    header: t('guests.dialog.deleteTitle'),
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: t('common.delete'),
+    rejectLabel: t('common.cancel'),
+    acceptProps: { severity: 'danger' },
+    accept: () => handleDelete(guest),
+  })
 }
 
-async function handleDelete() {
+async function handleDelete(guest) {
   try {
-    await store.destroy(deletingGuest.value.id)
-    snackbarText.value = t('guests.messages.deleted')
-    snackbar.value = true
-  } catch (e) { console.error(e);
-    snackbarText.value = store.error || t('common.messages.deleteError')
-    snackbar.value = true
-  } finally {
-    deleteDialog.value = false
-    deletingGuest.value = null
+    await store.destroy(guest.id)
+    toast.add({ severity: 'success', summary: t('guests.messages.deleted'), life: 3000 })
+  } catch (e) {
+    if (import.meta.env.DEV) console.error(e)
+    toast.add({
+      severity: 'error',
+      summary: store.error || t('common.messages.deleteError'),
+      life: 3000,
+    })
   }
 }
 
 onMounted(() => store.fetchAll())
 
-defineExpose({ confirmDelete, handleDelete, headers })
+defineExpose({ confirmDelete, handleDelete })
 </script>
