@@ -26,7 +26,15 @@ export const VUETIFY_STUBS = {
   'v-app-bar-nav-icon': passthrough('v-app-bar-nav-icon'),
   'v-app-bar-title': passthrough('v-app-bar-title'),
   'v-spacer': passthrough('v-spacer'),
-  'v-menu': passthrough('v-menu'),
+  'v-menu': {
+    name: 'v-menu',
+    props: ['modelValue', 'closeOnContentClick'],
+    emits: ['update:modelValue'],
+    template: `<div data-stub="v-menu">
+      <slot name="activator" :props="{ onClick: () => $emit('update:modelValue', true) }" />
+      <div v-if="modelValue" data-stub="v-menu-content" role="dialog"><slot /></div>
+    </div>`,
+  },
   'v-btn': passthrough('v-btn'),
   'v-icon': passthrough('v-icon'),
   'v-list': passthrough('v-list'),
@@ -82,6 +90,18 @@ export const VUETIFY_STUBS = {
     props: ['modelValue', 'label', 'items', 'rules', 'clearable', 'loading', 'disabled'],
     emits: ['update:modelValue'],
     template: '<div data-stub="v-select">{{ label }}</div>',
+  },
+  'v-autocomplete': {
+    name: 'v-autocomplete',
+    props: ['modelValue', 'label', 'items', 'itemTitle', 'itemValue', 'rules', 'clearable', 'loading', 'disabled', 'returnObject'],
+    emits: ['update:modelValue'],
+    template: '<div data-stub="v-autocomplete">{{ label }}</div>',
+  },
+  'v-date-picker': {
+    name: 'v-date-picker',
+    props: ['modelValue', 'multiple'],
+    emits: ['update:modelValue'],
+    template: '<div data-stub="v-date-picker" :data-multiple="multiple"></div>',
   },
   'v-textarea': {
     name: 'v-textarea',

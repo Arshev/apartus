@@ -351,7 +351,27 @@
       "guestsCount": "Количество гостей",
       "price": "Цена",
       "notes": "Заметки",
-      "priceCalcError": "Не удалось рассчитать цену автоматически"
+      "priceCalcError": "Не удалось рассчитать цену автоматически",
+      "dates": "Даты",
+      "datesPlaceholder": "Выберите даты",
+      "nightsCount": "{count} ночь | {count} ночи | {count} ночей",
+      "addGuest": "Новый гость",
+      "totalPrice": "Общая стоимость",
+      "sections": {
+        "unitDates": "Юнит и даты",
+        "guest": "Гость",
+        "pricing": "Цена",
+        "notes": "Заметки"
+      },
+      "priceSummary": {
+        "title": "Расчёт",
+        "emptyState": "Выберите юнит и даты",
+        "errorState": "Ошибка расчёта",
+        "seasonalLabel": "сезон",
+        "total": "Итого",
+        "manualPrice": "Ручная цена, {sign}{diff}",
+        "recalc": "Пересчитать"
+      }
     },
     "emptyState": {
       "title": "Нет бронирований",
@@ -375,6 +395,9 @@
     "addButton": "Добавить гостя",
     "editTitle": "Редактировать гостя",
     "createTitle": "Новый гость",
+    "quickCreate": {
+      "title": "Новый гость"
+    },
     "columns": {
       "name": "Имя",
       "email": "Email",

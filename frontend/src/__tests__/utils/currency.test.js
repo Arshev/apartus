@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatMoney, centsToUnits, unitsToCents, CURRENCY_LIST } from '../../utils/currency'
+import { formatMoney, centsToUnits, unitsToCents, CURRENCY_LIST, getCurrencySymbol } from '../../utils/currency'
 
 describe('currency utils', () => {
   it('formatMoney RUB — symbol after', () => {
@@ -99,5 +99,23 @@ describe('currency utils', () => {
   it('CURRENCY_LIST UZS has zero decimal places', () => {
     const uzs = CURRENCY_LIST.find((c) => c.code === 'UZS')
     expect(uzs.decimalPlaces).toBe(0)
+  })
+
+  // FT-035: getCurrencySymbol accessor
+  describe('getCurrencySymbol', () => {
+    it('returns symbol for known code', () => {
+      expect(getCurrencySymbol('RUB')).toBe('₽')
+      expect(getCurrencySymbol('USD')).toBe('$')
+      expect(getCurrencySymbol('EUR')).toBe('€')
+    })
+
+    it('falls back to $ for unknown code', () => {
+      expect(getCurrencySymbol('XYZ')).toBe('$')
+    })
+
+    it('falls back to $ for null/undefined', () => {
+      expect(getCurrencySymbol(null)).toBe('$')
+      expect(getCurrencySymbol(undefined)).toBe('$')
+    })
   })
 })

@@ -351,7 +351,27 @@
       "guestsCount": "Number of guests",
       "price": "Price",
       "notes": "Notes",
-      "priceCalcError": "Failed to calculate price automatically"
+      "priceCalcError": "Failed to calculate price automatically",
+      "dates": "Dates",
+      "datesPlaceholder": "Select dates",
+      "nightsCount": "{count} night | {count} nights",
+      "addGuest": "New guest",
+      "totalPrice": "Total price",
+      "sections": {
+        "unitDates": "Unit & dates",
+        "guest": "Guest",
+        "pricing": "Price",
+        "notes": "Notes"
+      },
+      "priceSummary": {
+        "title": "Breakdown",
+        "emptyState": "Select unit and dates",
+        "errorState": "Calculation error",
+        "seasonalLabel": "seasonal",
+        "total": "Total",
+        "manualPrice": "Manual price, {sign}{diff}",
+        "recalc": "Recalculate"
+      }
     },
     "emptyState": {
       "title": "No reservations",
@@ -375,6 +395,9 @@
     "addButton": "Add guest",
     "editTitle": "Edit guest",
     "createTitle": "New guest",
+    "quickCreate": {
+      "title": "New guest"
+    },
     "columns": {
       "name": "Name",
       "email": "Email",
