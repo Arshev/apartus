@@ -42,19 +42,19 @@ After P1, layout + auth converted. P2 converts 9 CRUD views (~1600 LOC) followin
 ### Scope
 
 - `REQ-01` **Property** — Form + List. Form: Zod schema с `name`, `address`, `branch_id`. List: PrimeVue DataTable + row-level edit/delete.
-- `REQ-02` **Unit** — Form + List nested под Property. Zod schema `name`, `base_price_cents`, `max_guests`, `property_id`. Price input uses currency prefix/suffix pattern из FT-035.
+- `REQ-02` **Unit** — Form + List nested под Property (current model, preserved). Zod schema fields: `name`, `unit_type` (room|apartment|bed|studio), `capacity` (1..100), `status` (available|maintenance|blocked), `base_price_cents` (optional int). `propertyId` остаётся **route param**, не form field (per current UnitFormView.vue pattern); NOT в schema. Price input uses currency prefix/suffix pattern из FT-035.
 - `REQ-03` **Guest** — Form + List. Zod schema `first_name`, `last_name`, `email?`, `phone?`, `notes?` — refactor existing `GuestQuickCreateDialog` schema для reuse.
 - `REQ-04` **Amenity catalog** — list view + inline create (Vuetify's version likely has inline form). Port to PrimeVue pattern с `Button` add + `Dialog` для edit/delete.
 - `REQ-05` **Branches** — tree view + recursive BranchNode component. Tree data structure unchanged (Pinia store logic); only rendering + add/edit/delete dialogs migrate.
 - `REQ-06` **Shared schemas.** Create `schemas/property.js`, `schemas/unit.js`, `schemas/guest.js`. Each exports create+update schemas (same fields typically) + `validate()` returning i18n key errors (pattern from P1 schemas/auth.js).
 - `REQ-07` **DataTable migration.** All list views use PrimeVue `DataTable` component. Columns defined as template refs. Sort, filter, pagination — if Vuetify version had them, preserve. Density = `compact` / `small`.
-- `REQ-08` **ConfirmDialog for deletion.** Replace `v-dialog` delete flow с PrimeVue `ConfirmDialog` + `useConfirm()` composable pattern. Install global `Toast` + `ConfirmDialog` на DefaultLayout.
+- `REQ-08` **ConfirmDialog + Toast — global install.** Register services в `plugins/primevue.js`: `app.use(ConfirmationService)` + `app.use(ToastService)`. Render `<ConfirmDialog />` + `<Toast />` singletons в `layouts/DefaultLayout.vue` template (and в auth layout if needed). Views use `useConfirm()` / `useToast()` composables. Replace each `v-dialog` delete flow + `v-snackbar` pattern.
 - `REQ-09` **Nested Unit form.** UnitForm called with `:propertyId` prop. Property auto-filled на create route `/properties/:id/units/new`, editable не allowed. Same behavior как сейчас.
-- `REQ-10` **Amenity attach/detach на Unit.** UnitFormView has amenity selector (multi-select). Migrate to PrimeVue `MultiSelect` + chips. List of amenity IDs sent через unitsApi.
+- `REQ-10` **Amenity attach/detach — preserve commit-on-toggle pattern (NS-03).** Current UnitFormView uses per-chip `unitAmenitiesApi.attach(unitId, amenityId)` / `detach(unitId, amenityId)` on each chip click — NOT batch save. Migration keeps exact behavior: PrimeVue chip/button group с per-item click handler → same per-item API call. No `MultiSelect` (implies batch submit). Visual change only: Vuetify `v-chip-group` → Tailwind flex + `<button>` toggle chips.
 - `REQ-11` **Icons — 22 MDI → PrimeIcons mappings в converted views.** Capture delta в `artifacts/ft-036/phase-2/mdi-inventory.txt`.
 - `REQ-12` **Tests rewrite.** 9 test files для views + 3 new schema test files. Use `mountWithPrimeVue` (extended из P1 — includes Vuetify shell stubs + PrimeVue stubs).
 - `REQ-13` **Add DataTable + Dialog stubs к mountWithPrimeVue.** Minimal pass-through templates so tests focus on logic not rendering.
-- `REQ-14` **Coverage ratchet — relaxed.** Threshold 92% per epic REQ-14 (hybrid phase). Per-phase rule: coverage не падает > 1pp vs P1 tip.
+- `REQ-14` **Coverage ratchet — hybrid floor + 1pp guardrail.** P1 tip is 95.58%. Per-phase epic rule: coverage не падает > 1pp vs previous phase tip → **effective floor P2 = 94.58%**. The absolute 92% is emergency floor (не допустить свободное падение ниже), не target. CHK-01 asserts ≥ 94.58%.
 
 ### Non-Scope
 
@@ -76,8 +76,6 @@ After P1, layout + auth converted. P2 converts 9 CRUD views (~1600 LOC) followin
 ## How
 
 ### Solution
-
-**Conversion order (не в spec — тактическое решение в plan):** начинать с самого простого и самостоятельного (Guest, 2 views, 209 LOC) для validation pattern. Затем Amenity, Branches, Unit (nested complexity), Property last.
 
 **Shared module pattern:**
 
@@ -121,8 +119,8 @@ src/components/
 
 | Contract | I/O | Notes |
 |---|---|---|
-| `CTR-01` | `propertyCreateSchema`, `propertyUpdateSchema` + `validate()` | Zod, i18n keys |
-| `CTR-02` | `unitCreateSchema`, `unitUpdateSchema` — `property_id` required on create, locked on update | Zod |
+| `CTR-01` | `propertySchema` (single, reused create+update) + `validate()` | Zod, i18n keys |
+| `CTR-02` | `unitSchema` (single schema для create + update) — `propertyId` остаётся route param, не в form/schema | Zod |
 | `CTR-03` | `guestCreateSchema` — reused в GuestForm, GuestQuickCreateDialog | Zod |
 | `CTR-04` | `ConfirmDialog` + `useConfirm()` composable pattern — `confirm.require({ message, accept })` | PrimeVue API |
 | `CTR-05` | DataTable `:value="items"`, columns via template — consistent API через все list views | PrimeVue |
@@ -131,7 +129,7 @@ src/components/
 
 - `FM-01` **DataTable stub может не покрыть filter/sort logic** — stub как passthrough; tests asserting filtered/sorted output skip за пределами scope.
 - `FM-02` **ConfirmDialog теleport** — stubbed в mountWithPrimeVue как passthrough.
-- `FM-03` **BranchTree recursive rendering** — BranchNode calls itself via recursive import (`<component :is="BranchNode">`). Migration должен сохранить recursion через standard Vue pattern.
+- `FM-03` **BranchTree recursive rendering — Vue 3.3+ `<script setup>` auto-recursion via filename.** Component resolves itself by its file name — `BranchNode.vue` можно reference как `<BranchNode>` внутри template without explicit import (Vue 3.3+ feature). Alternative: add `defineOptions({ name: 'BranchNode' })` для explicit `<branch-node>` kebab-tag resolution. Migration chooses filename auto-recursion (cleaner).
 - `FM-04` **MultiSelect для amenities** — PrimeVue MultiSelect behavior differs from Vuetify (may require different `option-label`/`option-value` wiring). Test thoroughly.
 - `FM-05` **Coverage drop > 1pp** — realistic в P2 потому что 9 views rewritten. Mitigation: если coverage падает > 1pp, investigate — likely test-count not matching view complexity. Adjust.
 - `FM-06` **Nested Unit form loses property context** on mount — URL parsing логика same, just rendering different. Verify на initialRoute в test.
@@ -148,7 +146,7 @@ src/components/
 - `EC-01` All `REQ-01..14` реализованы.
 - `EC-02` 9 views contain 0 `<v-` templates (converted pages).
 - `EC-03` `yarn test --run` — all tests green (≥ 821 from P1 baseline).
-- `EC-04` `yarn test:coverage --run` — ≥ 92% (relaxed threshold для hybrid).
+- `EC-04` `yarn test:coverage --run` — ≥ 94.58% (P1 tip −1pp per epic guardrail).
 - `EC-05` `yarn build` green.
 - `EC-06` Manual QA: create property → create unit under it → delete unit → create guest → delete guest — full CRUD round-trip works.
 - `EC-07` MDI inventory drops (baseline 94 → target ≤ 65).
@@ -189,7 +187,7 @@ src/components/
 
 | CHK | Covers | How | Expected |
 |---|---|---|---|
-| `CHK-01` | `EC-04` | `yarn test:coverage` | ≥ 92% |
+| `CHK-01` | `EC-04` | `yarn test:coverage` | ≥ 94.58% (P1 tip −1pp guardrail) |
 | `CHK-02` | `EC-03` | `yarn test` | all green |
 | `CHK-03` | `EC-05` | `yarn build` | success |
 | `CHK-04` | parity | i18n script | 490+/same |
