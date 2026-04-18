@@ -37,7 +37,8 @@ export default mergeConfig(
         thresholds: {
           // Coverage ratchet — raise after each feature, never lower without ADR.
           // Raised from 86 → 93 after full coverage pass (actual 94.21%).
-          lines: 93,
+          // Raised from 93 → 94 after FT-035 (actual 95.33%).
+          lines: 94,
         },
       },
     },

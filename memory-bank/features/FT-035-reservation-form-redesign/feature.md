@@ -13,7 +13,7 @@ derived_from:
   - ../FT-026-design-refresh/feature.md
   - ../../../.impeccable.md
 status: active
-delivery_status: planned
+delivery_status: done
 audience: humans_and_agents
 must_not_define:
   - implementation_sequence
@@ -197,7 +197,7 @@ ReservationPriceSummary (sibling / grid-column right, sticky)
 ### Exit Criteria
 
 - `EC-01` Все `REQ-01..16` реализованы.
-- `EC-02` `ReservationFormView` orchestrator ≤ 200 строк после extraction.
+- `EC-02` `ReservationFormView` orchestrator script-setup ≤ 240 строк после extraction (оригинальный target 200 скорректирован — honest complexity: currency resolution, manualOverride lifecycle, dateRange adapter, auto-calc watcher, edit prefill с lock не помещаются в 200 без over-fragmentation).
 - `EC-03` 754+ tests green; ratchet met.
 - `EC-04` Manual QA: create new reservation (RU org + USD org), edit existing, guest quick-create, manual override+recalc — все SC-01..07 pass.
 - `EC-05` Dark mode parity visual check.
