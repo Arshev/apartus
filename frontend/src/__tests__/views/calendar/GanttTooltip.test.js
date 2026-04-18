@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { mountWithVuetify } from '../../helpers/mountWithVuetify'
+import { mountWithPrimeVue } from '../../helpers/mountWithPrimeVue'
 import GanttTooltip from '../../../views/calendar/GanttTooltip.vue'
 import { useAuthStore } from '../../../stores/auth'
 
@@ -20,7 +20,7 @@ describe('GanttTooltip', () => {
   })
 
   function setup(propsOverride = {}, orgCurrency = 'RUB') {
-    const wrapper = mountWithVuetify(GanttTooltip, {
+    const wrapper = mountWithPrimeVue(GanttTooltip, {
       props: { booking: TEAPOT, visible: true, x: 100, y: 200, ...propsOverride },
       global: { stubs: { Teleport: { template: '<div><slot /></div>' } } },
     })
@@ -53,7 +53,7 @@ describe('GanttTooltip', () => {
   })
 
   it('falls back to RUB when org has no currency (FM-07)', async () => {
-    const wrapper = mountWithVuetify(GanttTooltip, {
+    const wrapper = mountWithPrimeVue(GanttTooltip, {
       props: { booking: TEAPOT, visible: true, x: 0, y: 0 },
       global: { stubs: { Teleport: { template: '<div><slot /></div>' } } },
     })

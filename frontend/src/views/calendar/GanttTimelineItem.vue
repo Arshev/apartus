@@ -204,12 +204,14 @@ defineExpose({
 
 .gantt-item:hover {
   opacity: 0.9;
-  /* FT-027 REQ-04: theme-aware outline replaces opaque box-shadow.
-     Outline sits outside the box model so it doesn't displace flex children,
-     and tints consistently in light + dark via --v-theme-on-surface. */
-  outline: 2px solid rgba(var(--v-theme-on-surface), 0.3);
+  /* FT-027 REQ-04: theme-aware outline replaces opaque box-shadow. */
+  outline: 2px solid rgba(0, 0, 0, 0.3);
   outline-offset: 2px;
   z-index: 2;
+}
+
+:where(.dark) .gantt-item:hover {
+  outline-color: rgba(255, 255, 255, 0.3);
 }
 
 .gantt-item__label {
@@ -246,25 +248,25 @@ defineExpose({
   pointer-events: none;
 }
 
-.gantt-item--confirmed { background: rgb(var(--v-theme-status-confirmed)); }
-.gantt-item--checked_in { background: rgb(var(--v-theme-status-checked-in)); }
-.gantt-item--checked_out { background: rgb(var(--v-theme-status-checked-out)); }
-.gantt-item--cancelled { background: rgb(var(--v-theme-status-cancelled)); }
-.gantt-item--pending { background: rgb(var(--v-theme-status-pending)); }
-.gantt-item--blocked { background: rgb(var(--v-theme-status-blocked)); }
+.gantt-item--confirmed { background: var(--color-status-confirmed); }
+.gantt-item--checked_in { background: var(--color-status-checked-in); }
+.gantt-item--checked_out { background: var(--color-status-checked-out); }
+.gantt-item--cancelled { background: var(--color-status-cancelled); }
+.gantt-item--pending { background: var(--color-status-pending); }
+.gantt-item--blocked { background: var(--color-status-blocked); }
 
 /* FT-021 Handover Mode — border highlights + dimming */
 .gantt-item--handover-checkin_today {
-  border: 3px solid rgb(var(--v-theme-success));
+  border: 3px solid var(--color-finance-revenue);
 }
 .gantt-item--handover-checkin_tomorrow {
-  border: 3px solid rgba(var(--v-theme-success), 0.5);
+  border: 3px solid color-mix(in oklch, var(--color-finance-revenue) 50%, transparent);
 }
 .gantt-item--handover-checkout_today {
-  border: 3px solid rgb(var(--v-theme-error));
+  border: 3px solid var(--color-finance-expense);
 }
 .gantt-item--handover-checkout_tomorrow {
-  border: 3px solid rgb(var(--v-theme-warning));
+  border: 3px solid var(--color-priority-high);
 }
 .gantt-item--dimmed {
   opacity: 0.35;
@@ -283,13 +285,13 @@ defineExpose({
 
 /* FT-022 Overdue Mode */
 .gantt-item--overdue {
-  border: 3px solid rgb(var(--v-theme-error));
+  border: 3px solid var(--color-finance-expense);
 }
 
 .gantt-item__overdue-label {
   margin-left: auto;
   padding: 0 4px;
-  background: rgb(var(--v-theme-error));
+  background: var(--color-finance-expense);
   color: #fff;
   font-size: 10px;
   font-weight: 700;
@@ -303,8 +305,8 @@ defineExpose({
 }
 
 @keyframes overdue-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--v-theme-error), 0.6); }
-  50% { box-shadow: 0 0 0 4px rgba(var(--v-theme-error), 0); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--color-finance-expense) 60%, transparent); }
+  50% { box-shadow: 0 0 0 4px color-mix(in oklch, var(--color-finance-expense) 0%, transparent); }
 }
 
 @media (prefers-reduced-motion: reduce) {

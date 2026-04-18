@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mountWithVuetify } from '../../helpers/mountWithVuetify'
+import { mountWithPrimeVue } from '../../helpers/mountWithPrimeVue'
 import GanttTimelineRow from '../../../views/calendar/GanttTimelineRow.vue'
 import { parseIsoDate } from '../../../utils/date'
 
@@ -11,7 +11,7 @@ const VIEW_END = parseIsoDate('2026-04-29')
 const PIXELS_PER_MS = 1400 / (14 * 86_400_000)
 
 function setup(bookings, extraProps = {}) {
-  return mountWithVuetify(GanttTimelineRow, {
+  return mountWithPrimeVue(GanttTimelineRow, {
     props: {
       unit: UNIT,
       bookings,

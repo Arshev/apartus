@@ -175,24 +175,28 @@ defineExpose({ enrichedBookings, laneData, computedRowHeight, rowStyle, itemLeft
 
 <style scoped>
 .gantt-row {
-  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
   box-sizing: border-box;
 }
 
-/* FT-023 Idle Gaps */
+:where(.dark) .gantt-row {
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+/* FT-023 Idle Gaps — color-mix for legacy rgba(var,alpha) pattern */
 .gantt-row__idle-gap {
   position: absolute;
   top: 0;
   bottom: 0;
   background: repeating-linear-gradient(
     -45deg,
-    rgba(var(--v-theme-error), 0.08),
-    rgba(var(--v-theme-error), 0.08) 4px,
-    rgba(var(--v-theme-error), 0.18) 4px,
-    rgba(var(--v-theme-error), 0.18) 8px
+    color-mix(in oklch, var(--color-finance-expense) 8%, transparent),
+    color-mix(in oklch, var(--color-finance-expense) 8%, transparent) 4px,
+    color-mix(in oklch, var(--color-finance-expense) 18%, transparent) 4px,
+    color-mix(in oklch, var(--color-finance-expense) 18%, transparent) 8px
   );
-  border-left: 2px dashed rgba(var(--v-theme-error), 0.5);
-  border-right: 2px dashed rgba(var(--v-theme-error), 0.5);
+  border-left: 2px dashed color-mix(in oklch, var(--color-finance-expense) 50%, transparent);
+  border-right: 2px dashed color-mix(in oklch, var(--color-finance-expense) 50%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -201,7 +205,7 @@ defineExpose({ enrichedBookings, laneData, computedRowHeight, rowStyle, itemLeft
 }
 
 .gantt-row__idle-gap-label {
-  background: rgba(var(--v-theme-error), 0.85);
+  background: color-mix(in oklch, var(--color-finance-expense) 85%, transparent);
   color: #fff;
   font-size: 10px;
   font-weight: 700;
@@ -219,10 +223,10 @@ defineExpose({ enrichedBookings, laneData, computedRowHeight, rowStyle, itemLeft
 }
 
 .gantt-row__heat-cell--busy {
-  background: rgba(var(--v-theme-error), 0.20);
+  background: color-mix(in oklch, var(--color-finance-expense) 20%, transparent);
 }
 
 .gantt-row__heat-cell--free {
-  background: rgba(var(--v-theme-success), 0.15);
+  background: color-mix(in oklch, var(--color-finance-revenue) 15%, transparent);
 }
 </style>

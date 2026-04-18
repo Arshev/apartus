@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest'
-import { mountWithVuetify } from '../../helpers/mountWithVuetify'
+import { mountWithPrimeVue } from '../../helpers/mountWithPrimeVue'
 import GanttTimelineHeader from '../../../views/calendar/GanttTimelineHeader.vue'
 import { parseIsoDate } from '../../../utils/date'
 
 const PIXELS_PER_MS = 100 / 86_400_000 // 100px per day
 
 function setup(viewStart, viewEnd, totalWidth) {
-  return mountWithVuetify(GanttTimelineHeader, {
+  return mountWithPrimeVue(GanttTimelineHeader, {
     props: { viewStart, viewEnd, pixelsPerMs: PIXELS_PER_MS, totalWidth },
   })
 }

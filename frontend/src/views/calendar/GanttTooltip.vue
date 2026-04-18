@@ -68,9 +68,9 @@ defineExpose({ statusKey, formattedPrice })
 .gantt-tooltip {
   position: fixed;
   z-index: 9999;
-  background: rgb(var(--v-theme-surface));
-  color: rgb(var(--v-theme-on-surface));
-  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  background: var(--p-surface-0, #ffffff);
+  color: var(--p-surface-900, #171c19);
+  border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 8px;
   padding: 10px 12px;
   min-width: 220px;
@@ -79,6 +79,12 @@ defineExpose({ statusKey, formattedPrice })
   font-size: 13px;
   pointer-events: none;
   transform: translate(8px, 8px);
+}
+
+:where(.dark) .gantt-tooltip {
+  background: var(--p-surface-900, #171c19);
+  color: var(--p-surface-0, #e1e6e2);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .gantt-tooltip__title {
@@ -95,18 +101,18 @@ defineExpose({ statusKey, formattedPrice })
 }
 
 .gantt-tooltip__row--muted {
-  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+  color: var(--p-surface-600, #5f6561);
   margin-top: 6px;
   font-size: 12px;
   justify-content: flex-start;
 }
 
 .gantt-tooltip__label {
-  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+  color: var(--p-surface-600, #5f6561);
 }
 
-.gantt-tooltip__status--confirmed { color: rgb(var(--v-theme-status-confirmed)); }
-.gantt-tooltip__status--checked_in { color: rgb(var(--v-theme-status-checked-in)); }
-.gantt-tooltip__status--checked_out { color: rgb(var(--v-theme-status-checked-out)); }
-.gantt-tooltip__status--cancelled { color: rgb(var(--v-theme-status-cancelled)); }
+.gantt-tooltip__status--confirmed { color: var(--color-status-confirmed); }
+.gantt-tooltip__status--checked_in { color: var(--color-status-checked-in); }
+.gantt-tooltip__status--checked_out { color: var(--color-status-checked-out); }
+.gantt-tooltip__status--cancelled { color: var(--color-status-cancelled); }
 </style>

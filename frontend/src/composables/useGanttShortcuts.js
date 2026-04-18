@@ -37,9 +37,13 @@ function isTypingTarget(target) {
 }
 
 function hasActiveOverlay() {
-  // Vuetify 4 applies `v-overlay--active` on the wrapper while the overlay
-  // is visible (dialog, menu, date picker, tooltip anchored in overlay).
-  return !!document.querySelector('.v-overlay--active')
+  // FT-036 P5: support both Vuetify (hybrid phases) and PrimeVue (post-P7).
+  // Vuetify: `.v-overlay--active` while dialog/menu/date-picker/tooltip visible.
+  // PrimeVue: `.p-overlay-mask` while Dialog modal open; `.p-menu` / `.p-popover`
+  // для popups.
+  return !!document.querySelector(
+    '.v-overlay--active, .p-overlay-mask, .p-menu-overlay, .p-popover',
+  )
 }
 
 export function useGanttShortcuts({

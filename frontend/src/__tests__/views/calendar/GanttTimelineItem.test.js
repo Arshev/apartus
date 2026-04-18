@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { mountWithVuetify } from '../../helpers/mountWithVuetify'
+import { mountWithPrimeVue } from '../../helpers/mountWithPrimeVue'
 import GanttTimelineItem from '../../../views/calendar/GanttTimelineItem.vue'
 
 const BASE = {
@@ -12,7 +12,7 @@ const BASE = {
 }
 
 function setup(propsOverride = {}) {
-  return mountWithVuetify(GanttTimelineItem, {
+  return mountWithPrimeVue(GanttTimelineItem, {
     props: { booking: BASE, left: 100, width: 200, lane: 0, itemHeight: 28, ...propsOverride },
   })
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { mountWithVuetify } from '../../helpers/mountWithVuetify'
+import { mountWithPrimeVue } from '../../helpers/mountWithPrimeVue'
 import GanttTimeline from '../../../views/calendar/GanttTimeline.vue'
 import { parseIsoDate, addDays } from '../../../utils/date'
 
@@ -14,7 +14,7 @@ const RES = [
 ]
 
 function setup(viewStartIso, viewEndIso, extraProps = {}) {
-  return mountWithVuetify(GanttTimeline, {
+  return mountWithPrimeVue(GanttTimeline, {
     props: {
       units: UNITS,
       reservations: RES,
@@ -71,7 +71,7 @@ describe('GanttTimeline', () => {
     const today = new Date()
     const start = addDays(today, -3)
     const end = addDays(today, 3)
-    const wrapper = mountWithVuetify(GanttTimeline, {
+    const wrapper = mountWithPrimeVue(GanttTimeline, {
       props: { units: UNITS, reservations: [], viewStart: start, viewEnd: end },
       global: {
         stubs: {
@@ -98,7 +98,7 @@ describe('GanttTimeline', () => {
     const viewStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
     const viewEnd = new Date(viewStart)
     viewEnd.setDate(viewEnd.getDate() + 13)
-    const wrapper = mountWithVuetify(GanttTimeline, {
+    const wrapper = mountWithPrimeVue(GanttTimeline, {
       props: {
         units: [{ id: 1, name: 'U1', property_name: 'P1' }],
         reservations: [],
@@ -122,7 +122,7 @@ describe('GanttTimeline', () => {
   // FT-033 Density toggle
   describe('density prop (FT-033)', () => {
     it('density="comfortable" → effectiveRowHeight 36 / effectiveItemHeight 28', async () => {
-      const wrapper = mountWithVuetify(GanttTimeline, {
+      const wrapper = mountWithPrimeVue(GanttTimeline, {
         props: {
           units: [{ id: 1, name: 'U1', property_name: 'P1' }],
           reservations: [],
@@ -139,7 +139,7 @@ describe('GanttTimeline', () => {
       // 30, not 28: aligned with Row's minimum 1-lane computedRowHeight
       // (max(base, 1*(item+2)+6) = max(30, 30) = 30). This keeps sidebar
       // cells in lockstep with timeline rows without transient drift.
-      const wrapper = mountWithVuetify(GanttTimeline, {
+      const wrapper = mountWithPrimeVue(GanttTimeline, {
         props: {
           units: [{ id: 1, name: 'U1', property_name: 'P1' }],
           reservations: [],
@@ -153,7 +153,7 @@ describe('GanttTimeline', () => {
     })
 
     it('density defaults to comfortable when prop omitted', () => {
-      const wrapper = mountWithVuetify(GanttTimeline, {
+      const wrapper = mountWithPrimeVue(GanttTimeline, {
         props: {
           units: [{ id: 1, name: 'U1', property_name: 'P1' }],
           reservations: [],
@@ -168,7 +168,7 @@ describe('GanttTimeline', () => {
   // FT-034 sidebar toggle badge
   describe('sidebar toggle badge (FT-034)', () => {
     it('renders kbd S badge when sidebar is expanded', () => {
-      const wrapper = mountWithVuetify(GanttTimeline, {
+      const wrapper = mountWithPrimeVue(GanttTimeline, {
         props: {
           units: [{ id: 1, name: 'U1', property_name: 'P1' }],
           reservations: [],
@@ -184,7 +184,7 @@ describe('GanttTimeline', () => {
     })
 
     it('hides kbd badge when sidebar is collapsed (no space in 48px corner)', () => {
-      const wrapper = mountWithVuetify(GanttTimeline, {
+      const wrapper = mountWithPrimeVue(GanttTimeline, {
         props: {
           units: [{ id: 1, name: 'U1', property_name: 'P1' }],
           reservations: [],

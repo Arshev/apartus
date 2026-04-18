@@ -2,10 +2,9 @@
   <div class="gantt-timeline" :class="{ 'gantt-timeline--sidebar-collapsed': sidebarCollapsed }">
     <!-- Sticky-left header corner — toggle button when collapsed, label otherwise -->
     <div class="gantt-timeline__corner">
-      <v-btn
-        variant="text"
-        size="small"
-        density="compact"
+      <button
+        type="button"
+        class="gantt-timeline__sidebar-btn"
         :title="`${sidebarCollapsed ? $t('calendar.gantt.sidebar.toggleExpand') : $t('calendar.gantt.sidebar.toggleCollapse')} (S)`"
         :aria-label="sidebarCollapsed ? $t('calendar.gantt.sidebar.toggleExpand') : $t('calendar.gantt.sidebar.toggleCollapse')"
         :aria-expanded="!sidebarCollapsed"
@@ -13,11 +12,10 @@
         data-testid="sidebar-toggle"
         @click="$emit('toggle-sidebar')"
       >
-        <v-icon>{{ sidebarCollapsed ? 'mdi-chevron-right' : 'mdi-chevron-left' }}</v-icon>
-        <!-- FT-034: inline shortcut badge. Hidden when sidebar is collapsed
-             (48px corner is too tight for chevron + badge). -->
+        <i :class="['pi', sidebarCollapsed ? 'pi-chevron-right' : 'pi-chevron-left']" aria-hidden="true" />
+        <!-- FT-034: inline shortcut badge. Hidden when collapsed (48px corner too tight). -->
         <kbd v-if="!sidebarCollapsed" aria-hidden="true" class="gantt-timeline__kbd" data-testid="kbd-sidebar">S</kbd>
-      </v-btn>
+      </button>
       <span v-if="!sidebarCollapsed" class="gantt-timeline__corner-label">{{ $t('calendar.unitColumn') }}</span>
     </div>
 
@@ -232,12 +230,17 @@ defineExpose({
   display: grid;
   grid-template-columns: 240px 1fr;
   grid-template-rows: auto 1fr;
-  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 8px;
   overflow: hidden;
-  background: rgb(var(--v-theme-surface));
+  background: var(--p-surface-0, #ffffff);
   /* FT-030: smooth sidebar collapse transition. */
   transition: grid-template-columns 0.2s ease-out;
+}
+
+:where(.dark) .gantt-timeline {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: var(--p-surface-900, #111a1b);
 }
 
 /* FT-030: collapsed — sidebar shrinks to 48px (minimal icon button width). */
@@ -254,12 +257,12 @@ defineExpose({
 .gantt-timeline__corner {
   grid-column: 1;
   grid-row: 1;
-  background: rgb(var(--v-theme-surface-light));
+  background: var(--p-surface-50, #fafdfa);
   padding: 4px 4px;
   font-weight: 600;
   font-size: 12px;
-  border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-right: 1px solid rgba(0, 0, 0, 0.12);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
   position: sticky;
   top: 0;
   z-index: 4;
@@ -268,6 +271,41 @@ defineExpose({
   gap: 4px;
   height: var(--gantt-header-height);
   box-sizing: border-box;
+}
+
+:where(.dark) .gantt-timeline__corner {
+  background: var(--p-surface-900, #111a1b);
+  border-right-color: rgba(255, 255, 255, 0.12);
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+/* FT-036 P5: Tailwind button replacing v-btn, overflow:visible для kbd badge */
+.gantt-timeline__sidebar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  overflow: visible;
+  color: inherit;
+  transition: background 0.15s;
+}
+
+.gantt-timeline__sidebar-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+:where(.dark) .gantt-timeline__sidebar-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.gantt-timeline__sidebar-btn:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
 }
 
 .gantt-timeline__corner-label {
@@ -290,38 +328,49 @@ defineExpose({
   font-size: 10px;
   font-weight: 600;
   line-height: 1;
-  color: rgba(var(--v-theme-on-surface), 0.7);
-  background: rgba(var(--v-theme-on-surface), 0.08);
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.15);
+  color: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: 3px;
   flex-shrink: 0;
   pointer-events: none;
 }
 
+:where(.dark) .gantt-timeline__kbd {
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
 .gantt-timeline__sidebar {
   grid-column: 1;
   grid-row: 2;
-  background: rgb(var(--v-theme-surface));
-  border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  background: var(--p-surface-0, #ffffff);
+  border-right: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+:where(.dark) .gantt-timeline__sidebar {
+  background: var(--p-surface-900, #111a1b);
+  border-right-color: rgba(255, 255, 255, 0.12);
 }
 
 .gantt-timeline__unit-cell {
   padding: 6px 8px;
-  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
   font-size: 12px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
   box-sizing: border-box;
-  /* FT-033: no CSS transition on height — sidebar must stay exactly in
-     lockstep with timeline rows (which snap instantly via Row's
-     computedRowHeight). Animating one side only produces visible drift
-     during the transition window. */
+}
+
+:where(.dark) .gantt-timeline__unit-cell {
+  border-bottom-color: rgba(255, 255, 255, 0.12);
 }
 
 .gantt-timeline__unit-property {
-  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+  color: var(--p-surface-600, #5f6561);
   font-size: 10px;
   white-space: nowrap;
   overflow: hidden;
@@ -342,7 +391,11 @@ defineExpose({
   font-weight: 600;
   letter-spacing: 0.02em;
   text-align: center;
-  color: rgb(var(--v-theme-on-surface));
+  color: var(--p-surface-900, #171c19);
+}
+
+:where(.dark) .gantt-timeline__unit-abbr {
+  color: var(--p-surface-0, #e1e6e2);
 }
 
 /* Reduce cell padding on collapsed to keep text centered in 48px. */
@@ -371,7 +424,7 @@ defineExpose({
   top: var(--gantt-header-height); /* below header */
   bottom: 0;
   width: 2px;
-  background: rgb(var(--v-theme-primary));
+  background: var(--color-primary-500);
   pointer-events: none;
   z-index: 5;
 }
@@ -382,7 +435,7 @@ defineExpose({
   position: absolute;
   top: var(--gantt-header-height); /* below header — aligns with marker */
   bottom: 0;
-  background: rgba(var(--v-theme-primary), 0.05);
+  background: color-mix(in oklch, var(--color-primary-500) 5%, transparent);
   pointer-events: none;
   z-index: 0;
 }

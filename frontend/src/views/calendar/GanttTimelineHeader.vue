@@ -58,8 +58,13 @@ defineExpose({ topCells, bottomCells, dayCellWidth })
   position: sticky;
   top: 0;
   z-index: 3;
-  background: rgb(var(--v-theme-surface-light));
-  border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  background: var(--p-surface-50, #fafdfa);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+:where(.dark) .gantt-header {
+  background: var(--p-surface-900, #111a1b);
+  border-bottom-color: rgba(255, 255, 255, 0.12);
 }
 
 .gantt-header__row {
@@ -67,14 +72,22 @@ defineExpose({ topCells, bottomCells, dayCellWidth })
 }
 
 .gantt-header__row--top {
-  border-bottom: 1px solid rgba(var(--v-border-color), calc(var(--v-border-opacity) * 0.5));
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+:where(.dark) .gantt-header__row--top {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 
 .gantt-header__cell {
   text-align: center;
   font-size: 12px;
-  border-right: 1px solid rgba(var(--v-border-color), calc(var(--v-border-opacity) * 0.5));
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
   box-sizing: border-box;
+}
+
+:where(.dark) .gantt-header__cell {
+  border-right-color: rgba(255, 255, 255, 0.06);
 }
 
 .gantt-header__cell--top {
@@ -87,7 +100,7 @@ defineExpose({ topCells, bottomCells, dayCellWidth })
 }
 
 .gantt-header__cell--top.is-current-month {
-  color: rgb(var(--v-theme-primary));
+  color: var(--color-primary-500);
 }
 
 .gantt-header__cell--bottom {
@@ -100,7 +113,7 @@ defineExpose({ topCells, bottomCells, dayCellWidth })
 
 .gantt-header__day-of-week {
   font-size: 10px;
-  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+  color: var(--p-surface-600, #5f6561);
   text-transform: uppercase;
 }
 
@@ -109,15 +122,19 @@ defineExpose({ topCells, bottomCells, dayCellWidth })
 }
 
 .gantt-header__cell--bottom.is-weekend {
-  background: rgba(var(--v-theme-on-surface), 0.04);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+:where(.dark) .gantt-header__cell--bottom.is-weekend {
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .gantt-header__cell--bottom.is-today {
-  background: rgba(var(--v-theme-primary), 0.12);
+  background: color-mix(in oklch, var(--color-primary-500) 12%, transparent);
   font-weight: 700;
 }
 
 .gantt-header__cell--bottom.is-today .gantt-header__day-num {
-  color: rgb(var(--v-theme-primary));
+  color: var(--color-primary-500);
 }
 </style>

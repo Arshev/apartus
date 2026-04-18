@@ -20,7 +20,7 @@ derived_from:
   - ../FT-033-density-toggle/feature.md
   - ../FT-034-shortcut-badges/feature.md
 status: active
-delivery_status: planned
+delivery_status: done
 audience: humans_and_agents
 must_not_define:
   - implementation_sequence
