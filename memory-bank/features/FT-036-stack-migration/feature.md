@@ -39,7 +39,7 @@ Frontend на Vuetify 4.0.4 имеет накопленные трения, ча
 | `MET-01` | Vuetify dependency in package.json | `vuetify ^4.0.4` | absent | `package.json` |
 | `MET-02` | `@mdi/font` dependency | present | absent (PrimeIcons заменяет) | `package.json` |
 | `MET-03` | New UI stack installed | — | `primevue@4`, `@primevue/themes@4`, `primeicons@7`, `tailwindcss@4`, `@tailwindcss/vite@4`, `zod@3`, `@primevue/forms@4` | `package.json` |
-| `MET-04` | Test baseline preserved | 799/799, coverage 95.33% | ≥ 799/800 tests, coverage ≥ 94% | `yarn test:coverage` |
+| `MET-04` | Test baseline preserved (final, post-P7) | 799/799, coverage 95.33% | tests ≥ 799, coverage ≥ 94% | `yarn test:coverage` |
 | `MET-05` | All 8 phases delivered | 0/8 | 8/8 | feature/FT-036-stack-migration/phase-*.md |
 | `MET-06` | Visual parity (key views) | screenshots pre-migration | no regression in Dashboard, Gantt, Reservations, Settings | Manual QA light+dark |
 | `MET-07` | Build success | `yarn build` green | `yarn build` green после каждой phase | CI |
@@ -56,15 +56,19 @@ Frontend на Vuetify 4.0.4 имеет накопленные трения, ча
   - Dark mode через `class="dark"` на `<html>`
 - `REQ-04` **Zod + @primevue/forms для validation.** Все form validation — через Zod schemas. PrimeVue `<Form>` component с Zod resolver (если форма non-trivial). Для trivial single-field — прямой `zod.parse()` в submit.
 - `REQ-05` **Icons migration.** MDI icons (`mdi-*`) заменены PrimeIcons (`pi pi-*`). Gantt custom icons если есть — остаются.
-- `REQ-06` **Design token port.** `--font-display`, `--font-body`, `--font-mono` CSS vars сохраняются; OKLCH palette перенесён в Tailwind theme config + PrimeVue Aura custom primitives. `--gantt-header-height` и прочие Gantt pixel-math vars — **не трогаются** (не Vuetify-specific).
+- `REQ-06` **Design token port — layered.** `--font-display`, `--font-body`, `--font-mono` CSS vars сохраняются.
+  - **PrimeVue Aura preset** owns: `primary` scale (50..950) derived from OKLCH green, `surface` scale, semantic `success/info/warn/danger` — via `definePreset`.
+  - **Tailwind `@theme` в tailwind.css** owns: fontFamily, borderRadius, spacing extensions, AND все **non-Aura semantic tokens** (reservation `status-*`, task `priority-*`, finance `revenue/expense`) как plain CSS custom properties + utility classes.
+  - `--gantt-header-height` и прочие Gantt pixel-math vars — **не трогаются** (не Vuetify-specific).
+  - Aura cannot hold all 17 light + 17 dark tokens as primitives — это не его abstraction. Semantic tokens mapping: Aura-native (primary/surface/success/etc.) → `definePreset` override. Non-Aura (status/priority/finance) → Tailwind tokens.
 - `REQ-07` **Test infrastructure.** Новый `mountWithPrimeVue.js` helper или — при возможности — mount компонентов unstubbed (PrimeVue не требует layout-inject). Vitest + @vue/test-utils остаются. Coverage ratchet сохраняется ≥ 94%.
 - `REQ-08` **Phased delivery.** Migration выполняется в 8 phases (P0..P7), каждая — отдельный spec `phase-N-<name>.md` + отдельный review gate + commits на long-lived branch `feature/ft-036-stack-migration`. Final merge в main только после P7.
 - `REQ-09` **Hybrid стадия разрешена.** Между P0 и P7 система может содержать mixed Vuetify + PrimeVue views. Это ожидаемо. Tests должны проходить в hybrid state.
 - `REQ-10` **Gantt CSS preservation.** FT-020..034 custom pixel-math (lane positioning, today-marker, hatched patterns, heatmap tints) переносится **как есть** в new context. Gantt — наибольший visual regression risk.
 - `REQ-11` **i18n untouched.** Keys, parity, vue-i18n plugin — не меняются. Migration не затрагивает translations.
 - `REQ-12` **Pinia stores untouched.** Data layer (stores, api/, utils/) не меняется. Только view layer.
-- `REQ-13` **Playwright e2e preserved.** Существующие e2e specs в `tests/e2e/` должны пройти после P6 (Gantt + reservations covered).
-- `REQ-14` **Coverage ratchet.** После каждой phase `yarn test:coverage` met threshold. После P7 финальный ratchet possibly bumped.
+- `REQ-13` **Playwright e2e — skipped during migration, restored в P7.** 20 existing e2e specs в `frontend/e2e/` используют Vuetify-specific селекторы и будут ломаться incrementally с P1. Strategy: mark e2e suite skipped при старте P1 (CI e2e job → allowed-to-fail или skip list); restore + rewrite selectors в P7 против final PrimeVue DOM. Alternatively each phase может обновить свои e2e selectors — author's choice per-phase, документируется в phase spec.
+- `REQ-14` **Coverage ratchet — relaxed during hybrid phases.** Baseline 95.33% / threshold 94%. P0, P1, P7 hold threshold ≥ 94%. **P2..P6 (hybrid phases) — relaxed threshold 92%** (temporary 2pp drop allowed during view-rewrite churn). Per-phase rule: coverage не должно упасть > 1pp vs tip of previous phase. P7 restores threshold to ≥ 94% (final MET-04).
 - `REQ-15` **Visual QA protocol.** После P4 (Dashboard) и P5 (Gantt) — manual screenshot comparison light+dark. Regression = blocker на phase merge.
 
 ### Non-Scope
@@ -126,7 +130,7 @@ Frontend на Vuetify 4.0.4 имеет накопленные трения, ча
 | `frontend/src/plugins/vuetify.js` | deprecate/remove | P0, P7 |
 | `frontend/src/plugins/primevue.js` | code (new) | P0 |
 | `frontend/src/styles/tailwind.css` | new entrypoint | P0 |
-| `frontend/tailwind.config.js` | new (OKLCH palette port) | P0 |
+| `frontend/src/styles/tailwind.css` | new (OKLCH palette port via `@theme`) | P0 |
 | `frontend/src/__tests__/helpers/mountWithVuetify.js` | replace with mountWithPrimeVue or drop | P0 |
 | `frontend/src/views/**` | progressive rewrite | P1..P6 |
 | `frontend/src/components/**` | progressive rewrite | P1..P6 |
@@ -139,7 +143,7 @@ Frontend на Vuetify 4.0.4 имеет накопленные трения, ча
 
 | Contract | I/O | Producer/Consumer | Notes |
 |---|---|---|---|
-| `CTR-01` | PrimeVue Aura preset config с custom primitives (OKLCH palette) | plugin → app theme | Single source of truth для brand colors |
+| `CTR-01` | PrimeVue Aura preset: `primary` + `surface` scales + Aura-native semantic tokens (`success/info/warn/danger`) via `definePreset` with OKLCH-derived hex | plugin → app theme | Non-Aura tokens (status/priority/finance) живут в Tailwind `@theme` per REQ-06 |
 | `CTR-02` | Tailwind theme config: colors, fontFamily, spacing | tailwind.config.js → utility classes | `@theme` directive в CSS entrypoint |
 | `CTR-03` | Zod schema per form | form definition → submit handler | `schema.safeParse(data)` pattern |
 | `CTR-04` | Dark mode toggle: `document.documentElement.classList.toggle('dark')` | theme store → DOM | Same class used by Tailwind + PrimeVue |
@@ -153,7 +157,7 @@ Frontend на Vuetify 4.0.4 имеет накопленные трения, ча
 - `FM-05` **Test stubs explosion в P0** — без layout-inject workarounds primitives могут работать напрямую, но некоторые случаи (overlay, menu) могут требовать stubs. Mitigation: try unstubbed first, add stubs минимально.
 - `FM-06` **Zod schema переписывание** — existing `rules.required/minOne` inline rules переводятся в schemas. Some edge cases (async validation, cross-field) — проверить в P2.
 - `FM-07` **i18n fallback в Zod error messages** — Zod default English messages. Mitigation: custom error map с i18n lookup.
-- `FM-08` **Long-lived branch conflicts с main** — если main движется параллельно, rebase затраты. Mitigation: feature freeze на main в период миграции, либо merge main в migration branch раз в phase.
+- `FM-08` **Long-lived branch conflicts с main** — если main движется параллельно (hotfixes, docs), rebase затраты. Mitigation: **`git merge main` в migration branch в начале каждой phase**; hotfixes на main welcome но migration branch остаётся authoritative для frontend changes. Feature work на main — paused пока migration активна.
 
 ### Rollback
 
@@ -168,8 +172,8 @@ Frontend на Vuetify 4.0.4 имеет накопленные трения, ча
 - `EC-01` Все 8 phases (P0..P7) delivered и merged в migration branch.
 - `EC-02` `vuetify`, `vite-plugin-vuetify`, `@mdi/font` отсутствуют в `frontend/package.json`.
 - `EC-03` Grep `<v-` в `frontend/src/**/*.vue` возвращает 0 результатов (за вычетом comments).
-- `EC-04` `yarn test:coverage --run` — 799+ tests green, coverage ≥ 94%.
-- `EC-05` `yarn build` — success, bundle размер не вырос > 15% vs baseline.
+- `EC-04` `yarn test:coverage --run` — tests ≥ 799, coverage ≥ 94% (post-P7). Hybrid phases — per-phase threshold per REQ-14.
+- `EC-05` **Post-P7** `yarn build` — success, production bundle размер не вырос > 15% vs baseline. Hybrid phases (P0..P6) — bundle size logged только информативно (будет больше из-за dual stack, не blocker).
 - `EC-06` CI на migration branch зелёный перед final merge.
 - `EC-07` Manual QA после P5 и P6 подтверждает visual parity.
 - `EC-08` i18n parity сохранена (RU 483 / EN 483).
