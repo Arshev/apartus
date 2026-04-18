@@ -111,7 +111,7 @@ Operational persona (manager, 10+ резерваций/день): хочет в�
 
 **Overall approach:** Extract 4 focused components, keep `ReservationFormView` как orchestrator form-state + submit + watchers. Data flow:
 
-```
+```text
 ReservationFormView
 ├── form state { unit_id, guest_id, check_in, check_out, guests_count, total_price_cents, notes }
 ├── manualOverride ref
@@ -144,6 +144,7 @@ ReservationPriceSummary (sibling / grid-column right, sticky)
 **Auto-calc remains in parent** (needs unitDataMap cache + access to form state); summary is pure display + triggers recalc event.
 
 **Trade-offs:**
+
 - **Component extraction vs inline.** Extracting 4 components добавляет файлы, но каждый < 120 строк, testable в изоляции, re-usable (DateRangePicker может пригодиться в Reports/Search filters). Inline version — один большой 400+-line файл, тяжёлый для LLM context и тестов. Chose extraction.
 - **Autocomplete vs select for guest.** Autocomplete добавляет type-to-filter (nice UX для 500+ guests), strict id-only return (no free-text). Combobox rejected потому что разрешает Enter-to-create free-text, что размыло бы single-entry-point принцип (quick-create dialog).
 - **Manual override UX.** Alternative — всегда blind auto-recalc. Rejected: user хочет задать скидку/надбавку. Current pattern (lock + recalc button) разделяет намерение.
