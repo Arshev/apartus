@@ -213,6 +213,13 @@ defineExpose({
 
 <style scoped>
 .gantt-timeline {
+  /* FT-033 bugfix: header natural height grew to ~64px after FT-026 switched
+     to Geologica/Geist fonts. Corner was hard-coded 50px, causing a 13-14px
+     vertical drift between sidebar column (starting at y=50) and timeline
+     rows (starting at y=64 inside scroll). Single source of truth via CSS
+     custom property keeps corner, today-column, and today-marker offsets
+     all aligned with the natural header height. */
+  --gantt-header-height: 64px;
   display: grid;
   grid-template-columns: 240px 1fr;
   grid-template-rows: auto 1fr;
@@ -250,7 +257,7 @@ defineExpose({
   display: flex;
   align-items: center;
   gap: 4px;
-  height: 50px;
+  height: var(--gantt-header-height);
   box-sizing: border-box;
 }
 
@@ -330,7 +337,7 @@ defineExpose({
 
 .gantt-timeline__today-marker {
   position: absolute;
-  top: 50px; /* below header */
+  top: var(--gantt-header-height); /* below header */
   bottom: 0;
   width: 2px;
   background: rgb(var(--v-theme-primary));
@@ -342,7 +349,7 @@ defineExpose({
    tint (~5%). Sits behind rows so items/heat-cells/gaps paint on top. */
 .gantt-timeline__today-column {
   position: absolute;
-  top: 50px; /* below header — aligns with marker */
+  top: var(--gantt-header-height); /* below header — aligns with marker */
   bottom: 0;
   background: rgba(var(--v-theme-primary), 0.05);
   pointer-events: none;
