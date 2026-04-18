@@ -18,7 +18,7 @@ describe('GuestQuickCreateDialog', () => {
       props: { modelValue: true },
     })
     expect(wrapper.find('[data-stub="v-dialog"]').exists()).toBe(true)
-    expect(wrapper.text()).toContain('guests.quickCreate.title')
+    expect(wrapper.text()).toContain('Новый гость')
   })
 
   it('does not emit created when API returns error; keeps dialog open', async () => {

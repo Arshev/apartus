@@ -8,7 +8,7 @@ describe('ReservationDateRangePicker', () => {
     const wrapper = mountWithVuetify(ReservationDateRangePicker, {
       props: { modelValue: { checkIn: '', checkOut: '' } },
     })
-    expect(wrapper.vm.displayText).toMatch(/datesPlaceholder/)
+    expect(wrapper.vm.displayText).toBe('Выберите даты')
   })
 
   it('formats range and nights count when both dates set', () => {

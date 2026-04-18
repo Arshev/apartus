@@ -19,14 +19,14 @@ describe('ReservationPriceSummary', () => {
     const wrapper = mountWithVuetify(ReservationPriceSummary, {
       props: { ...baseProps, unitId: null },
     })
-    expect(wrapper.text()).toContain('priceSummary.emptyState')
+    expect(wrapper.text()).toContain('Выберите юнит и даты')
   })
 
   it('shows empty state when dates missing', () => {
     const wrapper = mountWithVuetify(ReservationPriceSummary, {
       props: { ...baseProps, checkIn: '', checkOut: '' },
     })
-    expect(wrapper.text()).toContain('priceSummary.emptyState')
+    expect(wrapper.text()).toContain('Выберите юнит и даты')
   })
 
   it('breakdown shows single base bucket when no seasonals apply', () => {
@@ -69,7 +69,7 @@ describe('ReservationPriceSummary', () => {
         autoTotalCents: 2500000,
       },
     })
-    expect(wrapper.text()).toContain('priceSummary.manualPrice')
+    expect(wrapper.text()).toContain('Ручная цена')
   })
 
   it('does not show manual chip when manualOverride true but sums equal', () => {
@@ -81,7 +81,7 @@ describe('ReservationPriceSummary', () => {
         autoTotalCents: 2500000,
       },
     })
-    expect(wrapper.text()).not.toContain('priceSummary.manualPrice')
+    expect(wrapper.text()).not.toContain('Ручная цена')
   })
 
   it('emits recalc when button clicked', async () => {
