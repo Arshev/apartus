@@ -1,8 +1,10 @@
 <template>
   <v-container>
-    <div class="d-flex align-center mb-2">
-      <v-btn variant="text" icon="mdi-arrow-left" :to="'/properties'" />
-      <h1 class="text-h4 ml-2">{{ $t('units.title') }}{{ propertyName ? ` — ${propertyName}` : '' }}</h1>
+    <div class="d-flex align-center mb-6">
+      <v-btn variant="text" icon="mdi-arrow-left" :to="'/properties'" :aria-label="$t('common.back', 'Back')" />
+      <h1 class="text-h5 font-weight-bold ml-2">
+        {{ $t('units.title') }}<span v-if="propertyName" class="text-medium-emphasis"> — {{ propertyName }}</span>
+      </h1>
       <v-spacer />
       <v-btn color="primary" prepend-icon="mdi-plus" :to="`/properties/${propertyId}/units/new`">
         {{ $t('common.add') }}
@@ -23,16 +25,41 @@
       :loading="store.loading"
       density="comfortable"
       hover
+      class="list-table"
+      @click:row="onRowClick"
     >
       <template v-slot:item.unit_type="{ item }">
-        {{ typeLabels[item.unit_type] || item.unit_type }}
+        <span class="text-medium-emphasis">{{ typeLabels[item.unit_type] || item.unit_type }}</span>
+      </template>
+      <template v-slot:item.capacity="{ item }">
+        <span class="text-tabular">{{ item.capacity }}</span>
       </template>
       <template v-slot:item.status="{ item }">
-        {{ statusLabels[item.status] || item.status }}
+        <v-chip
+          :color="statusColor(item.status)"
+          size="small"
+          variant="tonal"
+          density="comfortable"
+          class="list-table__chip"
+        >
+          <span
+            class="list-table__chip-dot"
+            :style="{ background: `rgb(var(--v-theme-${statusColor(item.status)}))` }"
+          />
+          {{ statusLabels[item.status] || item.status }}
+        </v-chip>
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-btn icon="mdi-pencil" variant="text" size="small" :to="`/properties/${propertyId}/units/${item.id}/edit`" />
-        <v-btn icon="mdi-delete" variant="text" size="small" color="error" @click="confirmDelete(item)" />
+        <div @click.stop>
+          <v-btn
+            icon="mdi-delete-outline"
+            variant="text"
+            size="small"
+            color="error"
+            :aria-label="$t('common.delete')"
+            @click="confirmDelete(item)"
+          />
+        </div>
       </template>
     </v-data-table>
 
@@ -58,7 +85,7 @@
         <v-card-actions>
           <v-spacer />
           <v-btn @click="deleteDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="error" @click="handleDelete">{{ $t('common.delete') }}</v-btn>
+          <v-btn color="error" variant="flat" @click="handleDelete">{{ $t('common.delete') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -92,9 +119,9 @@ const propertyName = computed(() => {
 const headers = computed(() => [
   { title: t('units.columns.name'), key: 'name' },
   { title: t('units.columns.type'), key: 'unit_type' },
-  { title: t('units.columns.capacity'), key: 'capacity' },
+  { title: t('units.columns.capacity'), key: 'capacity', align: 'end' },
   { title: t('units.columns.status'), key: 'status' },
-  { title: '', key: 'actions', sortable: false, align: 'end' },
+  { title: '', key: 'actions', sortable: false, align: 'end', width: 80 },
 ])
 
 const typeLabels = computed(() => ({
@@ -110,10 +137,24 @@ const statusLabels = computed(() => ({
   blocked: t('units.statuses.blocked'),
 }))
 
+// Status → theme color. success for normal operation, warning for maintenance,
+// status-blocked (neutral grey) for intentionally-unavailable.
+const statusColors = {
+  available: 'success',
+  maintenance: 'warning',
+  blocked: 'status-blocked',
+}
+function statusColor(s) { return statusColors[s] || 'status-blocked' }
+
 const deleteDialog = ref(false)
 const deletingUnit = ref(null)
 const snackbar = ref(false)
 const snackbarText = ref('')
+
+function onRowClick(_event, { item }) {
+  if (!item?.id) return
+  router.push(`/properties/${propertyId.value}/units/${item.id}/edit`)
+}
 
 function confirmDelete(unit) {
   deletingUnit.value = unit
@@ -125,7 +166,8 @@ async function handleDelete() {
     await store.destroy(deletingUnit.value.id)
     snackbarText.value = t('units.messages.deleted')
     snackbar.value = true
-  } catch (e) { console.error(e);
+  } catch (e) {
+    console.error(e)
     snackbarText.value = store.error || t('common.messages.deleteError')
     snackbar.value = true
   } finally {
@@ -142,5 +184,32 @@ onMounted(async () => {
   await store.fetchAll(propertyId.value)
 })
 
-defineExpose({ confirmDelete, handleDelete, headers, typeLabels, statusLabels, propertyId })
+defineExpose({
+  confirmDelete, handleDelete, headers, typeLabels, statusLabels, statusColor,
+  propertyId, deletingUnit, deleteDialog,
+})
 </script>
+
+<style scoped>
+.list-table :deep(tbody tr) {
+  cursor: pointer;
+}
+
+.list-table__chip :deep(.v-chip__content) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.list-table__chip-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.text-tabular {
+  font-variant-numeric: tabular-nums;
+}
+</style>

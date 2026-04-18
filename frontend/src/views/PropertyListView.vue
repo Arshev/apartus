@@ -1,7 +1,7 @@
 <template>
   <v-container>
-    <div class="d-flex align-center mb-4">
-      <h1 class="text-h4">{{ $t('properties.title') }}</h1>
+    <div class="d-flex align-center mb-6">
+      <h1 class="text-h5 font-weight-bold">{{ $t('properties.title') }}</h1>
       <v-spacer />
       <v-btn color="primary" prepend-icon="mdi-plus" :to="'/properties/new'">
         {{ $t('properties.addButton') }}
@@ -22,14 +22,30 @@
       :loading="store.loading"
       density="comfortable"
       hover
+      class="list-table"
+      @click:row="onRowClick"
     >
       <template v-slot:item.property_type="{ item }">
-        {{ typeLabels[item.property_type] || item.property_type }}
+        <span class="text-medium-emphasis">{{ typeLabels[item.property_type] || item.property_type }}</span>
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-btn icon="mdi-door" variant="text" size="small" :title="$t('properties.unitsButton')" :to="`/properties/${item.id}/units`" />
-        <v-btn icon="mdi-pencil" variant="text" size="small" :to="`/properties/${item.id}/edit`" />
-        <v-btn icon="mdi-delete" variant="text" size="small" color="error" @click="confirmDelete(item)" />
+        <div @click.stop>
+          <v-btn
+            icon="mdi-door-open"
+            variant="text"
+            size="small"
+            :title="$t('properties.unitsButton')"
+            :to="`/properties/${item.id}/units`"
+          />
+          <v-btn
+            icon="mdi-delete-outline"
+            variant="text"
+            size="small"
+            color="error"
+            :aria-label="$t('common.delete')"
+            @click="confirmDelete(item)"
+          />
+        </div>
       </template>
     </v-data-table>
 
@@ -55,7 +71,7 @@
         <v-card-actions>
           <v-spacer />
           <v-btn @click="deleteDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="error" @click="handleDelete">{{ $t('common.delete') }}</v-btn>
+          <v-btn color="error" variant="flat" @click="handleDelete">{{ $t('common.delete') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -69,16 +85,18 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { usePropertiesStore } from '../stores/properties'
 
 const { t } = useI18n()
+const router = useRouter()
 const store = usePropertiesStore()
 
 const headers = computed(() => [
   { title: t('properties.columns.name'), key: 'name' },
   { title: t('properties.columns.address'), key: 'address' },
   { title: t('properties.columns.type'), key: 'property_type' },
-  { title: '', key: 'actions', sortable: false, align: 'end' },
+  { title: '', key: 'actions', sortable: false, align: 'end', width: 120 },
 ])
 
 const typeLabels = computed(() => ({
@@ -93,6 +111,12 @@ const deletingProperty = ref(null)
 const snackbar = ref(false)
 const snackbarText = ref('')
 
+/** Row click → edit. Action icon wrapper stops propagation so doors/delete work. */
+function onRowClick(_event, { item }) {
+  if (!item?.id) return
+  router.push(`/properties/${item.id}/edit`)
+}
+
 function confirmDelete(property) {
   deletingProperty.value = property
   deleteDialog.value = true
@@ -103,7 +127,8 @@ async function handleDelete() {
     await store.destroy(deletingProperty.value.id)
     snackbarText.value = t('properties.messages.deleted')
     snackbar.value = true
-  } catch (e) { console.error(e);
+  } catch (e) {
+    console.error(e)
     snackbarText.value = store.error || t('properties.messages.deleteError')
     snackbar.value = true
   } finally {
@@ -114,5 +139,11 @@ async function handleDelete() {
 
 onMounted(() => store.fetchAll())
 
-defineExpose({ confirmDelete, handleDelete, headers, typeLabels })
+defineExpose({ confirmDelete, handleDelete, headers, typeLabels, deletingProperty, deleteDialog })
 </script>
+
+<style scoped>
+.list-table :deep(tbody tr) {
+  cursor: pointer;
+}
+</style>
