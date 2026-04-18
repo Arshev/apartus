@@ -10,7 +10,7 @@ vi.mock('../../../api/client', () => ({
   default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() },
 }))
 
-import { mountWithVuetify } from '../../helpers/mountWithVuetify'
+import { mountWithPrimeVueAsync } from '../../helpers/mountWithPrimeVue'
 import RegisterPage from '../../../pages/auth/RegisterPage.vue'
 import * as authApi from '../../../api/auth'
 
@@ -20,29 +20,48 @@ const ROUTES = [
   { path: '/auth/register', name: 'register', component: RegisterPage },
 ]
 
+async function mount() {
+  return mountWithPrimeVueAsync(RegisterPage, { routes: ROUTES, initialRoute: '/auth/register' })
+}
+
+const validForm = {
+  organization_name: 'Acme',
+  first_name: 'Ada',
+  last_name: 'Lovelace',
+  email: 'ada@example.com',
+  password: 'longpass1',
+  password_confirmation: 'longpass1',
+}
+
 describe('RegisterPage', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
-  it('renders registration form', () => {
-    const wrapper = mountWithVuetify(RegisterPage, { routes: ROUTES })
+  it('renders registration form', async () => {
+    const wrapper = await mount()
     expect(wrapper.text()).toContain('Регистрация')
     expect(wrapper.text()).toContain('Создать аккаунт')
     expect(wrapper.text()).toContain('Войти')
   })
 
-  it('validation rules', () => {
-    const wrapper = mountWithVuetify(RegisterPage, { routes: ROUTES })
-    expect(wrapper.vm.rules.required('')).toBe('Обязательное поле')
-    expect(wrapper.vm.rules.email('x')).toBe('Некорректный email')
-    expect(wrapper.vm.rules.minLength('short')).toBe('Минимум 8 символов')
-    expect(wrapper.vm.rules.minLength('longpassword')).toBe(true)
+  it('validateField flags empty required field', async () => {
+    const wrapper = await mount()
+    wrapper.vm.validateField('organization_name')
+    expect(wrapper.vm.fieldErrors.organization_name).toBe('common.validation.required')
   })
 
-  it('passwordMatch rule compares with form.password', () => {
-    const wrapper = mountWithVuetify(RegisterPage, { routes: ROUTES })
-    wrapper.vm.form.password = 'secret123'
-    expect(wrapper.vm.rules.passwordMatch('secret123')).toBe(true)
-    expect(wrapper.vm.rules.passwordMatch('wrong')).toBe('Пароли не совпадают')
+  it('validateField clears error on valid value', async () => {
+    const wrapper = await mount()
+    Object.assign(wrapper.vm.form, validForm)
+    wrapper.vm.validateField('email')
+    expect(wrapper.vm.fieldErrors.email).toBe('')
+  })
+
+  it('password mismatch caught by schema', async () => {
+    const wrapper = await mount()
+    Object.assign(wrapper.vm.form, { ...validForm, password_confirmation: 'different' })
+    await wrapper.vm.handleRegister()
+    expect(wrapper.vm.fieldErrors.password_confirmation).toBe('common.validation.passwordsMismatch')
+    expect(authApi.signUp).not.toHaveBeenCalled()
   })
 
   it('handleRegister redirects to / on success', async () => {
@@ -50,25 +69,26 @@ describe('RegisterPage', () => {
       token: 't', refresh_token: 'r', user: { id: 1 },
       organization: { id: 1 },
     })
-    const wrapper = mountWithVuetify(RegisterPage, { routes: ROUTES })
-    wrapper.vm.formValid = true
+    const wrapper = await mount()
+    Object.assign(wrapper.vm.form, validForm)
     const pushSpy = vi.spyOn(wrapper.vm.$router, 'push')
     await wrapper.vm.handleRegister()
     expect(pushSpy).toHaveBeenCalledWith('/')
   })
 
   it('handleRegister does nothing when invalid', async () => {
-    const wrapper = mountWithVuetify(RegisterPage, { routes: ROUTES })
-    wrapper.vm.formValid = false
+    const wrapper = await mount()
+    // empty form
     await wrapper.vm.handleRegister()
     expect(authApi.signUp).not.toHaveBeenCalled()
+    expect(Object.keys(wrapper.vm.fieldErrors).length).toBeGreaterThan(0)
   })
 
-  it('handleRegister error: caught silently', async () => {
+  it('handleRegister error caught silently', async () => {
     authApi.signUp.mockRejectedValue(new Error('409'))
-    const wrapper = mountWithVuetify(RegisterPage, { routes: ROUTES })
-    wrapper.vm.formValid = true
+    const wrapper = await mount()
+    Object.assign(wrapper.vm.form, validForm)
     await wrapper.vm.handleRegister()
-    // No throw, stays on page
+    // no throw, no redirect
   })
 })

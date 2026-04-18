@@ -10,9 +10,8 @@ vi.mock('../../../api/client', () => ({
   default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() },
 }))
 
-import { mountWithVuetify } from '../../helpers/mountWithVuetify'
+import { mountWithPrimeVueAsync } from '../../helpers/mountWithPrimeVue'
 import LoginPage from '../../../pages/auth/LoginPage.vue'
-import { useAuthStore } from '../../../stores/auth'
 import * as authApi from '../../../api/auth'
 
 const ROUTES = [
@@ -22,21 +21,38 @@ const ROUTES = [
   { path: '/auth/select-organization', name: 'selectOrganization', component: { template: '<div/>' } },
 ]
 
+async function mount() {
+  return mountWithPrimeVueAsync(LoginPage, { routes: ROUTES, initialRoute: '/auth/login' })
+}
+
 describe('LoginPage', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
-  it('renders login form with email and password fields', () => {
-    const wrapper = mountWithVuetify(LoginPage, { routes: ROUTES })
+  it('renders login form with email and password fields', async () => {
+    const wrapper = await mount()
     expect(wrapper.text()).toContain('Apartus')
     expect(wrapper.text()).toContain('Войти')
     expect(wrapper.text()).toContain('Регистрация')
   })
 
-  it('has validation rules', () => {
-    const wrapper = mountWithVuetify(LoginPage, { routes: ROUTES })
-    expect(wrapper.vm.rules.required('')).toBe('Обязательное поле')
-    expect(wrapper.vm.rules.email('bad')).toBe('Некорректный email')
-    expect(wrapper.vm.rules.email('a@b.c')).toBe(true)
+  it('has Zod-backed form state', async () => {
+    const wrapper = await mount()
+    expect(wrapper.vm.form.email).toBe('')
+    expect(wrapper.vm.form.password).toBe('')
+    expect(wrapper.vm.fieldErrors).toEqual({})
+  })
+
+  it('validateField marks email empty → error', async () => {
+    const wrapper = await mount()
+    wrapper.vm.validateField('email')
+    expect(wrapper.vm.fieldErrors.email).toBe('common.validation.required')
+  })
+
+  it('validateField clears error on valid email', async () => {
+    const wrapper = await mount()
+    wrapper.vm.form.email = 'a@b.com'
+    wrapper.vm.validateField('email')
+    expect(wrapper.vm.fieldErrors.email).toBe('')
   })
 
   it('handleLogin with single org redirects to /', async () => {
@@ -48,10 +64,9 @@ describe('LoginPage', () => {
       user: { id: 1 }, organizations: [{ id: 1 }],
       organization: { id: 1 }, membership: { role: 'owner', permissions: [] },
     })
-    const wrapper = mountWithVuetify(LoginPage, { routes: ROUTES })
-    wrapper.vm.form.email = 'a@b.c'
+    const wrapper = await mount()
+    wrapper.vm.form.email = 'a@b.com'
     wrapper.vm.form.password = 'pass'
-    wrapper.vm.formValid = true
     const pushSpy = vi.spyOn(wrapper.vm.$router, 'push')
     await wrapper.vm.handleLogin()
     expect(pushSpy).toHaveBeenCalledWith('/')
@@ -62,28 +77,28 @@ describe('LoginPage', () => {
       token: 't', refresh_token: 'r', user: { id: 1 },
       organizations: [{ id: 1 }, { id: 2 }],
     })
-    const wrapper = mountWithVuetify(LoginPage, { routes: ROUTES })
-    wrapper.vm.form.email = 'a@b.c'
+    const wrapper = await mount()
+    wrapper.vm.form.email = 'a@b.com'
     wrapper.vm.form.password = 'pass'
-    wrapper.vm.formValid = true
     const pushSpy = vi.spyOn(wrapper.vm.$router, 'push')
     await wrapper.vm.handleLogin()
     expect(pushSpy).toHaveBeenCalledWith({ name: 'selectOrganization' })
   })
 
   it('handleLogin does nothing when form invalid', async () => {
-    const wrapper = mountWithVuetify(LoginPage, { routes: ROUTES })
-    wrapper.vm.formValid = false
+    const wrapper = await mount()
+    // empty email + password → invalid
     await wrapper.vm.handleLogin()
     expect(authApi.signIn).not.toHaveBeenCalled()
+    expect(wrapper.vm.fieldErrors.email).toBeTruthy()
   })
 
-  it('handleLogin error: caught silently (error handled by store)', async () => {
+  it('handleLogin error: caught silently', async () => {
     authApi.signIn.mockRejectedValue(new Error('network'))
-    const wrapper = mountWithVuetify(LoginPage, { routes: ROUTES })
-    wrapper.vm.formValid = true
-    // Should not throw
+    const wrapper = await mount()
+    wrapper.vm.form.email = 'a@b.com'
+    wrapper.vm.form.password = 'pass'
     await wrapper.vm.handleLogin()
-    // Stays on page, no redirect
+    // no throw; stays on page
   })
 })

@@ -11,6 +11,7 @@
     "ok": "OK",
     "yes": "Yes",
     "no": "No",
+    "close": "Close",
     "search": "Search",
     "free": "Free",
     "blocking": "Blocked",
@@ -54,6 +55,7 @@
     }
   },
   "nav": {
+    "mainMenu": "Main menu",
     "home": "Home",
     "reservations": "Reservations",
     "calendar": "Calendar",
@@ -71,7 +73,10 @@
     "selectOrganization": "Select organization"
   },
   "topbar": {
-    "logout": "Log out"
+    "logout": "Log out",
+    "toggleNavigation": "Menu",
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode"
   },
   "dashboard": {
     "greeting": "Hello, {name}",
@@ -710,7 +715,9 @@
       "passwordLabel": "Password",
       "submitButton": "Sign in",
       "noAccount": "Don't have an account?",
-      "registerLink": "Register"
+      "registerLink": "Register",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
     },
     "register": {
       "title": "Registration",

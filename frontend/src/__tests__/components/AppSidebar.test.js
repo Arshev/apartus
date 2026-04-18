@@ -16,7 +16,7 @@ vi.mock('../../api/client', () => ({
   removeAuthTokens: vi.fn(), getAuthToken: vi.fn().mockReturnValue('t'),
 }))
 
-import { mountWithVuetify } from '../helpers/mountWithVuetify'
+import { mountWithPrimeVue, mountWithPrimeVueAsync } from '../helpers/mountWithPrimeVue'
 import AppSidebar from '../../components/AppSidebar.vue'
 import { useAuthStore } from '../../stores/auth'
 
@@ -28,11 +28,11 @@ const ROUTES = [
   { path: '/branches', component: { template: '<div/>' } },
 ]
 
-describe('AppSidebar', () => {
+describe('AppSidebar (FT-036 P1)', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
-  it('exposes 13 navigation items', () => {
-    const wrapper = mountWithVuetify(AppSidebar, { routes: ROUTES, props: { modelValue: true } })
+  it('exposes 13 navigation items with PrimeIcons', () => {
+    const wrapper = mountWithPrimeVue(AppSidebar, { routes: ROUTES, props: { modelValue: true } })
     const navItems = wrapper.vm.navItems
     expect(navItems).toHaveLength(13)
     expect(navItems.map((n) => n.title)).toEqual([
@@ -40,10 +40,14 @@ describe('AppSidebar', () => {
       'Собственники', 'Каналы', 'Задачи', 'Расходы', 'Отчёты',
       'Удобства', 'Филиалы', 'Настройки',
     ])
+    // All icons should be PrimeIcons (pi-*) post-migration
+    for (const item of navItems) {
+      expect(item.icon).toMatch(/^pi-/)
+    }
   })
 
   it('renders organization name when authenticated', async () => {
-    const wrapper = mountWithVuetify(AppSidebar, { routes: ROUTES, props: { modelValue: true } })
+    const wrapper = mountWithPrimeVue(AppSidebar, { routes: ROUTES, props: { modelValue: true } })
     const store = useAuthStore()
     store.user = { id: 1, full_name: 'Demo' }
     store.organization = { id: 1, name: 'Org A' }
@@ -52,8 +56,8 @@ describe('AppSidebar', () => {
     expect(wrapper.text()).toContain('Org A')
   })
 
-  it('switchOrg calls authStore.switchOrganization and pushes to / (SC-03)', async () => {
-    const wrapper = mountWithVuetify(AppSidebar, { routes: ROUTES, props: { modelValue: true } })
+  it('switchOrg calls authStore.switchOrganization and pushes to /', async () => {
+    const wrapper = mountWithPrimeVue(AppSidebar, { routes: ROUTES, props: { modelValue: true } })
     const store = useAuthStore()
     const spy = vi.spyOn(store, 'switchOrganization')
     const router = wrapper.vm.$router
@@ -64,5 +68,22 @@ describe('AppSidebar', () => {
 
     expect(spy).toHaveBeenCalledWith(targetOrg)
     expect(pushSpy).toHaveBeenCalledWith('/')
+  })
+
+  it('isActive differentiates root route vs nested', async () => {
+    const wrapper = await mountWithPrimeVueAsync(AppSidebar, {
+      routes: ROUTES,
+      props: { modelValue: true },
+      initialRoute: '/properties',
+    })
+    expect(wrapper.vm.isActive({ to: '/' })).toBe(false)
+    expect(wrapper.vm.isActive({ to: '/properties' })).toBe(true)
+  })
+
+  it('v-navigation-drawer shell preserved (hybrid, data-width=256)', () => {
+    const wrapper = mountWithPrimeVue(AppSidebar, { routes: ROUTES, props: { modelValue: true } })
+    const drawer = wrapper.find('[data-stub="v-navigation-drawer"]')
+    expect(drawer.exists()).toBe(true)
+    expect(drawer.attributes('data-width')).toBe('256')
   })
 })

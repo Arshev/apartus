@@ -11,6 +11,7 @@
     "ok": "Ок",
     "yes": "Да",
     "no": "Нет",
+    "close": "Закрыть",
     "search": "Найти",
     "free": "Бесплатно",
     "blocking": "Блокировка",
@@ -54,6 +55,7 @@
     }
   },
   "nav": {
+    "mainMenu": "Главное меню",
     "home": "Главная",
     "reservations": "Бронирования",
     "calendar": "Календарь",
@@ -71,7 +73,10 @@
     "selectOrganization": "Выберите организацию"
   },
   "topbar": {
-    "logout": "Выйти"
+    "logout": "Выйти",
+    "toggleNavigation": "Меню",
+    "lightMode": "Светлая тема",
+    "darkMode": "Тёмная тема"
   },
   "dashboard": {
     "greeting": "Здравствуйте, {name}",
@@ -710,7 +715,9 @@
       "passwordLabel": "Пароль",
       "submitButton": "Войти",
       "noAccount": "Нет аккаунта?",
-      "registerLink": "Регистрация"
+      "registerLink": "Регистрация",
+      "showPassword": "Показать пароль",
+      "hidePassword": "Скрыть пароль"
     },
     "register": {
       "title": "Регистрация",
