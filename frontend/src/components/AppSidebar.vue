@@ -1,10 +1,11 @@
 <template>
-  <!-- FT-036 P1 hybrid: v-navigation-drawer outer preserves Vuetify layout
-       injection for hybrid phase. Inner = PrimeVue + Tailwind. -->
-  <v-navigation-drawer
-    :model-value="modelValue"
-    width="256"
-    @update:model-value="$emit('update:modelValue', $event)"
+  <!-- FT-036 P7: v-navigation-drawer removed; sidebar positioning driven by
+       DefaultLayout flex/grid. `modelValue` remains for open/close state. -->
+  <aside
+    v-show="modelValue"
+    :data-open="modelValue"
+    class="app-sidebar"
+    :aria-label="$t('nav.mainMenu')"
   >
     <div class="h-full flex flex-col">
       <!-- Organization switcher (authenticated) -->
@@ -55,7 +56,7 @@
         </RouterLink>
       </nav>
     </div>
-  </v-navigation-drawer>
+  </aside>
 </template>
 
 <script setup>
@@ -121,3 +122,18 @@ async function switchOrg(org) {
 
 defineExpose({ navItems, orgMenuItems, switchOrg, toggleOrgMenu, isActive })
 </script>
+
+<style scoped>
+.app-sidebar {
+  width: 256px;
+  height: 100%;
+  background: var(--p-surface-0, #ffffff);
+  border-right: 1px solid rgba(0, 0, 0, 0.12);
+  overflow-y: auto;
+}
+
+:where(.dark) .app-sidebar {
+  background: var(--p-surface-900, #111a1b);
+  border-right-color: rgba(255, 255, 255, 0.12);
+}
+</style>

@@ -9,44 +9,43 @@ vi.mock('../../api/allUnits', () => ({
   list: vi.fn().mockResolvedValue([]),
 }))
 
-import { mountWithVuetify } from '../helpers/mountWithVuetify'
+import { mountWithPrimeVue } from '../helpers/mountWithPrimeVue'
 import ChannelListView from '../../views/ChannelListView.vue'
 import { useChannelsStore } from '../../stores/channels'
 
 describe('ChannelListView', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
-  it('has correct headers', () => {
-    const wrapper = mountWithVuetify(ChannelListView)
-    expect(wrapper.vm.headers.map((h) => h.key)).toContain('unit_name')
-    expect(wrapper.vm.headers.map((h) => h.key)).toContain('platform')
+  it('exposes platforms list + platformLabel mapper', () => {
+    const wrapper = mountWithPrimeVue(ChannelListView)
+    expect(wrapper.vm.platformLabel('booking_com')).toContain('Booking')
+    expect(wrapper.vm.platforms.length).toBe(4)
   })
 
   it('openCreate resets form', () => {
-    const wrapper = mountWithVuetify(ChannelListView)
+    const wrapper = mountWithPrimeVue(ChannelListView)
     wrapper.vm.openCreate()
     expect(wrapper.vm.editing).toBeNull()
     expect(wrapper.vm.form.platform).toBe('booking_com')
   })
 
   it('openEdit fills form', () => {
-    const wrapper = mountWithVuetify(ChannelListView)
+    const wrapper = mountWithPrimeVue(ChannelListView)
     wrapper.vm.openEdit({ id: 1, platform: 'airbnb', ical_import_url: 'https://example.com' })
     expect(wrapper.vm.editing.id).toBe(1)
     expect(wrapper.vm.form.platform).toBe('airbnb')
   })
 
-  it('confirmDelete + handleDelete', async () => {
-    const wrapper = mountWithVuetify(ChannelListView)
+  it('handleDelete invokes store.destroy', async () => {
+    const wrapper = mountWithPrimeVue(ChannelListView)
     const store = useChannelsStore()
     vi.spyOn(store, 'destroy')
-    wrapper.vm.confirmDelete({ id: 1 })
-    await wrapper.vm.handleDelete()
+    await wrapper.vm.handleDelete({ id: 1 })
     expect(store.destroy).toHaveBeenCalledWith(1)
   })
 
   it('doSync calls store.syncChannel', async () => {
-    const wrapper = mountWithVuetify(ChannelListView)
+    const wrapper = mountWithPrimeVue(ChannelListView)
     const store = useChannelsStore()
     vi.spyOn(store, 'syncChannel').mockResolvedValue({})
     await wrapper.vm.doSync({ id: 1 })
@@ -54,7 +53,7 @@ describe('ChannelListView', () => {
   })
 
   it('platformLabel covers all enums', () => {
-    const wrapper = mountWithVuetify(ChannelListView)
+    const wrapper = mountWithPrimeVue(ChannelListView)
     expect(wrapper.vm.platformLabel('booking_com')).toBe('Booking.com')
     expect(wrapper.vm.platformLabel('airbnb')).toBe('Airbnb')
     expect(wrapper.vm.platformLabel('ostrovok')).toBe('Островок')

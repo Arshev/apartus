@@ -7,7 +7,7 @@ derived_from:
   - architecture.md
 status: active
 audience: humans_and_agents
-last_verified: 2026-04-13
+last_verified: 2026-04-18
 canonical_for:
   - apartus_ui_surfaces
   - frontend_stack
@@ -30,12 +30,15 @@ Apartus frontend — это одно приложение, SPA.
 ## Stack
 
 - Vue 3 (Composition API, **чистый JavaScript без TypeScript** — см. [`../adr/ADR-002-no-typescript-frontend.md`](../adr/ADR-002-no-typescript-frontend.md))
-- Vuetify 4 — canonical UI kit
-- Vite — build/dev server
+- **PrimeVue 4** (Aura preset) — canonical UI kit (FT-036 migrated from Vuetify)
+- **Tailwind CSS 4** — utility-first styling с CSS-first `@theme` config в `src/styles/tailwind.css`
+- **Zod 3** — form validation schemas (`src/schemas/`: auth, property, unit, guest, expense, owner, reservation)
+- **PrimeIcons 7** — icon set (replaced MDI)
+- Vite 7 — build/dev server
 - Pinia — state management
 - Vue Router 4 — routing
 - Axios — HTTP client (см. [`../adr/ADR-006-axios-api-client.md`](../adr/ADR-006-axios-api-client.md))
-- Vitest + jsdom — тесты
+- Vitest + jsdom — тесты (`mountWithPrimeVue` helper per testing-policy.md)
 - **Typography (FT-026):** Geologica (display) + Geist (body) — оба OFL 1.1, self-hosted в `public/fonts/`, Cyrillic-ready. OKLCH-derived palette. См. [`../engineering/design-style-guide.md`](../engineering/design-style-guide.md) и [`/.impeccable.md`](../../.impeccable.md).
 
 ## Layout
@@ -48,14 +51,18 @@ Apartus frontend — это одно приложение, SPA.
 - `api/` — axios API clients (28 modules: auth, client, allUnits, amenities, branches, channels, dashboard, expenses, guestTimeline, guests, members, notifications, organizations, owners, pdfExport, photos, pricingRules, properties, publicBooking, reports, reservations, roles, seasonalPrices, tasks, unitAmenities, units)
 - `utils/` — currency (formatMoney, centsToUnits, unitsToCents), date (parseIsoDate, addDays, startOfDay/Month, endOfMonth, diffDays, formatMonth, formatShortDate, formatIsoDate — FT-020), gantt (dateToPixel, bookingWidth, generateTopLevelDates, generateBottomLevelDates, assignLanes — FT-020)
 - `router/` — Vue Router config с auth guards
-- `plugins/` — Vuetify и др.
+- `plugins/` — PrimeVue, pinia, i18n, router.
+- `schemas/` — Zod validation schemas (one module per domain).
+- `composables/` — shared reactive helpers (`useGanttShortcuts`, `useBreakpoint`).
 
 ## Component Rules
 
-- Новые UI-элементы берут из Vuetify 3 компонент-базы (`v-card`, `v-data-table`, `v-form`, и т.д.). Ad-hoc CSS избегаем.
-- Переиспользуемые — в `components/`. Локальные для одной страницы — inline во view.
+- Новые UI-элементы берут из **PrimeVue 4** (Aura preset): `Button`, `InputText`, `Select`, `DataTable`, `Column`, `Dialog`, `Menu`, `DatePicker`, `Textarea`, `Toast`, `ConfirmDialog`, `Tabs`/`TabPanel`, `ProgressBar`, `Tree`, `MultiSelect`, `AutoComplete`. Layout — **Tailwind** utility classes (`flex`, `grid`, `space-y-*`, `rounded-*`, `text-surface-*`, `dark:*` variants).
+- Form validation — Zod schemas в `src/schemas/`: consumer calls `validate(schema, form)` → `{ valid, errors: { field → i18n_key }}`. Resolves via `t()`.
+- Dialogs — PrimeVue `<Dialog v-model:visible>` с `#footer` slot. Confirm/delete flows — `useConfirm()`; feedback — `useToast()`. Global singletons registered в `layouts/DefaultLayout.vue` (`<ConfirmDialog />` + `<Toast />`).
 - Composition API (`<script setup>`) — canonical стиль. Options API допустим только для унаследованного hw-0 кода.
 - Sharing state между view — через Pinia store, не через props drilling.
+- Ad-hoc CSS для pixel-math (Gantt lane positioning, today marker) — допустимо в `<style scoped>`; используй CSS custom properties и `color-mix(in oklch, ...)` для opacity tints (не `rgba(var(--hex), alpha)` — недействительный синтаксис).
 
 ## Interaction Patterns
 

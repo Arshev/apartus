@@ -80,10 +80,10 @@ describe('AppSidebar (FT-036 P1)', () => {
     expect(wrapper.vm.isActive({ to: '/properties' })).toBe(true)
   })
 
-  it('v-navigation-drawer shell preserved (hybrid, data-width=256)', () => {
+  it('sidebar renders as <aside> after Vuetify removal (FT-036 P7)', () => {
     const wrapper = mountWithPrimeVue(AppSidebar, { routes: ROUTES, props: { modelValue: true } })
-    const drawer = wrapper.find('[data-stub="v-navigation-drawer"]')
-    expect(drawer.exists()).toBe(true)
-    expect(drawer.attributes('data-width')).toBe('256')
+    const aside = wrapper.find('aside.app-sidebar')
+    expect(aside.exists()).toBe(true)
+    expect(aside.attributes('data-open')).toBe('true')
   })
 })

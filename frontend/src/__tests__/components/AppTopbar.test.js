@@ -75,10 +75,9 @@ describe('AppTopbar (FT-036 P1)', () => {
     expect(store.user).toBeNull()
   })
 
-  it('v-app-bar shell preserved (hybrid, stubbed data-height=64)', () => {
+  it('topbar renders as <header> after Vuetify removal (FT-036 P7)', () => {
     const wrapper = mountWithPrimeVue(AppTopbar)
-    const topbar = wrapper.find('[data-stub="v-app-bar"]')
-    expect(topbar.exists()).toBe(true)
-    expect(topbar.attributes('data-height')).toBe('64')
+    const header = wrapper.find('header.app-topbar')
+    expect(header.exists()).toBe(true)
   })
 })

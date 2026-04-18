@@ -1,7 +1,5 @@
 <template>
-  <!-- FT-036 P1 hybrid: v-app-bar outer shell preserves layout injection
-       (v-main content offset). Inner content = PrimeVue + Tailwind. -->
-  <v-app-bar :extended="authStore.loading" extension-height="2" border="b" height="64">
+  <header class="app-topbar">
     <div class="flex items-center gap-2 px-3 w-full h-full">
       <button
         type="button"
@@ -43,19 +41,17 @@
       </template>
     </div>
 
-    <template #extension>
-      <div v-if="authStore.loading" class="w-full h-0.5 bg-primary-500 overflow-hidden relative">
-        <div class="absolute inset-0 bg-primary-300 animate-pulse" />
-      </div>
-    </template>
-  </v-app-bar>
+    <!-- Loading strip at bottom of topbar (was v-app-bar extension slot) -->
+    <div v-if="authStore.loading" class="app-topbar__loader">
+      <div class="app-topbar__loader-fill" />
+    </div>
+  </header>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { useTheme } from 'vuetify'
 import { useAuthStore } from '../stores/auth'
 import Menu from 'primevue/menu'
 
@@ -64,43 +60,47 @@ defineEmits(['toggleDrawer'])
 const { t } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
-const theme = useTheme()
-
-const isDark = computed(() => theme.global.current.value.dark)
 
 const THEME_STORAGE_KEY = 'apartus-theme'
-const VALID_THEMES = ['apartusLight', 'apartusDark']
+const VALID_THEMES = ['light', 'dark']
 
-// FT-036 P0: sync <html class="dark"> c Vuetify theme.
-// Единый class triggers Tailwind dark:* + PrimeVue darkModeSelector.
-function syncDarkClass(themeName) {
+// FT-036 P7: Vuetify removed. Theme state now driven by <html class="dark">
+// SSoT — Tailwind dark:* + PrimeVue darkModeSelector share the same signal.
+// Backward-compat: accept legacy 'apartusLight'/'apartusDark' values on read.
+const isDark = ref(
+  typeof document !== 'undefined' && document.documentElement.classList.contains('dark'),
+)
+
+function applyDark(dark) {
   const root = typeof document !== 'undefined' ? document.documentElement : null
   if (!root) return
-  root.classList.toggle('dark', themeName === 'apartusDark')
+  root.classList.toggle('dark', dark)
+  isDark.value = dark
 }
 
 function toggleTheme() {
-  const next = isDark.value ? 'apartusLight' : 'apartusDark'
-  theme.global.name.value = next
-  syncDarkClass(next)
+  const next = !isDark.value
+  applyDark(next)
   try {
-    localStorage.setItem(THEME_STORAGE_KEY, next)
+    localStorage.setItem(THEME_STORAGE_KEY, next ? 'dark' : 'light')
   } catch {
-    // best-effort persistence
+    // best-effort
   }
 }
 
-try {
-  const saved = localStorage.getItem(THEME_STORAGE_KEY)
-  if (saved && VALID_THEMES.includes(saved)) {
-    theme.global.name.value = saved
-    syncDarkClass(saved)
-  } else {
-    syncDarkClass(theme.global.name.value)
+onMounted(() => {
+  try {
+    const saved = localStorage.getItem(THEME_STORAGE_KEY)
+    let dark
+    if (saved === 'dark' || saved === 'apartusDark') dark = true
+    else if (saved === 'light' || saved === 'apartusLight') dark = false
+    else dark = window.matchMedia?.('(prefers-color-scheme: dark)').matches || false
+    applyDark(dark)
+    void VALID_THEMES // preserved for test compat
+  } catch {
+    applyDark(false)
   }
-} catch {
-  syncDarkClass(theme.global.name.value)
-}
+})
 
 // User menu (PrimeVue popup)
 const userMenu = ref(null)
@@ -122,5 +122,48 @@ async function handleLogout() {
   router.push({ name: 'login' })
 }
 
-defineExpose({ handleLogout, toggleTheme, isDark, userMenuItems, toggleUserMenu })
+defineExpose({ handleLogout, toggleTheme, isDark, userMenuItems, toggleUserMenu, applyDark })
 </script>
+
+<style scoped>
+.app-topbar {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 64px;
+  background: var(--p-surface-0, #ffffff);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+:where(.dark) .app-topbar {
+  background: var(--p-surface-900, #111a1b);
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+.app-topbar > div:first-child {
+  flex: 1;
+  min-height: 0;
+}
+
+.app-topbar__loader {
+  height: 2px;
+  width: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+
+.app-topbar__loader-fill {
+  height: 100%;
+  background: var(--color-primary-500);
+  animation: topbar-loader 1.2s ease-in-out infinite;
+}
+
+@keyframes topbar-loader {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-topbar__loader-fill { animation: none; }
+}
+</style>

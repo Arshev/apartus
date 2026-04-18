@@ -10,7 +10,7 @@ import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
 import { definePreset } from '@primevue/themes'
 
-// Apartus OKLCH-derived primary green (matches FT-026 vuetify.js #3b9555).
+// Apartus OKLCH-derived primary green (#3b9555 from FT-026 palette).
 // Aura interpolates 50..950 scale; we override key stops для сохранения
 // точного brand hue.
 const ApartusPreset = definePreset(Aura, {
@@ -72,10 +72,10 @@ export const primeVueConfig = {
       // Dark mode через class="dark" на <html> — единый toggle с Tailwind.
       darkModeSelector: '.dark',
       // CSS layer интеграция — matches order в tailwind.css:
-      // tailwind → primevue → vuetify → scoped.
+      // tailwind → primevue → scoped.
       cssLayer: {
         name: 'primevue',
-        order: 'tailwind, primevue, vuetify, scoped',
+        order: 'tailwind, primevue, scoped',
       },
     },
   },

@@ -1,10 +1,9 @@
-/* FT-036 P0: Tailwind 4 entrypoint with CSS-first @theme config.
+/* FT-036: Tailwind 4 entrypoint with CSS-first @theme config.
  *
  * Layer order controls cascade: Tailwind utilities win over PrimeVue,
- * PrimeVue wins over Vuetify (hybrid phases), scoped component styles
- * override all.
+ * scoped component styles override all.
  */
-@layer tailwind, primevue, vuetify, scoped;
+@layer tailwind, primevue, scoped;
 
 @import "tailwindcss";
 @import "primeicons/primeicons.css";

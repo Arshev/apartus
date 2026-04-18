@@ -1,38 +1,17 @@
-// FT-036 P0: Test helper для PrimeVue views.
+// FT-036 P7: Test helper for PrimeVue-only stack (Vuetify removed).
 //
-// Mirrors mountWithVuetify signature: per-suite mount (без global mocks
-// per testing-policy.md), plugins array [pinia, router, i18n, PrimeVue]
-// with Aura preset.
-//
-// Stub strategy (per P0 REQ-08, reviewer I4):
-// - Stubbed by default: overlay/teleport-based components (jsdom layout
-//   limitations — PrimeVue overlays position via getBoundingClientRect).
-// - Real: simple interactive primitives (Button, InputText, InputNumber,
-//   Textarea, Checkbox, Card, Divider).
+// Stub strategy: overlay/teleport-based components stubbed (jsdom layout
+// limitations — PrimeVue overlays position via getBoundingClientRect).
+// Simple interactive primitives (Button, InputText, Textarea, Checkbox)
+// mount as-is.
 
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { createRouter, createMemoryHistory } from 'vue-router'
-import { createVuetify } from 'vuetify'
 import PrimeVue, { primeVueConfig } from '../../plugins/primevue'
 import ConfirmationService from 'primevue/confirmationservice'
 import ToastService from 'primevue/toastservice'
 import i18n from '../../plugins/i18n'
-
-// FT-036 P1: include Vuetify plugin для hybrid views (AppTopbar,
-// AppSidebar используют v-app-bar / v-navigation-drawer shells
-// даже после P1). Individual Vuetify components stubbed below.
-// Themes configured с apartusLight/apartusDark names so useTheme()
-// based code (theme.global.current.value.dark) работает в tests.
-const vuetify = createVuetify({
-  theme: {
-    defaultTheme: 'apartusLight',
-    themes: {
-      apartusLight: { dark: false, colors: {} },
-      apartusDark: { dark: true, colors: {} },
-    },
-  },
-})
 
 // Pass-through template copies slot children + activator slot contents
 // так, что wrapper.text() и wrapper.find() продолжают работать.
@@ -135,38 +114,6 @@ export const PRIMEVUE_STUBS = {
   },
 }
 
-// FT-036 P1: Vuetify shell stubs — only components still used by hybrid
-// P1 shells (v-app-bar в AppTopbar, v-navigation-drawer в AppSidebar,
-// v-app wrapper в DefaultLayout). Pass-through templates preserve
-// children visibility via wrapper.text()/find().
-export const VUETIFY_SHELL_STUBS = {
-  'v-app': passthrough('v-app'),
-  'v-app-bar': {
-    name: 'v-app-bar',
-    props: ['extended', 'extensionHeight'],
-    template: `<div class="v-app-bar" data-stub="v-app-bar" data-height="64">
-      <slot name="default" />
-      <slot />
-      <slot name="extension" />
-    </div>`,
-  },
-  'v-app-bar-nav-icon': passthrough('v-app-bar-nav-icon'),
-  'v-navigation-drawer': {
-    name: 'v-navigation-drawer',
-    props: ['modelValue'],
-    emits: ['update:modelValue'],
-    template: `<div class="v-navigation-drawer" data-stub="v-navigation-drawer" data-width="256">
-      <slot />
-    </div>`,
-  },
-  'v-main': passthrough('v-main'),
-  'v-spacer': passthrough('v-spacer'),
-  'v-progress-linear': {
-    name: 'v-progress-linear',
-    template: '<div data-stub="v-progress-linear" />',
-  },
-}
-
 export function mountWithPrimeVue(component, options = {}) {
   const { wrapper } = _buildMount(component, options)
   return wrapper
@@ -197,8 +144,8 @@ export async function mountWithPrimeVueAsync(component, options = {}) {
     slots,
     attachTo: document.body,
     global: {
-      plugins: [[PrimeVue, primeVueConfig], ConfirmationService, ToastService, vuetify, pinia, router, i18n],
-      stubs: { ...PRIMEVUE_STUBS, ...VUETIFY_SHELL_STUBS, ...(globalOpts.stubs || {}) },
+      plugins: [[PrimeVue, primeVueConfig], ConfirmationService, ToastService, pinia, router, i18n],
+      stubs: { ...PRIMEVUE_STUBS, ...(globalOpts.stubs || {}) },
       ...globalOpts,
     },
   })
@@ -226,8 +173,8 @@ function _buildMount(component, options = {}) {
     slots,
     attachTo: document.body,
     global: {
-      plugins: [[PrimeVue, primeVueConfig], ConfirmationService, ToastService, vuetify, pinia, router, i18n],
-      stubs: { ...PRIMEVUE_STUBS, ...VUETIFY_SHELL_STUBS, ...(globalOpts.stubs || {}) },
+      plugins: [[PrimeVue, primeVueConfig], ConfirmationService, ToastService, pinia, router, i18n],
+      stubs: { ...PRIMEVUE_STUBS, ...(globalOpts.stubs || {}) },
       ...globalOpts,
     },
   })

@@ -13,7 +13,7 @@ vi.mock('../../../api/client', () => ({
   default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() },
 }))
 
-import { mountWithVuetify } from '../../helpers/mountWithVuetify'
+import { mountWithPrimeVue } from '../../helpers/mountWithPrimeVue'
 import SelectOrganizationPage from '../../../pages/auth/SelectOrganizationPage.vue'
 import { useAuthStore } from '../../../stores/auth'
 
@@ -26,12 +26,12 @@ describe('SelectOrganizationPage', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
   it('renders title', () => {
-    const wrapper = mountWithVuetify(SelectOrganizationPage, { routes: ROUTES })
+    const wrapper = mountWithPrimeVue(SelectOrganizationPage, { routes: ROUTES })
     expect(wrapper.text()).toContain('Выберите организацию')
   })
 
   it('selectOrganization calls store.switchOrganization and routes to /', async () => {
-    const wrapper = mountWithVuetify(SelectOrganizationPage, { routes: ROUTES })
+    const wrapper = mountWithPrimeVue(SelectOrganizationPage, { routes: ROUTES })
     const store = useAuthStore()
     const spy = vi.spyOn(store, 'switchOrganization')
     const pushSpy = vi.spyOn(wrapper.vm.$router, 'push')
