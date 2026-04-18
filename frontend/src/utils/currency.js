@@ -35,6 +35,10 @@ export function unitsToCents(units) {
   return Math.round(units * 100)
 }
 
+export function getCurrencySymbol(code) {
+  return CURRENCIES[code]?.symbol ?? '$'
+}
+
 export const CURRENCY_LIST = Object.entries(CURRENCIES).map(([code, cfg]) => ({
   code,
   label: `${code} (${cfg.symbol})`,
