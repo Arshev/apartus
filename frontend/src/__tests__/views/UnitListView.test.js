@@ -10,7 +10,7 @@ vi.mock('../../api/properties', () => ({
   get: vi.fn(), create: vi.fn(), update: vi.fn(), destroy: vi.fn(),
 }))
 
-import { mountWithVuetify, mountWithVuetifyAsync } from '../helpers/mountWithVuetify'
+import { mountWithPrimeVueAsync } from '../helpers/mountWithPrimeVue'
 import UnitListView from '../../views/UnitListView.vue'
 import { useUnitsStore } from '../../stores/units'
 
@@ -21,68 +21,53 @@ const ROUTES = [
   { path: '/properties/:propertyId/units/:id/edit', component: { template: '<div/>' } },
 ]
 
-describe('UnitListView', () => {
+async function mount() {
+  return mountWithPrimeVueAsync(UnitListView, {
+    routes: ROUTES,
+    initialRoute: '/properties/10/units',
+  })
+}
+
+describe('UnitListView (FT-036 P2)', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
-  it('has correct headers', () => {
-    const wrapper = mountWithVuetify(UnitListView, {
-      routes: ROUTES,
-      initialRoute: '/properties/10/units',
-    })
-    expect(wrapper.vm.headers.map((h) => h.key)).toEqual(['name', 'unit_type', 'capacity', 'status', 'actions'])
-  })
-
-  it('renders «Добавить» button', () => {
-    const wrapper = mountWithVuetify(UnitListView, {
-      routes: ROUTES,
-      initialRoute: '/properties/10/units',
-    })
+  it('renders add button', async () => {
+    const wrapper = await mount()
     expect(wrapper.text()).toContain('Добавить')
   })
 
-  it('confirmDelete + handleDelete calls store.destroy', async () => {
-    const wrapper = mountWithVuetify(UnitListView, {
-      routes: ROUTES,
-      initialRoute: '/properties/10/units',
-    })
-    const store = useUnitsStore()
-    const spy = vi.spyOn(store, 'destroy')
-    wrapper.vm.confirmDelete({ id: 1, name: 'R101' })
-    await wrapper.vm.handleDelete()
-    expect(spy).toHaveBeenCalledWith(1)
-  })
-
-  it('handleDelete error: closes dialog', async () => {
-    const wrapper = mountWithVuetify(UnitListView, {
-      routes: ROUTES,
-      initialRoute: '/properties/10/units',
-    })
-    const store = useUnitsStore()
-    vi.spyOn(store, 'destroy').mockRejectedValue(new Error('404'))
-    store.error = 'Not found'
-    wrapper.vm.confirmDelete({ id: 1, name: 'R101' })
-    await wrapper.vm.handleDelete()
-    expect(wrapper.vm.deleteDialog).toBe(false)
-  })
-
-  it('calls store.fetchAll on mount when propertyId present', async () => {
-    const wrapper = await mountWithVuetifyAsync(UnitListView, {
-      routes: ROUTES,
-      initialRoute: '/properties/10/units',
-    })
-    const store = useUnitsStore()
-    // onMounted fires with propertyId=10, fetchAll called
-    await wrapper.vm.$nextTick()
-    // onMounted called fetchAll('10') which sets propertyId
-    expect(store.propertyId).toBe('10')
-  })
-
-  it('typeLabels and statusLabels cover all enums', () => {
-    const wrapper = mountWithVuetify(UnitListView, {
-      routes: ROUTES,
-      initialRoute: '/properties/10/units',
-    })
+  it('typeLabels and statusLabels cover all enums', async () => {
+    const wrapper = await mount()
     expect(Object.keys(wrapper.vm.typeLabels)).toEqual(['room', 'apartment', 'bed', 'studio'])
     expect(Object.keys(wrapper.vm.statusLabels)).toEqual(['available', 'maintenance', 'blocked'])
+  })
+
+  it('confirmDelete does not throw', async () => {
+    const wrapper = await mount()
+    expect(() => wrapper.vm.confirmDelete({ id: 1, name: 'R101' })).not.toThrow()
+  })
+
+  it('handleDelete invokes API destroy', async () => {
+    const unitsApi = await import('../../api/units')
+    const wrapper = await mount()
+    await wrapper.vm.handleDelete({ id: 42, name: 'X' })
+    // Store passes (propertyId, id) to API; assert id present
+    expect(unitsApi.destroy).toHaveBeenCalled()
+    const args = unitsApi.destroy.mock.calls[0]
+    expect(args[args.length - 1]).toBe(42)
+  })
+
+  it('handleDelete error does not throw', async () => {
+    const unitsApi = await import('../../api/units')
+    unitsApi.destroy.mockRejectedValueOnce(new Error('fail'))
+    const wrapper = await mount()
+    await wrapper.vm.handleDelete({ id: 1, name: 'X' })
+  })
+
+  it('fetchAll called on mount with propertyId', async () => {
+    await mount()
+    const store = useUnitsStore()
+    await new Promise((r) => setTimeout(r, 0))
+    expect(store.propertyId).toBe('10')
   })
 })

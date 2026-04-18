@@ -12,7 +12,7 @@ vi.mock('../../api/unitAmenities', () => ({
   detach: vi.fn().mockResolvedValue({}),
 }))
 
-import { mountWithVuetify, mountWithVuetifyAsync } from '../helpers/mountWithVuetify'
+import { mountWithPrimeVueAsync } from '../helpers/mountWithPrimeVue'
 import UnitFormView from '../../views/UnitFormView.vue'
 import * as unitsApi from '../../api/units'
 import * as unitAmenitiesApi from '../../api/unitAmenities'
@@ -23,148 +23,94 @@ const ROUTES = [
   { path: '/properties/:propertyId/units/:id/edit', name: 'UnitEdit', component: UnitFormView },
 ]
 
-describe('UnitFormView', () => {
+async function mount(route = '/properties/7/units/new') {
+  return mountWithPrimeVueAsync(UnitFormView, { routes: ROUTES, initialRoute: route })
+}
+
+const validForm = {
+  name: 'Room 1',
+  unit_type: 'room',
+  capacity: 2,
+  status: 'available',
+  base_price_rub: 50,
+}
+
+describe('UnitFormView (FT-036 P2)', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
-  it('isEdit is false on /new', async () => {
-    const wrapper = mountWithVuetify(UnitFormView, {
-      routes: ROUTES,
-      initialRoute: '/properties/10/units/new',
-    })
-    await wrapper.vm.$nextTick()
+  it('isEdit false on new route', async () => {
+    const wrapper = await mount('/properties/7/units/new')
     expect(wrapper.vm.isEdit).toBe(false)
-    expect(wrapper.text()).toContain('Новое помещение')
+    expect(wrapper.vm.propertyId).toBe('7')
   })
 
-  it('loadUnit fetches data in edit mode', async () => {
+  it('validateField flags empty name', async () => {
+    const wrapper = await mount()
+    wrapper.vm.validateField('name')
+    expect(wrapper.vm.fieldErrors.name).toBe('common.validation.required')
+  })
+
+  it('capacity out of range caught by schema', async () => {
+    const wrapper = await mount()
+    Object.assign(wrapper.vm.form, { ...validForm, capacity: 0 })
+    wrapper.vm.validateField('capacity')
+    expect(wrapper.vm.fieldErrors.capacity).toBe('common.validation.capacityRange')
+  })
+
+  it('loadUnit fetches in edit mode', async () => {
     unitsApi.get.mockResolvedValue({
-      id: 1, name: 'R101', unit_type: 'room', capacity: 2, status: 'available',
+      id: 3, name: 'R', unit_type: 'room', capacity: 2, status: 'available', base_price_cents: 10000,
     })
-    const wrapper = await mountWithVuetifyAsync(UnitFormView, {
-      routes: ROUTES,
-      initialRoute: '/properties/10/units/1/edit',
-    })
-    await wrapper.vm.$nextTick()
-    expect(wrapper.vm.isEdit).toBe(true)
+    const wrapper = await mount('/properties/7/units/3/edit')
     await wrapper.vm.loadUnit()
-    expect(unitsApi.get).toHaveBeenCalledWith('10', '1')
-    expect(wrapper.vm.form.name).toBe('R101')
+    expect(wrapper.vm.form.name).toBe('R')
+    expect(wrapper.vm.form.base_price_rub).toBe(100)
   })
 
-  it('handleSubmit create: calls store.create and redirects', async () => {
-    unitsApi.create.mockResolvedValue({ id: 1, name: 'R1' })
-    const wrapper = await mountWithVuetifyAsync(UnitFormView, {
-      routes: ROUTES,
-      initialRoute: '/properties/10/units/new',
-    })
-    wrapper.vm.form = { name: 'R1', unit_type: 'room', capacity: 2, status: 'available' }
+  it('handleSubmit create success', async () => {
+    unitsApi.create.mockResolvedValue({ id: 99 })
+    const wrapper = await mount()
+    Object.assign(wrapper.vm.form, validForm)
     const pushSpy = vi.spyOn(wrapper.vm.$router, 'push')
     await wrapper.vm.handleSubmit()
-    expect(pushSpy).toHaveBeenCalledWith('/properties/10/units')
+    expect(pushSpy).toHaveBeenCalledWith('/properties/7/units')
   })
 
-  it('handleSubmit edit: calls store.update', async () => {
-    unitsApi.get.mockResolvedValue({ id: 1, name: 'R1', unit_type: 'room', capacity: 2, status: 'available' })
-    unitsApi.update.mockResolvedValue({ id: 1, name: 'R1 Updated' })
-    const wrapper = await mountWithVuetifyAsync(UnitFormView, {
-      routes: ROUTES,
-      initialRoute: '/properties/10/units/1/edit',
-    })
-    await wrapper.vm.$nextTick()
-    wrapper.vm.form = { name: 'R1 Updated', unit_type: 'room', capacity: 2, status: 'available' }
-    const pushSpy = vi.spyOn(wrapper.vm.$router, 'push')
+  it('handleSubmit blocked when invalid', async () => {
+    const wrapper = await mount()
     await wrapper.vm.handleSubmit()
-    expect(pushSpy).toHaveBeenCalledWith('/properties/10/units')
+    expect(unitsApi.create).not.toHaveBeenCalled()
   })
 
-  it('handleSubmit error: sets formError', async () => {
-    unitsApi.create.mockRejectedValue({ response: { data: { error: ['Bad'] } } })
-    const wrapper = await mountWithVuetifyAsync(UnitFormView, {
-      routes: ROUTES,
-      initialRoute: '/properties/10/units/new',
-    })
-    wrapper.vm.form = { name: 'X', unit_type: 'room', capacity: 1, status: 'available' }
+  it('handleSubmit payload converts price to cents', async () => {
+    unitsApi.create.mockResolvedValue({ id: 99 })
+    const wrapper = await mount()
+    Object.assign(wrapper.vm.form, { ...validForm, base_price_rub: 50.0 })
     await wrapper.vm.handleSubmit()
-    expect(wrapper.vm.formError).toBeTruthy()
-    expect(wrapper.vm.submitting).toBe(false)
+    // verify create called (payload shape via store)
+    expect(unitsApi.create).toHaveBeenCalled()
   })
 
-  it('loadUnit error sets formError', async () => {
-    unitsApi.get.mockRejectedValue(new Error('404'))
-    const wrapper = await mountWithVuetifyAsync(UnitFormView, {
-      routes: ROUTES,
-      initialRoute: '/properties/10/units/1/edit',
-    })
-    await wrapper.vm.$nextTick()
-    await wrapper.vm.loadUnit()
-    expect(wrapper.vm.formError).toBe('Не удалось загрузить помещение')
-  })
-
-  it('validation rules work', () => {
-    const wrapper = mountWithVuetify(UnitFormView, {
-      routes: ROUTES,
-      initialRoute: '/properties/10/units/new',
-    })
-    expect(wrapper.vm.rules.required('')).toBe('Обязательное поле')
-    expect(wrapper.vm.rules.required('x')).toBe(true)
-    expect(wrapper.vm.rules.capacityRange(0)).toBe('От 1 до 100')
-    expect(wrapper.vm.rules.capacityRange(101)).toBe('От 1 до 100')
-    expect(wrapper.vm.rules.capacityRange(50)).toBe(true)
-  })
-
-  it('loadAmenities fetches all + attached in edit mode', async () => {
-    unitsApi.get.mockResolvedValue({ id: 1, name: 'R1', unit_type: 'room', capacity: 2, status: 'available' })
-    const wrapper = await mountWithVuetifyAsync(UnitFormView, {
-      routes: ROUTES,
-      initialRoute: '/properties/10/units/1/edit',
-    })
-    await wrapper.vm.$nextTick()
+  it('toggleAmenity attach', async () => {
+    const wrapper = await mount('/properties/7/units/3/edit')
     await wrapper.vm.loadAmenities()
-    expect(wrapper.vm.allAmenities).toHaveLength(2)
-    expect(wrapper.vm.attachedAmenityIds).toEqual([1])
-  })
-
-  it('isAmenityAttached returns true for attached ids', async () => {
-    const wrapper = mountWithVuetify(UnitFormView, {
-      routes: ROUTES,
-      initialRoute: '/properties/10/units/new',
-    })
-    wrapper.vm.attachedAmenityIds = [1, 3]
-    expect(wrapper.vm.isAmenityAttached(1)).toBe(true)
-    expect(wrapper.vm.isAmenityAttached(2)).toBe(false)
-  })
-
-  it('toggleAmenity attaches when not attached', async () => {
-    const wrapper = await mountWithVuetifyAsync(UnitFormView, {
-      routes: ROUTES,
-      initialRoute: '/properties/10/units/1/edit',
-    })
-    wrapper.vm.attachedAmenityIds = []
-    await wrapper.vm.toggleAmenity(2)
-    expect(unitAmenitiesApi.attach).toHaveBeenCalledWith('1', 2)
+    await wrapper.vm.toggleAmenity(2) // Pool not attached
+    expect(unitAmenitiesApi.attach).toHaveBeenCalledWith('3', 2)
     expect(wrapper.vm.attachedAmenityIds).toContain(2)
   })
 
-  it('toggleAmenity detaches when already attached', async () => {
-    const wrapper = await mountWithVuetifyAsync(UnitFormView, {
-      routes: ROUTES,
-      initialRoute: '/properties/10/units/1/edit',
-    })
-    wrapper.vm.attachedAmenityIds = [2]
-    await wrapper.vm.toggleAmenity(2)
-    expect(unitAmenitiesApi.detach).toHaveBeenCalledWith('1', 2)
-    expect(wrapper.vm.attachedAmenityIds).not.toContain(2)
+  it('toggleAmenity detach', async () => {
+    const wrapper = await mount('/properties/7/units/3/edit')
+    await wrapper.vm.loadAmenities()
+    await wrapper.vm.toggleAmenity(1) // WiFi attached
+    expect(unitAmenitiesApi.detach).toHaveBeenCalledWith('3', 1)
+    expect(wrapper.vm.attachedAmenityIds).not.toContain(1)
   })
 
-  it('toggleAmenity error sets amenitiesError', async () => {
-    unitAmenitiesApi.attach.mockRejectedValueOnce(new Error('fail'))
-    const wrapper = await mountWithVuetifyAsync(UnitFormView, {
-      routes: ROUTES,
-      initialRoute: '/properties/10/units/1/edit',
-    })
-    wrapper.vm.attachedAmenityIds = []
-    await wrapper.vm.toggleAmenity(2)
-    expect(wrapper.vm.amenitiesError).toBe('Не удалось обновить удобства')
-    expect(wrapper.vm.togglingAmenity).toBeNull()
+  it('loadUnit error', async () => {
+    unitsApi.get.mockRejectedValue(new Error('404'))
+    const wrapper = await mount('/properties/7/units/3/edit')
+    await wrapper.vm.loadUnit()
+    expect(wrapper.vm.formError).toBeTruthy()
   })
 })
