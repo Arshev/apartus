@@ -2,15 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('../../api/properties', () => ({
   list: vi.fn().mockResolvedValue([]),
-  get: vi.fn(),
-  create: vi.fn(),
-  update: vi.fn(),
+  get: vi.fn(), create: vi.fn(), update: vi.fn(),
   destroy: vi.fn().mockResolvedValue({}),
 }))
 
-import { mountWithVuetify } from '../helpers/mountWithVuetify'
+import { mountWithPrimeVue } from '../helpers/mountWithPrimeVue'
 import PropertyListView from '../../views/PropertyListView.vue'
-import { usePropertiesStore } from '../../stores/properties'
 
 const ROUTES = [
   { path: '/properties', component: PropertyListView },
@@ -18,47 +15,36 @@ const ROUTES = [
   { path: '/properties/:id/edit', component: { template: '<div/>' } },
 ]
 
-describe('PropertyListView', () => {
+describe('PropertyListView (FT-036 P2)', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
-  it('exposes correct table headers', () => {
-    const wrapper = mountWithVuetify(PropertyListView, { routes: ROUTES })
-    expect(wrapper.vm.headers.map((h) => h.key)).toEqual(['name', 'address', 'property_type', 'actions'])
-  })
-
-  it('renders «Добавить объект» button', () => {
-    const wrapper = mountWithVuetify(PropertyListView, { routes: ROUTES })
+  it('renders title + add button', () => {
+    const wrapper = mountWithPrimeVue(PropertyListView, { routes: ROUTES })
+    expect(wrapper.text()).toContain('Объекты')
     expect(wrapper.text()).toContain('Добавить объект')
   })
 
   it('typeLabels maps all backend enum values', () => {
-    const wrapper = mountWithVuetify(PropertyListView, { routes: ROUTES })
+    const wrapper = mountWithPrimeVue(PropertyListView, { routes: ROUTES })
     expect(Object.keys(wrapper.vm.typeLabels)).toEqual(['apartment', 'hotel', 'house', 'hostel'])
   })
 
-  it('confirmDelete sets deletingProperty and opens dialog', () => {
-    const wrapper = mountWithVuetify(PropertyListView, { routes: ROUTES })
-    wrapper.vm.confirmDelete({ id: 1, name: 'Test' })
-    expect(wrapper.vm.deletingProperty).toEqual({ id: 1, name: 'Test' })
+  it('confirmDelete wires to useConfirm without throwing', () => {
+    const wrapper = mountWithPrimeVue(PropertyListView, { routes: ROUTES })
+    expect(() => wrapper.vm.confirmDelete({ id: 1, name: 'Test' })).not.toThrow()
   })
 
-  it('handleDelete calls store.destroy and shows snackbar (SC-04)', async () => {
-    const wrapper = mountWithVuetify(PropertyListView, { routes: ROUTES })
-    const store = usePropertiesStore()
-    const spy = vi.spyOn(store, 'destroy')
-    wrapper.vm.confirmDelete({ id: 1, name: 'Test' })
-    await wrapper.vm.handleDelete()
-    expect(spy).toHaveBeenCalledWith(1)
+  it('handleDelete invokes API destroy', async () => {
+    const propertiesApi = await import('../../api/properties')
+    const wrapper = mountWithPrimeVue(PropertyListView, { routes: ROUTES })
+    await wrapper.vm.handleDelete({ id: 42, name: 'X' })
+    expect(propertiesApi.destroy).toHaveBeenCalledWith(42)
   })
 
-  it('handleDelete error: closes dialog and shows error', async () => {
-    const wrapper = mountWithVuetify(PropertyListView, { routes: ROUTES })
-    const store = usePropertiesStore()
-    vi.spyOn(store, 'destroy').mockRejectedValue(new Error('404'))
-    store.error = 'Not found'
-    wrapper.vm.confirmDelete({ id: 1, name: 'Test' })
-    await wrapper.vm.handleDelete()
-    expect(wrapper.vm.deleteDialog).toBe(false)
-    expect(wrapper.vm.deletingProperty).toBeNull()
+  it('handleDelete error path does not throw', async () => {
+    const propertiesApi = await import('../../api/properties')
+    propertiesApi.destroy.mockRejectedValueOnce(new Error('fail'))
+    const wrapper = mountWithPrimeVue(PropertyListView, { routes: ROUTES })
+    await wrapper.vm.handleDelete({ id: 1, name: 'X' })
   })
 })

@@ -1,87 +1,158 @@
 <template>
-  <v-container>
-    <h1 class="text-h4 mb-4">{{ isEdit ? $t('properties.editTitle') : $t('properties.createTitle') }}</h1>
+  <div class="max-w-2xl mx-auto px-4 py-6">
+    <h1 class="text-2xl font-display font-medium tracking-tight mb-6 text-surface-950 dark:text-surface-50">
+      {{ isEdit ? $t('properties.editTitle') : $t('properties.createTitle') }}
+    </h1>
 
-    <v-alert v-if="formError" type="error" class="mb-4" closable @click:close="formError = null">
-      {{ Array.isArray(formError) ? formError.join(', ') : formError }}
-    </v-alert>
+    <div
+      v-if="formError"
+      class="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 px-3 py-2 text-sm text-red-800 dark:text-red-200 mb-4"
+    >
+      <i class="pi pi-exclamation-circle mt-0.5" aria-hidden="true" />
+      <span class="flex-1">
+        {{ Array.isArray(formError) ? formError.join(', ') : formError }}
+      </span>
+      <button
+        type="button"
+        class="text-red-500 hover:text-red-700"
+        :aria-label="$t('common.close')"
+        @click="formError = null"
+      >
+        <i class="pi pi-times" />
+      </button>
+    </div>
 
-    <v-form ref="formRef" @submit.prevent="handleSubmit" :disabled="submitting">
-      <v-text-field
-        v-model="form.name"
-        :label="$t('properties.form.name')"
-        :rules="[rules.required]"
-        class="mb-2"
-      />
-      <v-text-field
-        v-model="form.address"
-        :label="$t('properties.form.address')"
-        :rules="[rules.required]"
-        class="mb-2"
-      />
-      <v-select
-        v-model="form.property_type"
-        :label="$t('properties.form.propertyType')"
-        :items="propertyTypes"
-        item-title="label"
-        item-value="value"
-        :rules="[rules.required]"
-        class="mb-2"
-      />
-      <v-textarea
-        v-model="form.description"
-        :label="$t('properties.form.description')"
-        :rules="[rules.maxLength5000]"
-        rows="3"
-        class="mb-2"
-      />
-      <v-select
-        v-model="form.branch_id"
-        :label="$t('properties.form.branch')"
-        :items="branches"
-        item-title="name"
-        item-value="id"
-        clearable
-        :loading="branchesLoading"
-        :disabled="branchesError !== null"
-        :hint="branchesError ? $t('properties.form.branchLoadError') : ''"
-        persistent-hint
-        class="mb-4"
-      />
-
-      <div class="d-flex ga-2">
-        <v-btn type="submit" color="primary" :loading="submitting">
-          {{ isEdit ? $t('common.save') : $t('common.create') }}
-        </v-btn>
-        <v-btn variant="text" :to="'/properties'">{{ $t('common.cancel') }}</v-btn>
+    <form @submit.prevent="handleSubmit" class="space-y-4" novalidate>
+      <div>
+        <label for="prop-name" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+          {{ $t('properties.form.name') }}
+        </label>
+        <InputText
+          id="prop-name"
+          v-model="form.name"
+          class="w-full"
+          :invalid="!!fieldErrors.name"
+          @blur="validateField('name')"
+        />
+        <p v-if="fieldErrors.name" class="mt-1 text-xs text-red-600 dark:text-red-400">
+          {{ $t(fieldErrors.name) }}
+        </p>
       </div>
-    </v-form>
 
-    <v-snackbar v-model="snackbar" :timeout="3000" color="success">
-      {{ snackbarText }}
-    </v-snackbar>
-  </v-container>
+      <div>
+        <label for="prop-address" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+          {{ $t('properties.form.address') }}
+        </label>
+        <InputText
+          id="prop-address"
+          v-model="form.address"
+          class="w-full"
+          :invalid="!!fieldErrors.address"
+          @blur="validateField('address')"
+        />
+        <p v-if="fieldErrors.address" class="mt-1 text-xs text-red-600 dark:text-red-400">
+          {{ $t(fieldErrors.address) }}
+        </p>
+      </div>
+
+      <div>
+        <label for="prop-type" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+          {{ $t('properties.form.propertyType') }}
+        </label>
+        <Select
+          id="prop-type"
+          v-model="form.property_type"
+          :options="propertyTypes"
+          option-label="label"
+          option-value="value"
+          class="w-full"
+          :invalid="!!fieldErrors.property_type"
+          @change="validateField('property_type')"
+        />
+        <p v-if="fieldErrors.property_type" class="mt-1 text-xs text-red-600 dark:text-red-400">
+          {{ $t(fieldErrors.property_type) }}
+        </p>
+      </div>
+
+      <div>
+        <label for="prop-desc" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+          {{ $t('properties.form.description') }}
+        </label>
+        <Textarea
+          id="prop-desc"
+          v-model="form.description"
+          rows="3"
+          class="w-full"
+          :invalid="!!fieldErrors.description"
+          @blur="validateField('description')"
+        />
+        <p v-if="fieldErrors.description" class="mt-1 text-xs text-red-600 dark:text-red-400">
+          {{ $t(fieldErrors.description) }}
+        </p>
+      </div>
+
+      <div>
+        <label for="prop-branch" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+          {{ $t('properties.form.branch') }}
+        </label>
+        <Select
+          id="prop-branch"
+          v-model="form.branch_id"
+          :options="branches"
+          option-label="name"
+          option-value="id"
+          :loading="branchesLoading"
+          :disabled="branchesError !== null"
+          show-clear
+          class="w-full"
+        />
+        <p v-if="branchesError" class="mt-1 text-xs text-surface-500 dark:text-surface-400">
+          {{ branchesError }}
+        </p>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <Button
+          type="submit"
+          :label="isEdit ? $t('common.save') : $t('common.create')"
+          :loading="submitting"
+        />
+        <Button
+          type="button"
+          :label="$t('common.cancel')"
+          severity="secondary"
+          variant="text"
+          @click="$router.push('/properties')"
+        />
+      </div>
+    </form>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import { useToast } from 'primevue/usetoast'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Textarea from 'primevue/textarea'
+import Select from 'primevue/select'
 import { usePropertiesStore } from '../stores/properties'
 import * as propertiesApi from '../api/properties'
 import * as branchesApi from '../api/branches'
+import { propertySchema, PROPERTY_TYPES, validate } from '../schemas/property'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const store = usePropertiesStore()
+const toast = useToast()
 
 const isEdit = computed(() => !!route.params.id)
-const formRef = ref(null)
 const submitting = ref(false)
 const formError = ref(null)
-const snackbar = ref(false)
-const snackbarText = ref('')
+const fieldErrors = ref({})
 
 const form = ref({
   name: '',
@@ -95,16 +166,16 @@ const branches = ref([])
 const branchesLoading = ref(false)
 const branchesError = ref(null)
 
-const propertyTypes = computed(() => [
-  { label: t('properties.types.apartment'), value: 'apartment' },
-  { label: t('properties.types.hotel'), value: 'hotel' },
-  { label: t('properties.types.house'), value: 'house' },
-  { label: t('properties.types.hostel'), value: 'hostel' },
-])
+const propertyTypes = computed(() =>
+  PROPERTY_TYPES.map((value) => ({
+    value,
+    label: t(`properties.types.${value}`),
+  })),
+)
 
-const rules = {
-  required: (v) => !!v || t('common.validation.required'),
-  maxLength5000: (v) => !v || v.length <= 5000 || t('common.validation.maxLength5000'),
+function validateField(field) {
+  const { errors } = validate(propertySchema, form.value)
+  fieldErrors.value = { ...fieldErrors.value, [field]: errors[field] || '' }
 }
 
 async function loadBranches() {
@@ -112,7 +183,8 @@ async function loadBranches() {
   branchesError.value = null
   try {
     branches.value = await branchesApi.list()
-  } catch (e) { console.error(e);
+  } catch (e) {
+    if (import.meta.env.DEV) console.error(e)
     branchesError.value = t('properties.form.branchLoadError')
     branches.value = []
   } finally {
@@ -131,13 +203,15 @@ async function loadProperty() {
       description: property.description || '',
       branch_id: property.branch_id,
     }
-  } catch (e) { console.error(e);
+  } catch (e) {
+    if (import.meta.env.DEV) console.error(e)
     formError.value = t('properties.messages.loadError')
   }
 }
 
 async function handleSubmit() {
-  const { valid } = await formRef.value.validate()
+  const { valid, errors } = validate(propertySchema, form.value)
+  fieldErrors.value = errors
   if (!valid) return
 
   submitting.value = true
@@ -145,12 +219,11 @@ async function handleSubmit() {
   try {
     if (isEdit.value) {
       await store.update(Number(route.params.id), form.value)
-      snackbarText.value = t('properties.messages.updated')
+      toast.add({ severity: 'success', summary: t('properties.messages.updated'), life: 3000 })
     } else {
       await store.create(form.value)
-      snackbarText.value = t('properties.messages.created')
+      toast.add({ severity: 'success', summary: t('properties.messages.created'), life: 3000 })
     }
-    snackbar.value = true
     router.push('/properties')
   } catch (e) {
     formError.value = e.response?.data?.error || store.error || t('common.messages.saveError')
@@ -164,5 +237,8 @@ onMounted(() => {
   loadProperty()
 })
 
-defineExpose({ form, formError, handleSubmit, isEdit, branches, branchesLoading, branchesError, rules, submitting, loadProperty, loadBranches })
+defineExpose({
+  form, formError, fieldErrors, submitting, isEdit, branches, branchesLoading, branchesError,
+  propertyTypes, validateField, handleSubmit, loadBranches, loadProperty,
+})
 </script>
