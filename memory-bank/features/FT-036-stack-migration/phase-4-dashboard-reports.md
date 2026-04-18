@@ -8,7 +8,7 @@ derived_from:
   - ./phase-3-settings.md
   - ../FT-031-dashboard-redesign/feature.md
 status: active
-delivery_status: planned
+delivery_status: done
 audience: humans_and_agents
 must_not_define:
   - implementation_sequence
@@ -49,10 +49,10 @@ All reuse P2/P3 patterns (DataTable, Dialog, ConfirmDialog, Toast). No new infra
   - `v-btn` → PrimeVue Button
   - `v-icon` → PrimeIcons
   - `v-chip` → Tailwind styled span
-- `REQ-02` **ReportsView.** Summary cards + monthly `v-data-table` → PrimeVue DataTable. Period selector → `v-select` → PrimeVue Select.
+- `REQ-02` **ReportsView.** Summary cards + monthly `v-data-table` → PrimeVue DataTable. Period selector → `v-select` → PrimeVue Select. **PDF export button preserved** (calls `downloadFinancialReport(period)`; show loading state during download).
 - `REQ-03` **ExpenseListView.** Standard CRUD pattern: DataTable + Dialog + useConfirm/useToast. Expense schema in `schemas/expense.js` (create date/amount/category required).
 - `REQ-04` **OwnerListView.** Same CRUD pattern. Owner schema в `schemas/owner.js`.
-- `REQ-05` **OwnerStatementView.** Read-only per-owner financial breakdown. Tailwind table + status chips.
+- `REQ-05` **OwnerStatementView.** Per-owner financial breakdown (read-only data, interactive shell): back-nav link to `/owners`, **PDF export button** (`downloadOwnerStatement(ownerId)` с loading state), 4 summary cards (revenue/commission/expenses/net payout — net colored by sign), per-property breakdown table. Tailwind layout, no chips needed (it's financial cards, not statuses).
 - `REQ-06` **Money formatting invariant.** Every money value renders через `formatMoney(cents, currency)` where `currency = authStore.organization?.currency || 'RUB'`. No hardcoded `₽`.
 - `REQ-07` **Dashboard empty-state preservation.** FT-031 patterns (no KPI card grids, no saturated accent background) — verify не regress.
 - `REQ-08` **Tests rewrite.** 5 test files — mountWithPrimeVue pattern.

@@ -1,117 +1,138 @@
 <template>
-  <v-container fluid class="pa-6">
-    <div class="d-flex align-center mb-6">
-      <h1 class="text-h5 font-weight-bold">{{ $t('reports.title') }}</h1>
-      <v-spacer />
-      <v-btn variant="outlined" prepend-icon="mdi-file-pdf-box" @click="downloadPdf" :loading="downloading">{{ $t('reports.downloadPdf') }}</v-btn>
+  <div class="max-w-6xl mx-auto px-6 py-6">
+    <div class="flex items-center mb-6">
+      <h1 class="text-2xl font-display font-medium tracking-tight text-surface-950 dark:text-surface-50">
+        {{ $t('reports.title') }}
+      </h1>
+      <div class="flex-1" />
+      <Button
+        :label="$t('reports.downloadPdf')"
+        icon="pi pi-file-pdf"
+        severity="secondary"
+        variant="outlined"
+        :loading="downloading"
+        @click="downloadPdf"
+      />
     </div>
 
-    <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
-    <v-alert v-if="error" type="error" class="mb-4">{{ error }}</v-alert>
+    <div v-if="loading" class="h-0.5 bg-primary-500 animate-pulse mb-4" />
+    <div
+      v-if="error"
+      class="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 px-3 py-2 text-sm text-red-800 dark:text-red-200 mb-4"
+    >
+      <i class="pi pi-exclamation-circle mt-0.5" aria-hidden="true" />
+      <span>{{ error }}</span>
+    </div>
 
     <template v-if="data">
-      <!-- Finance KPI — full-color like RentProg -->
-      <v-row class="mb-6">
-        <v-col cols="12" sm="4">
-          <v-card color="finance-revenue" variant="flat">
-            <v-card-text class="pa-4">
-              <div class="d-flex align-center mb-2">
-                <v-icon size="20" class="mr-2">mdi-trending-up</v-icon>
-                <span class="text-caption font-weight-medium text-uppercase">{{ $t('reports.kpi.revenue') }}</span>
-              </div>
-              <div class="text-h4 font-weight-bold">{{ formatPrice(data.total_revenue) }}</div>
-            </v-card-text>
-          </v-card>
-        </v-col>
-        <v-col cols="12" sm="4">
-          <v-card color="finance-expense" variant="flat">
-            <v-card-text class="pa-4">
-              <div class="d-flex align-center mb-2">
-                <v-icon size="20" class="mr-2">mdi-trending-down</v-icon>
-                <span class="text-caption font-weight-medium text-uppercase">{{ $t('reports.kpi.expenses') }}</span>
-              </div>
-              <div class="text-h4 font-weight-bold">{{ formatPrice(data.total_expenses) }}</div>
-            </v-card-text>
-          </v-card>
-        </v-col>
-        <v-col cols="12" sm="4">
-          <v-card :color="data.net_income >= 0 ? 'finance-revenue' : 'finance-expense'" variant="flat">
-            <v-card-text class="pa-4">
-              <div class="d-flex align-center mb-2">
-                <v-icon size="20" class="mr-2">mdi-cash-multiple</v-icon>
-                <span class="text-caption font-weight-medium text-uppercase">{{ $t('reports.kpi.netIncome') }}</span>
-              </div>
-              <div class="text-h4 font-weight-bold">{{ formatPrice(data.net_income) }}</div>
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
+      <!-- Finance KPI — keeps tonal treatment (not editorial-hero; functional) -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="rounded-lg p-4 bg-green-100 dark:bg-green-950/30">
+          <div class="flex items-center gap-2 mb-2 text-green-800 dark:text-green-300">
+            <i class="pi pi-arrow-up-right" aria-hidden="true" />
+            <span class="text-xs font-medium uppercase tracking-wide">{{ $t('reports.kpi.revenue') }}</span>
+          </div>
+          <div class="text-2xl font-bold tabular-nums text-green-900 dark:text-green-100">
+            {{ formatPrice(data.total_revenue) }}
+          </div>
+        </div>
+        <div class="rounded-lg p-4 bg-red-100 dark:bg-red-950/30">
+          <div class="flex items-center gap-2 mb-2 text-red-800 dark:text-red-300">
+            <i class="pi pi-arrow-down-right" aria-hidden="true" />
+            <span class="text-xs font-medium uppercase tracking-wide">{{ $t('reports.kpi.expenses') }}</span>
+          </div>
+          <div class="text-2xl font-bold tabular-nums text-red-900 dark:text-red-100">
+            {{ formatPrice(data.total_expenses) }}
+          </div>
+        </div>
+        <div
+          :class="[
+            'rounded-lg p-4',
+            data.net_income >= 0 ? 'bg-green-100 dark:bg-green-950/30' : 'bg-red-100 dark:bg-red-950/30',
+          ]"
+        >
+          <div
+            :class="[
+              'flex items-center gap-2 mb-2',
+              data.net_income >= 0 ? 'text-green-800 dark:text-green-300' : 'text-red-800 dark:text-red-300',
+            ]"
+          >
+            <i class="pi pi-wallet" aria-hidden="true" />
+            <span class="text-xs font-medium uppercase tracking-wide">{{ $t('reports.kpi.netIncome') }}</span>
+          </div>
+          <div
+            :class="[
+              'text-2xl font-bold tabular-nums',
+              data.net_income >= 0 ? 'text-green-900 dark:text-green-100' : 'text-red-900 dark:text-red-100',
+            ]"
+          >
+            {{ formatPrice(data.net_income) }}
+          </div>
+        </div>
+      </div>
 
       <!-- Metrics row -->
-      <v-row class="mb-6">
-        <v-col cols="6" sm="3">
-          <v-card variant="outlined">
-            <v-card-text class="text-center pa-3">
-              <div class="text-h5 font-weight-bold">{{ (data.occupancy_rate * 100).toFixed(1) }}%</div>
-              <div class="text-caption text-medium-emphasis">{{ $t('reports.metrics.occupancy') }}</div>
-            </v-card-text>
-          </v-card>
-        </v-col>
-        <v-col cols="6" sm="3">
-          <v-card variant="outlined">
-            <v-card-text class="text-center pa-3">
-              <div class="text-h5 font-weight-bold">{{ formatPrice(data.adr) }}</div>
-              <div class="text-caption text-medium-emphasis">{{ $t('reports.metrics.adr') }}</div>
-            </v-card-text>
-          </v-card>
-        </v-col>
-        <v-col cols="6" sm="3">
-          <v-card variant="outlined">
-            <v-card-text class="text-center pa-3">
-              <div class="text-h5 font-weight-bold">{{ formatPrice(data.revpar) }}</div>
-              <div class="text-caption text-medium-emphasis">{{ $t('reports.metrics.revpar') }}</div>
-            </v-card-text>
-          </v-card>
-        </v-col>
-        <v-col cols="6" sm="3">
-          <v-card variant="outlined">
-            <v-card-text class="text-center pa-3">
-              <div class="text-h5 font-weight-bold">{{ data.occupied_nights }} / {{ data.total_room_nights }}</div>
-              <div class="text-caption text-medium-emphasis">{{ $t('reports.metrics.nights') }}</div>
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div class="rounded-lg border border-surface-200 dark:border-surface-700 p-3 text-center">
+          <div class="text-xl font-bold tabular-nums text-surface-900 dark:text-surface-100">
+            {{ (data.occupancy_rate * 100).toFixed(1) }}%
+          </div>
+          <div class="text-xs text-surface-600 dark:text-surface-400 mt-1">{{ $t('reports.metrics.occupancy') }}</div>
+        </div>
+        <div class="rounded-lg border border-surface-200 dark:border-surface-700 p-3 text-center">
+          <div class="text-xl font-bold tabular-nums text-surface-900 dark:text-surface-100">
+            {{ formatPrice(data.adr) }}
+          </div>
+          <div class="text-xs text-surface-600 dark:text-surface-400 mt-1">{{ $t('reports.metrics.adr') }}</div>
+        </div>
+        <div class="rounded-lg border border-surface-200 dark:border-surface-700 p-3 text-center">
+          <div class="text-xl font-bold tabular-nums text-surface-900 dark:text-surface-100">
+            {{ formatPrice(data.revpar) }}
+          </div>
+          <div class="text-xs text-surface-600 dark:text-surface-400 mt-1">{{ $t('reports.metrics.revpar') }}</div>
+        </div>
+        <div class="rounded-lg border border-surface-200 dark:border-surface-700 p-3 text-center">
+          <div class="text-xl font-bold tabular-nums text-surface-900 dark:text-surface-100">
+            {{ data.occupied_nights }} / {{ data.total_room_nights }}
+          </div>
+          <div class="text-xs text-surface-600 dark:text-surface-400 mt-1">{{ $t('reports.metrics.nights') }}</div>
+        </div>
+      </div>
 
-      <v-row>
-        <v-col cols="12" md="6">
-          <v-card>
-            <v-card-title>{{ $t('reports.revenueByProperty') }}</v-card-title>
-            <v-list density="compact">
-              <v-list-item v-for="r in data.revenue_by_property" :key="r.property_name"
-                :title="r.property_name" :subtitle="formatPrice(r.revenue)" />
-            </v-list>
-            <v-card-text v-if="!data.revenue_by_property.length" class="text-medium-emphasis">{{ $t('common.noData') }}</v-card-text>
-          </v-card>
-        </v-col>
-        <v-col cols="12" md="6">
-          <v-card>
-            <v-card-title>{{ $t('reports.expensesByCategory') }}</v-card-title>
-            <v-list density="compact">
-              <v-list-item v-for="e in data.expenses_by_category" :key="e.category"
-                :title="expenseCategoryLabel(e.category)" :subtitle="formatPrice(e.total)" />
-            </v-list>
-            <v-card-text v-if="!data.expenses_by_category.length" class="text-medium-emphasis">{{ $t('common.noData') }}</v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="rounded-lg border border-surface-200 dark:border-surface-700 overflow-hidden">
+          <h3 class="text-sm font-semibold text-surface-700 dark:text-surface-200 px-4 py-3 border-b border-surface-200 dark:border-surface-700">
+            {{ $t('reports.revenueByProperty') }}
+          </h3>
+          <ul v-if="data.revenue_by_property.length" class="divide-y divide-surface-200 dark:divide-surface-700">
+            <li v-for="r in data.revenue_by_property" :key="r.property_name" class="px-4 py-2 flex justify-between">
+              <span class="text-sm text-surface-800 dark:text-surface-200">{{ r.property_name }}</span>
+              <span class="text-sm tabular-nums text-surface-600 dark:text-surface-400">{{ formatPrice(r.revenue) }}</span>
+            </li>
+          </ul>
+          <div v-else class="px-4 py-3 text-sm text-surface-600 dark:text-surface-400">{{ $t('common.noData') }}</div>
+        </div>
+        <div class="rounded-lg border border-surface-200 dark:border-surface-700 overflow-hidden">
+          <h3 class="text-sm font-semibold text-surface-700 dark:text-surface-200 px-4 py-3 border-b border-surface-200 dark:border-surface-700">
+            {{ $t('reports.expensesByCategory') }}
+          </h3>
+          <ul v-if="data.expenses_by_category.length" class="divide-y divide-surface-200 dark:divide-surface-700">
+            <li v-for="e in data.expenses_by_category" :key="e.category" class="px-4 py-2 flex justify-between">
+              <span class="text-sm text-surface-800 dark:text-surface-200">{{ expenseCategoryLabel(e.category) }}</span>
+              <span class="text-sm tabular-nums text-surface-600 dark:text-surface-400">{{ formatPrice(e.total) }}</span>
+            </li>
+          </ul>
+          <div v-else class="px-4 py-3 text-sm text-surface-600 dark:text-surface-400">{{ $t('common.noData') }}</div>
+        </div>
+      </div>
     </template>
-  </v-container>
+  </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import Button from 'primevue/button'
 import * as reportsApi from '../api/reports'
 import { downloadFinancialReport } from '../api/pdfExport'
 import { useAuthStore } from '../stores/auth'
@@ -125,10 +146,15 @@ const downloading = ref(false)
 
 async function downloadPdf() {
   downloading.value = true
-  try { await downloadFinancialReport() }
-  catch (e) { console.error(e) }
-  finally { downloading.value = false }
+  try {
+    await downloadFinancialReport()
+  } catch (e) {
+    if (import.meta.env.DEV) console.error(e)
+  } finally {
+    downloading.value = false
+  }
 }
+
 const authStore = useAuthStore()
 
 const categoryKeys = ['maintenance', 'utilities', 'cleaning', 'supplies', 'other']
@@ -147,7 +173,8 @@ async function loadReport() {
   error.value = null
   try {
     data.value = await reportsApi.financial()
-  } catch (e) { console.error(e);
+  } catch (e) {
+    if (import.meta.env.DEV) console.error(e)
     error.value = t('reports.messages.loadError')
   } finally {
     loading.value = false
@@ -156,5 +183,5 @@ async function loadReport() {
 
 onMounted(() => loadReport())
 
-defineExpose({ data, loading, error, formatPrice, loadReport, expenseCategoryLabel })
+defineExpose({ data, loading, error, downloading, formatPrice, loadReport, expenseCategoryLabel, downloadPdf })
 </script>

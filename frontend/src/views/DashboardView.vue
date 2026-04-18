@@ -1,21 +1,27 @@
 <template>
-  <v-container fluid class="pa-6 dashboard">
+  <div class="dashboard max-w-[1280px] mx-auto px-6 py-6">
     <!-- Greeting -->
-    <h1 class="dashboard__greeting text-h5 font-weight-bold mb-1">
+    <h1 class="dashboard__greeting text-xl font-bold mb-1">
       {{ $t('dashboard.greeting', { name: authStore.user?.full_name }) }}
     </h1>
-    <p class="dashboard__org text-body-2 text-medium-emphasis mb-8">
+    <p class="dashboard__org text-sm text-surface-600 dark:text-surface-400 mb-8">
       {{ authStore.organization?.name }}
     </p>
 
-    <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
-    <v-alert v-if="error" type="error" class="mb-4" closable @click:close="error = null">
-      {{ error }}
-    </v-alert>
+    <div v-if="loading" class="h-0.5 bg-primary-500 animate-pulse mb-4" />
+    <div
+      v-if="error"
+      class="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 px-3 py-2 text-sm text-red-800 dark:text-red-200 mb-4"
+    >
+      <i class="pi pi-exclamation-circle mt-0.5" aria-hidden="true" />
+      <span class="flex-1">{{ error }}</span>
+      <button type="button" class="text-red-500 hover:text-red-700" :aria-label="$t('common.close')" @click="error = null">
+        <i class="pi pi-times" />
+      </button>
+    </div>
 
     <template v-if="data">
-      <!-- FT-031: Hero — revenue dominates, supporting metrics inline. No cards.
-           Editorial hierarchy — owner scans this first for "сколько заработал". -->
+      <!-- FT-031: Hero — revenue dominates, supporting metrics inline. No cards. -->
       <section class="dashboard__hero mb-10" data-testid="dashboard-hero">
         <div class="dashboard__hero-label text-table-header">
           {{ $t('dashboard.kpi.revenue') }}
@@ -41,7 +47,6 @@
           </div>
         </div>
 
-        <!-- Slim occupancy bar — visual reinforcement of the % above. -->
         <div class="dashboard__occupancy-track">
           <div
             class="dashboard__occupancy-fill"
@@ -55,8 +60,7 @@
         </div>
       </section>
 
-      <!-- FT-031: Status breakdown — single horizontal stacked bar + legend.
-           Replaces 4 identical saturated-colored cards. -->
+      <!-- FT-031: Status breakdown — single horizontal stacked bar + legend. -->
       <section class="dashboard__status mb-10" data-testid="dashboard-status">
         <div class="dashboard__status-header">
           <div class="dashboard__status-total text-tabular" data-testid="dashboard-status-total">{{ totalReservations }}</div>
@@ -74,7 +78,7 @@
               :title="`${$t('dashboard.statuses.' + seg.i18nKey)}: ${seg.count}`"
             />
           </template>
-          <span v-else class="dashboard__status-bar-empty text-medium-emphasis">—</span>
+          <span v-else class="dashboard__status-bar-empty text-surface-600 dark:text-surface-400">—</span>
         </div>
 
         <ul class="dashboard__status-legend">
@@ -91,10 +95,10 @@
         </ul>
       </section>
 
-      <!-- FT-031: Upcoming — clean lists without icon-on-heading / bullet-dot-icons. -->
+      <!-- FT-031: Upcoming — clean lists. -->
       <section class="dashboard__upcoming" data-testid="dashboard-upcoming">
-        <v-row>
-          <v-col cols="12" md="6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
             <h2 class="dashboard__upcoming-heading">{{ $t('dashboard.checkIns') }}</h2>
             <ul v-if="data.upcoming_check_ins.length" class="dashboard__upcoming-list">
               <li
@@ -103,13 +107,13 @@
                 class="dashboard__upcoming-item"
               >
                 <span class="dashboard__upcoming-name">{{ r.guest_name || $t('common.blocking') }}</span>
-                <span class="dashboard__upcoming-unit text-medium-emphasis">{{ r.unit_name }}</span>
+                <span class="dashboard__upcoming-unit text-surface-600 dark:text-surface-400">{{ r.unit_name }}</span>
                 <span class="dashboard__upcoming-date text-tabular">{{ r.check_in }}</span>
               </li>
             </ul>
-            <div v-else class="dashboard__upcoming-empty text-medium-emphasis">{{ $t('dashboard.noCheckIns') }}</div>
-          </v-col>
-          <v-col cols="12" md="6">
+            <div v-else class="dashboard__upcoming-empty text-surface-600 dark:text-surface-400">{{ $t('dashboard.noCheckIns') }}</div>
+          </div>
+          <div>
             <h2 class="dashboard__upcoming-heading">{{ $t('dashboard.checkOuts') }}</h2>
             <ul v-if="data.upcoming_check_outs.length" class="dashboard__upcoming-list">
               <li
@@ -118,16 +122,16 @@
                 class="dashboard__upcoming-item"
               >
                 <span class="dashboard__upcoming-name">{{ r.guest_name || $t('common.blocking') }}</span>
-                <span class="dashboard__upcoming-unit text-medium-emphasis">{{ r.unit_name }}</span>
+                <span class="dashboard__upcoming-unit text-surface-600 dark:text-surface-400">{{ r.unit_name }}</span>
                 <span class="dashboard__upcoming-date text-tabular">{{ r.check_out }}</span>
               </li>
             </ul>
-            <div v-else class="dashboard__upcoming-empty text-medium-emphasis">{{ $t('dashboard.noCheckOuts') }}</div>
-          </v-col>
-        </v-row>
+            <div v-else class="dashboard__upcoming-empty text-surface-600 dark:text-surface-400">{{ $t('dashboard.noCheckOuts') }}</div>
+          </div>
+        </div>
       </section>
     </template>
-  </v-container>
+  </div>
 </template>
 
 <script setup>
@@ -155,8 +159,6 @@ const totalReservations = computed(() => {
   return (s.confirmed || 0) + (s.checked_in || 0) + (s.checked_out || 0) + (s.cancelled || 0)
 })
 
-// FT-031: Status segments — single source for bar + legend. `flexBasis`
-// directly drives horizontal bar segment widths. Guards totalReservations=0.
 const statusSegments = computed(() => {
   const s = data.value?.reservations_by_status || {}
   const total = totalReservations.value
@@ -182,7 +184,7 @@ async function loadDashboard() {
   try {
     data.value = await dashboardApi.get()
   } catch (e) {
-    console.error(e)
+    if (import.meta.env.DEV) console.error(e)
     error.value = t('dashboard.messages.loadError')
   } finally {
     loading.value = false
@@ -196,20 +198,24 @@ defineExpose({ data, loading, error, formatPrice, loadDashboard, totalReservatio
 
 <style scoped>
 /* FT-031: Editorial hierarchy — typography does the work.
-   No saturated-card backgrounds, left-aligned, asymmetric density. */
-
-.dashboard {
-  max-width: 1280px;
-}
+   FT-036 P4: Vuetify theme tokens swapped для raw color functions +
+   Tailwind color tokens (@theme) where semantic. Structure/classes
+   preserved — FT-031 test ids still match. */
 
 .dashboard__greeting {
   font-family: var(--font-display);
-  letter-spacing: var(--tracking-tight);
+  letter-spacing: -0.02em;
 }
 
 /* ── Hero ─────────────────────────────────────────────────────────── */
 .dashboard__hero-label {
-  margin-bottom: var(--space-xs, 8px);
+  margin-bottom: 8px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgb(var(--p-surface-600));
 }
 
 .dashboard__hero-value {
@@ -217,23 +223,27 @@ defineExpose({ data, loading, error, formatPrice, loadDashboard, totalReservatio
   font-size: clamp(1.75rem, 4vw, 3.5rem);
   font-weight: 600;
   line-height: 1;
-  letter-spacing: var(--tracking-tight);
-  color: rgb(var(--v-theme-on-surface));
+  letter-spacing: -0.02em;
+  color: rgb(var(--p-surface-900));
   overflow-wrap: anywhere;
-  margin-bottom: var(--space-lg, 24px);
+  margin-bottom: 24px;
+}
+
+:where(.dark) .dashboard__hero-value {
+  color: rgb(var(--p-surface-0));
 }
 
 .dashboard__supporting {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-xl, 32px);
-  margin-bottom: var(--space-md, 16px);
+  gap: 32px;
+  margin-bottom: 16px;
 }
 
 .dashboard__stat {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3xs, 2px);
+  gap: 2px;
 }
 
 .dashboard__stat-value {
@@ -241,30 +251,38 @@ defineExpose({ data, loading, error, formatPrice, loadDashboard, totalReservatio
   font-size: 20px;
   font-weight: 600;
   line-height: 1;
-  color: rgb(var(--v-theme-on-surface));
+  color: rgb(var(--p-surface-900));
+}
+
+:where(.dark) .dashboard__stat-value {
+  color: rgb(var(--p-surface-0));
 }
 
 .dashboard__stat-label {
   font-family: var(--font-body);
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: var(--tracking-wide);
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+  color: rgb(var(--p-surface-600));
 }
 
 .dashboard__occupancy-track {
   height: 2px;
   width: 100%;
   max-width: 480px;
-  background: rgba(var(--v-theme-on-surface), 0.08);
+  background: rgba(0, 0, 0, 0.08);
   border-radius: 2px;
   overflow: hidden;
 }
 
+:where(.dark) .dashboard__occupancy-track {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .dashboard__occupancy-fill {
   height: 100%;
-  background: rgb(var(--v-theme-primary));
+  background: var(--color-primary-500);
   transition: width 0.3s ease-out;
 }
 
@@ -276,8 +294,8 @@ defineExpose({ data, loading, error, formatPrice, loadDashboard, totalReservatio
 .dashboard__status-header {
   display: flex;
   align-items: baseline;
-  gap: var(--space-sm, 12px);
-  margin-bottom: var(--space-sm, 12px);
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .dashboard__status-total {
@@ -285,7 +303,11 @@ defineExpose({ data, loading, error, formatPrice, loadDashboard, totalReservatio
   font-size: 2rem;
   font-weight: 600;
   line-height: 1;
-  color: rgb(var(--v-theme-on-surface));
+  color: rgb(var(--p-surface-900));
+}
+
+:where(.dark) .dashboard__status-total {
+  color: rgb(var(--p-surface-0));
 }
 
 .dashboard__status-bar {
@@ -293,10 +315,14 @@ defineExpose({ data, loading, error, formatPrice, loadDashboard, totalReservatio
   height: 8px;
   width: 100%;
   max-width: 720px;
-  background: rgba(var(--v-theme-on-surface), 0.06);
+  background: rgba(0, 0, 0, 0.06);
   border-radius: 4px;
   overflow: hidden;
-  margin-bottom: var(--space-md, 16px);
+  margin-bottom: 16px;
+}
+
+:where(.dark) .dashboard__status-bar {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .dashboard__status-bar-segment {
@@ -304,10 +330,10 @@ defineExpose({ data, loading, error, formatPrice, loadDashboard, totalReservatio
   transition: flex-basis 0.3s ease-out;
 }
 
-.dashboard__status-bar-segment--confirmed   { background: rgb(var(--v-theme-status-confirmed)); }
-.dashboard__status-bar-segment--checked-in  { background: rgb(var(--v-theme-status-checked-in)); }
-.dashboard__status-bar-segment--checked-out { background: rgb(var(--v-theme-status-checked-out)); }
-.dashboard__status-bar-segment--cancelled   { background: rgb(var(--v-theme-status-cancelled)); }
+.dashboard__status-bar-segment--confirmed   { background: var(--color-status-confirmed); }
+.dashboard__status-bar-segment--checked-in  { background: var(--color-status-checked-in); }
+.dashboard__status-bar-segment--checked-out { background: var(--color-status-checked-out); }
+.dashboard__status-bar-segment--cancelled   { background: var(--color-status-cancelled); }
 
 .dashboard__status-bar-empty {
   display: flex;
@@ -320,7 +346,7 @@ defineExpose({ data, loading, error, formatPrice, loadDashboard, totalReservatio
 .dashboard__status-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-lg, 24px) var(--space-md, 16px);
+  gap: 24px 16px;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -329,7 +355,7 @@ defineExpose({ data, loading, error, formatPrice, loadDashboard, totalReservatio
 .dashboard__status-legend-item {
   display: flex;
   align-items: center;
-  gap: var(--space-xs, 8px);
+  gap: 8px;
   font-size: 13px;
 }
 
@@ -340,18 +366,22 @@ defineExpose({ data, loading, error, formatPrice, loadDashboard, totalReservatio
   flex-shrink: 0;
 }
 
-.dashboard__status-dot--confirmed   { background: rgb(var(--v-theme-status-confirmed)); }
-.dashboard__status-dot--checked-in  { background: rgb(var(--v-theme-status-checked-in)); }
-.dashboard__status-dot--checked-out { background: rgb(var(--v-theme-status-checked-out)); }
-.dashboard__status-dot--cancelled   { background: rgb(var(--v-theme-status-cancelled)); }
+.dashboard__status-dot--confirmed   { background: var(--color-status-confirmed); }
+.dashboard__status-dot--checked-in  { background: var(--color-status-checked-in); }
+.dashboard__status-dot--checked-out { background: var(--color-status-checked-out); }
+.dashboard__status-dot--cancelled   { background: var(--color-status-cancelled); }
 
 .dashboard__status-legend-label {
-  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+  color: rgb(var(--p-surface-600));
 }
 
 .dashboard__status-legend-count {
   font-weight: 600;
-  color: rgb(var(--v-theme-on-surface));
+  color: rgb(var(--p-surface-900));
+}
+
+:where(.dark) .dashboard__status-legend-count {
+  color: rgb(var(--p-surface-0));
 }
 
 /* ── Upcoming ─────────────────────────────────────────────────────── */
@@ -360,8 +390,8 @@ defineExpose({ data, loading, error, formatPrice, loadDashboard, totalReservatio
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0;
-  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
-  margin-bottom: var(--space-sm, 12px);
+  color: rgb(var(--p-surface-600));
+  margin-bottom: 12px;
 }
 
 .dashboard__upcoming-list {
@@ -374,20 +404,28 @@ defineExpose({ data, loading, error, formatPrice, loadDashboard, totalReservatio
   display: grid;
   grid-template-columns: 1fr auto auto;
   align-items: baseline;
-  gap: var(--space-md, 16px);
-  padding: var(--space-sm, 12px) 0;
-  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   font-size: 14px;
+}
+
+:where(.dark) .dashboard__upcoming-item {
+  border-bottom-color: rgba(255, 255, 255, 0.12);
 }
 
 .dashboard__upcoming-item:last-child { border-bottom: none; }
 
 .dashboard__upcoming-name {
   font-weight: 500;
-  color: rgb(var(--v-theme-on-surface));
+  color: rgb(var(--p-surface-900));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+:where(.dark) .dashboard__upcoming-name {
+  color: rgb(var(--p-surface-0));
 }
 
 .dashboard__upcoming-unit {
@@ -396,11 +434,23 @@ defineExpose({ data, loading, error, formatPrice, loadDashboard, totalReservatio
 
 .dashboard__upcoming-date {
   font-size: 13px;
-  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
 }
 
 .dashboard__upcoming-empty {
-  padding: var(--space-md, 16px) 0;
+  padding: 16px 0;
   font-size: 14px;
+}
+
+.text-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.text-table-header {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgb(var(--p-surface-600));
 }
 </style>

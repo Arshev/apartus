@@ -13,36 +13,31 @@ vi.mock('../../api/expenses', () => ({
   destroy: vi.fn().mockResolvedValue({}),
 }))
 
-import { mountWithVuetify } from '../helpers/mountWithVuetify'
+import { mountWithPrimeVue } from '../helpers/mountWithPrimeVue'
 import ExpenseListView from '../../views/ExpenseListView.vue'
-import { useExpensesStore } from '../../stores/expenses'
 
-describe('ExpenseListView', () => {
+describe('ExpenseListView (FT-036 P4)', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
-  it('has correct headers', () => {
-    const wrapper = mountWithVuetify(ExpenseListView)
-    expect(wrapper.vm.headers.map((h) => h.key)).toContain('expense_date')
-    expect(wrapper.vm.headers.map((h) => h.key)).toContain('category')
-    expect(wrapper.vm.headers.map((h) => h.key)).toContain('amount_cents')
-  })
-
   it('openCreate resets form', () => {
-    const wrapper = mountWithVuetify(ExpenseListView)
+    const wrapper = mountWithPrimeVue(ExpenseListView)
     wrapper.vm.openCreate()
     expect(wrapper.vm.editing).toBeNull()
     expect(wrapper.vm.form.category).toBe('other')
   })
 
   it('openEdit fills form with rub conversion', () => {
-    const wrapper = mountWithVuetify(ExpenseListView)
-    wrapper.vm.openEdit({ id: 1, category: 'cleaning', amount_cents: 5000, expense_date: '2026-04-01', description: 'test' })
+    const wrapper = mountWithPrimeVue(ExpenseListView)
+    wrapper.vm.openEdit({
+      id: 1, category: 'cleaning', amount_cents: 5000,
+      expense_date: '2026-04-01', description: 'test',
+    })
     expect(wrapper.vm.editing.id).toBe(1)
     expect(wrapper.vm.form.amount_rub).toBe(50)
   })
 
   it('categoryLabel covers all enums', () => {
-    const wrapper = mountWithVuetify(ExpenseListView)
+    const wrapper = mountWithPrimeVue(ExpenseListView)
     expect(wrapper.vm.categoryLabel('maintenance')).toBe('Обслуживание')
     expect(wrapper.vm.categoryLabel('utilities')).toBe('Коммунальные')
     expect(wrapper.vm.categoryLabel('cleaning')).toBe('Уборка')
@@ -50,12 +45,37 @@ describe('ExpenseListView', () => {
     expect(wrapper.vm.categoryLabel('other')).toBe('Прочее')
   })
 
-  it('confirmDelete + handleDelete', async () => {
-    const wrapper = mountWithVuetify(ExpenseListView)
-    const store = useExpensesStore()
-    vi.spyOn(store, 'destroy')
-    wrapper.vm.confirmDelete({ id: 1 })
-    await wrapper.vm.handleDelete()
-    expect(store.destroy).toHaveBeenCalledWith(1)
+  it('confirmDelete does not throw', () => {
+    const wrapper = mountWithPrimeVue(ExpenseListView)
+    expect(() => wrapper.vm.confirmDelete({ id: 1, category: 'other' })).not.toThrow()
+  })
+
+  it('handleDelete invokes API destroy', async () => {
+    const expensesApi = await import('../../api/expenses')
+    const wrapper = mountWithPrimeVue(ExpenseListView)
+    await wrapper.vm.handleDelete({ id: 42 })
+    expect(expensesApi.destroy).toHaveBeenCalledWith(42)
+  })
+
+  it('handleSubmit validates and converts rub→cents', async () => {
+    const expensesApi = await import('../../api/expenses')
+    const wrapper = mountWithPrimeVue(ExpenseListView)
+    wrapper.vm.openCreate()
+    wrapper.vm.form.amount_rub = 50
+    await wrapper.vm.handleSubmit()
+    expect(expensesApi.create).toHaveBeenCalled()
+    const payload = expensesApi.create.mock.calls[0][0]
+    expect(payload.amount_cents).toBe(5000)
+    expect(payload).not.toHaveProperty('amount_rub')
+  })
+
+  it('handleSubmit blocked on invalid (empty date)', async () => {
+    const expensesApi = await import('../../api/expenses')
+    const wrapper = mountWithPrimeVue(ExpenseListView)
+    wrapper.vm.openCreate()
+    wrapper.vm.form.expense_date = ''
+    await wrapper.vm.handleSubmit()
+    expect(expensesApi.create).not.toHaveBeenCalled()
+    expect(wrapper.vm.fieldErrors.expense_date).toBeTruthy()
   })
 })

@@ -21,13 +21,13 @@ vi.mock('../../api/dashboard', () => ({
   }),
 }))
 
-import { mountWithVuetify } from '../helpers/mountWithVuetify'
+import { mountWithPrimeVue } from '../helpers/mountWithPrimeVue'
 import DashboardView from '../../views/DashboardView.vue'
 import { useAuthStore } from '../../stores/auth'
 
 describe('DashboardView', () => {
   it('renders greeting', async () => {
-    const wrapper = mountWithVuetify(DashboardView)
+    const wrapper = mountWithPrimeVue(DashboardView)
     const store = useAuthStore()
     store.user = { id: 1, full_name: 'Иван Иванов' }
     store.organization = { id: 1, name: 'Тест Орг' }
@@ -37,7 +37,7 @@ describe('DashboardView', () => {
   })
 
   it('loadDashboard populates data', async () => {
-    const wrapper = mountWithVuetify(DashboardView)
+    const wrapper = mountWithPrimeVue(DashboardView)
     await wrapper.vm.$nextTick()
     await wrapper.vm.$nextTick()
     expect(wrapper.vm.data).toBeTruthy()
@@ -46,7 +46,7 @@ describe('DashboardView', () => {
   })
 
   it('formatPrice formats cents to currency', () => {
-    const wrapper = mountWithVuetify(DashboardView)
+    const wrapper = mountWithPrimeVue(DashboardView)
     const store = useAuthStore()
     store.organization = { id: 1, name: 'Test', currency: 'RUB' }
     expect(wrapper.vm.formatPrice(50000)).toBe('500.00 ₽')
@@ -56,7 +56,7 @@ describe('DashboardView', () => {
   it('loadDashboard error sets error', async () => {
     const { get } = await import('../../api/dashboard')
     get.mockRejectedValueOnce(new Error('network'))
-    const wrapper = mountWithVuetify(DashboardView)
+    const wrapper = mountWithPrimeVue(DashboardView)
     await wrapper.vm.loadDashboard()
     expect(wrapper.vm.error).toBe('Не удалось загрузить данные')
   })
@@ -64,7 +64,7 @@ describe('DashboardView', () => {
   // --- FT-031 Editorial redesign ---
   describe('editorial hierarchy (FT-031)', () => {
     it('hero renders revenue as dominant value', async () => {
-      const wrapper = mountWithVuetify(DashboardView)
+      const wrapper = mountWithPrimeVue(DashboardView)
       const store = useAuthStore()
       store.organization = { id: 1, name: 'Test', currency: 'RUB' }
       await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
@@ -75,7 +75,7 @@ describe('DashboardView', () => {
     })
 
     it('supporting metrics expose units / occupancy / reservations', async () => {
-      const wrapper = mountWithVuetify(DashboardView)
+      const wrapper = mountWithPrimeVue(DashboardView)
       await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
       expect(wrapper.find('[data-testid="dashboard-stat-units"]').text()).toBe('10')
       expect(wrapper.find('[data-testid="dashboard-stat-occupancy"]').text()).toBe('40%')
@@ -84,7 +84,7 @@ describe('DashboardView', () => {
     })
 
     it('statusSegments compute flexBasis proportional to counts', async () => {
-      const wrapper = mountWithVuetify(DashboardView)
+      const wrapper = mountWithPrimeVue(DashboardView)
       await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
       const segs = wrapper.vm.statusSegments
       expect(segs).toHaveLength(4)
@@ -105,7 +105,7 @@ describe('DashboardView', () => {
         upcoming_check_outs: [],
         reservations_by_status: { confirmed: 0, checked_in: 0, checked_out: 0, cancelled: 0 },
       })
-      const wrapper = mountWithVuetify(DashboardView)
+      const wrapper = mountWithPrimeVue(DashboardView)
       await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
       expect(wrapper.vm.totalReservations).toBe(0)
       for (const seg of wrapper.vm.statusSegments) {
@@ -114,7 +114,7 @@ describe('DashboardView', () => {
     })
 
     it('status legend renders all 4 status entries', async () => {
-      const wrapper = mountWithVuetify(DashboardView)
+      const wrapper = mountWithPrimeVue(DashboardView)
       await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
       for (const key of ['confirmed', 'checked-in', 'checked-out', 'cancelled']) {
         expect(wrapper.find(`[data-testid="dashboard-status-legend-${key}"]`).exists()).toBe(true)
@@ -122,7 +122,7 @@ describe('DashboardView', () => {
     })
 
     it('editorial sections present (hero / status / upcoming)', async () => {
-      const wrapper = mountWithVuetify(DashboardView)
+      const wrapper = mountWithPrimeVue(DashboardView)
       await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
       expect(wrapper.find('[data-testid="dashboard-hero"]').exists()).toBe(true)
       expect(wrapper.find('[data-testid="dashboard-status"]').exists()).toBe(true)

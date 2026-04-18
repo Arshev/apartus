@@ -26,34 +26,28 @@ vi.mock('../../utils/currency', () => ({
   formatMoney: vi.fn((cents) => `${(cents / 100).toFixed(0)} ₽`),
 }))
 
-import { mountWithVuetifyAsync } from '../helpers/mountWithVuetify'
+import { mountWithPrimeVueAsync } from '../helpers/mountWithPrimeVue'
 import OwnerStatementView from '../../views/OwnerStatementView.vue'
 import * as ownersApi from '../../api/owners'
 import { downloadOwnerStatement } from '../../api/pdfExport'
 
-describe('OwnerStatementView', () => {
+describe('OwnerStatementView (FT-036 P4)', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
   async function mount() {
-    return mountWithVuetifyAsync(OwnerStatementView, {
+    return mountWithPrimeVueAsync(OwnerStatementView, {
       routes: [
         { path: '/owners/:id/statement', component: OwnerStatementView },
+        { path: '/owners', component: { template: '<div/>' } },
       ],
       initialRoute: '/owners/1/statement',
     })
   }
 
   it('loads statement on mount', async () => {
-    const wrapper = await mount()
-    await wrapper.vm.$nextTick()
+    await mount()
+    await new Promise((r) => setTimeout(r, 0))
     expect(ownersApi.statement).toHaveBeenCalledWith('1')
-  })
-
-  it('has correct propHeaders', async () => {
-    const wrapper = await mount()
-    expect(wrapper.vm.propHeaders.map((h) => h.key)).toEqual([
-      'property_name', 'revenue', 'commission', 'expenses', 'payout',
-    ])
   })
 
   it('fmt formats money', async () => {
@@ -62,11 +56,16 @@ describe('OwnerStatementView', () => {
   })
 
   it('sets error on load failure', async () => {
-    ownersApi.statement.mockRejectedValueOnce(new Error('fail'))
+    ownersApi.statement.mockRejectedValue(new Error('fail'))
     const wrapper = await mount()
-    // onMounted consumed the rejected mock — wait for it to settle
-    await vi.dynamicImportSettled()
-    await wrapper.vm.$nextTick()
+    await wrapper.vm.loadStatement()
     expect(wrapper.vm.error).toBe('Не удалось загрузить отчёт')
+  })
+
+  it('downloadPdf calls pdfExport', async () => {
+    const wrapper = await mount()
+    await wrapper.vm.downloadPdf()
+    expect(downloadOwnerStatement).toHaveBeenCalledWith('1')
+    expect(wrapper.vm.downloading).toBe(false)
   })
 })

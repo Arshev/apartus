@@ -19,7 +19,7 @@ vi.mock('../../api/pdfExport', () => ({
   downloadFinancialReport: vi.fn().mockResolvedValue(undefined),
 }))
 
-import { mountWithVuetify } from '../helpers/mountWithVuetify'
+import { mountWithPrimeVue } from '../helpers/mountWithPrimeVue'
 import ReportsView from '../../views/ReportsView.vue'
 import { useAuthStore } from '../../stores/auth'
 
@@ -27,12 +27,12 @@ describe('ReportsView', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
   it('renders report title', () => {
-    const wrapper = mountWithVuetify(ReportsView)
+    const wrapper = mountWithPrimeVue(ReportsView)
     expect(wrapper.text()).toContain('Финансовый отчёт')
   })
 
   it('loadReport populates data', async () => {
-    const wrapper = mountWithVuetify(ReportsView)
+    const wrapper = mountWithPrimeVue(ReportsView)
     await wrapper.vm.$nextTick()
     await wrapper.vm.$nextTick()
     expect(wrapper.vm.data).toBeTruthy()
@@ -40,7 +40,7 @@ describe('ReportsView', () => {
   })
 
   it('expenseCategoryLabel covers all', () => {
-    const wrapper = mountWithVuetify(ReportsView)
+    const wrapper = mountWithPrimeVue(ReportsView)
     expect(wrapper.vm.expenseCategoryLabel('cleaning')).toBe('Уборка')
     expect(wrapper.vm.expenseCategoryLabel('maintenance')).toBe('Обслуживание')
   })
