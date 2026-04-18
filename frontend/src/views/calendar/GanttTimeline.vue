@@ -29,6 +29,11 @@
         <template v-if="sidebarCollapsed">
           <div class="gantt-timeline__unit-abbr">{{ abbreviateUnit(unit.name) }}</div>
         </template>
+        <template v-else-if="density === 'compact'">
+          <!-- FT-033: compact mode — single-line unit name only. Property
+               name stays in :title tooltip (line above) for hover access. -->
+          <div class="gantt-timeline__unit-name">{{ unit.name }}</div>
+        </template>
         <template v-else>
           <div class="gantt-timeline__unit-property">{{ unit.property_name }}</div>
           <div class="gantt-timeline__unit-name">{{ unit.name }}</div>
