@@ -35,6 +35,7 @@ audience: humans_and_agents
 **Why first:** Tasks 3+4 tests need stubs для `v-autocomplete`, `v-date-picker`, `v-menu` (activator slot).
 
 **Files:**
+
 - Modify: `frontend/src/__tests__/helpers/mountWithVuetify.js`
 
 - [ ] **Step 1.1: Add stubs**
@@ -98,6 +99,7 @@ EOF
 ## Task 2: `getCurrencySymbol` helper — TDD
 
 **Files:**
+
 - Modify: `frontend/src/utils/currency.js`
 - Modify: `frontend/src/__tests__/utils/currency.test.js`
 
@@ -167,6 +169,7 @@ EOF
 ## Task 3: `ReservationFormSection.vue` — TDD
 
 **Files:**
+
 - Create: `frontend/src/components/ReservationFormSection.vue`
 - Create: `frontend/src/__tests__/components/ReservationFormSection.test.js`
 
@@ -299,6 +302,7 @@ EOF
 ## Task 4: `GuestQuickCreateDialog.vue` — TDD
 
 **Files:**
+
 - Create: `frontend/src/components/GuestQuickCreateDialog.vue`
 - Create: `frontend/src/__tests__/components/GuestQuickCreateDialog.test.js`
 - Check: `frontend/src/api/guests.js` (existing `create` function)
@@ -497,6 +501,7 @@ EOF
 ## Task 5: `ReservationDateRangePicker.vue` — TDD
 
 **Files:**
+
 - Create: `frontend/src/components/ReservationDateRangePicker.vue`
 - Create: `frontend/src/__tests__/components/ReservationDateRangePicker.test.js`
 
@@ -695,6 +700,7 @@ EOF
 ## Task 6: `ReservationPriceSummary.vue` — TDD
 
 **Files:**
+
 - Create: `frontend/src/components/ReservationPriceSummary.vue`
 - Create: `frontend/src/__tests__/components/ReservationPriceSummary.test.js`
 
@@ -1024,6 +1030,7 @@ EOF
 ## Task 7: Add i18n keys (ru + en)
 
 **Files:**
+
 - Modify: `frontend/src/locales/ru.json`
 - Modify: `frontend/src/locales/en.json`
 
@@ -1136,6 +1143,7 @@ EOF
 ## Task 8: Refactor `ReservationFormView.vue` — orchestrator rewrite
 
 **Files:**
+
 - Modify: `frontend/src/views/ReservationFormView.vue`
 - Modify: `frontend/src/__tests__/views/ReservationFormView.test.js`
 
@@ -1695,6 +1703,7 @@ Expected: 0 errors (warnings acceptable if pre-existing).
 Run dev server: `cd frontend && yarn dev &` wait for ready.
 
 Manual checklist (record screenshots → `artifacts/ft-035/verify/chk-05/`):
+
 - [ ] `/reservations/new` — hero heading Geologica visible
 - [ ] 4 sections stacked на narrow, 2-col grid на wide
 - [ ] Unit autocomplete type-to-filter работает
@@ -1720,7 +1729,7 @@ delivery_status: done
 
 Edit `memory-bank/features/README.md`:
 
-```
+```markdown
 | [FT-035-reservation-form-redesign](FT-035-reservation-form-redesign/feature.md) | active | done | Reservation form redesign ...
 ```
 
@@ -1793,6 +1802,7 @@ EOF
 **Placeholder scan:** один placeholder был в Task 8 test draft (`mountWithVuetify_OMIT_ROUTE_HERE`), replaced с real test.
 
 **Type consistency:**
+
 - `form.total_price_cents` (cents int) везде — консистентно
 - `{ checkIn, checkOut }` в DateRangePicker v-model object — консистентно
 - `manualOverride`, `autoTotalCents`, `manualTotalCents` — consistent naming
