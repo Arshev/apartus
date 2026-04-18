@@ -21,13 +21,23 @@ import { mountWithVuetify } from '../helpers/mountWithVuetify'
 import ReservationListView from '../../views/ReservationListView.vue'
 import { useReservationsStore } from '../../stores/reservations'
 
+/** Sample reservation used for descriptor-aware confirm tests. */
+const SAMPLE_ITEM = {
+  id: 1,
+  guest_name: 'Иванов Алексей',
+  unit_name: 'Квартира 5',
+  check_in: '2026-05-01',
+  check_out: '2026-05-03',
+  status: 'checked_in',
+}
+
 describe('ReservationListView', () => {
   beforeEach(() => { vi.clearAllMocks() })
 
-  it('has correct headers', () => {
+  it('headers — 6 columns (guest consolidates unit)', () => {
     const wrapper = mountWithVuetify(ReservationListView)
     expect(wrapper.vm.headers.map((h) => h.key)).toEqual([
-      'unit_name', 'guest_name', 'check_in', 'check_out', 'status', 'total_price_cents', 'actions',
+      'guest_name', 'check_in', 'check_out', 'status', 'total_price_cents', 'actions',
     ])
   })
 
@@ -40,16 +50,18 @@ describe('ReservationListView', () => {
     expect(wrapper.vm.formatPrice(0)).toBe('—')
   })
 
-  it('confirmDelete + handleDelete', async () => {
+  it('confirmDelete opens dialog; runConfirm triggers store.destroy', async () => {
     const wrapper = mountWithVuetify(ReservationListView)
     const store = useReservationsStore()
-    vi.spyOn(store, 'destroy')
+    const spy = vi.spyOn(store, 'destroy').mockResolvedValue({})
     wrapper.vm.confirmDelete({ id: 1 })
-    await wrapper.vm.handleDelete()
-    expect(store.destroy).toHaveBeenCalledWith(1)
+    expect(wrapper.vm.confirmDialog.open).toBe(true)
+    await wrapper.vm.runConfirm()
+    expect(spy).toHaveBeenCalledWith(1)
+    expect(wrapper.vm.confirmDialog.open).toBe(false)
   })
 
-  it('doCheckIn calls store.checkIn', async () => {
+  it('doCheckIn calls store.checkIn directly (no confirm)', async () => {
     const wrapper = mountWithVuetify(ReservationListView)
     const store = useReservationsStore()
     const spy = vi.spyOn(store, 'checkIn').mockResolvedValue({})
@@ -57,19 +69,23 @@ describe('ReservationListView', () => {
     expect(spy).toHaveBeenCalledWith(1)
   })
 
-  it('doCheckOut calls store.checkOut', async () => {
+  it('doCheckOut opens confirm; runConfirm triggers store.checkOut', async () => {
     const wrapper = mountWithVuetify(ReservationListView)
     const store = useReservationsStore()
     const spy = vi.spyOn(store, 'checkOut').mockResolvedValue({})
-    await wrapper.vm.doCheckOut({ id: 1 })
+    wrapper.vm.doCheckOut(SAMPLE_ITEM)
+    expect(wrapper.vm.confirmDialog.open).toBe(true)
+    await wrapper.vm.runConfirm()
     expect(spy).toHaveBeenCalledWith(1)
   })
 
-  it('doCancel calls store.cancelReservation', async () => {
+  it('doCancel opens confirm; runConfirm triggers store.cancelReservation', async () => {
     const wrapper = mountWithVuetify(ReservationListView)
     const store = useReservationsStore()
     const spy = vi.spyOn(store, 'cancelReservation').mockResolvedValue({})
-    await wrapper.vm.doCancel({ id: 1 })
+    wrapper.vm.doCancel(SAMPLE_ITEM)
+    expect(wrapper.vm.confirmDialog.open).toBe(true)
+    await wrapper.vm.runConfirm()
     expect(spy).toHaveBeenCalledWith(1)
   })
 })

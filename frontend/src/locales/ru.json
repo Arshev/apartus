@@ -345,6 +345,17 @@
       "checkedOut": "Выселен",
       "cancelled": "Отменено"
     },
+    "actions": {
+      "checkIn": "Заселить",
+      "checkOut": "Выселить"
+    },
+    "confirm": {
+      "cancelTitle": "Отменить бронирование?",
+      "cancelText": "Гость {guest} · {dates}. Действие необратимо.",
+      "cancelAccept": "Да, отменить",
+      "checkOutTitle": "Выселить гостя?",
+      "checkOutText": "Гость {guest} · {dates}. Статус изменится на «выселен»."
+    },
     "form": {
       "unit": "Юнит",
       "guest": "Гость (необязательно)",

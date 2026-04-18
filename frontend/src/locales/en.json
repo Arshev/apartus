@@ -345,6 +345,17 @@
       "checkedOut": "Checked out",
       "cancelled": "Cancelled"
     },
+    "actions": {
+      "checkIn": "Check in",
+      "checkOut": "Check out"
+    },
+    "confirm": {
+      "cancelTitle": "Cancel reservation?",
+      "cancelText": "Guest {guest} · {dates}. This action cannot be undone.",
+      "cancelAccept": "Yes, cancel",
+      "checkOutTitle": "Check out guest?",
+      "checkOutText": "Guest {guest} · {dates}. Status will change to checked-out."
+    },
     "form": {
       "unit": "Unit",
       "guest": "Guest (optional)",
