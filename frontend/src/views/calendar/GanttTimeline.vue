@@ -23,11 +23,16 @@
         v-for="unit in units"
         :key="unit.id"
         class="gantt-timeline__unit-cell"
-        :style="{ height: (rowHeights[unit.id] || baseRowHeight) + 'px' }"
+        :style="{ height: (rowHeights[unit.id] || effectiveRowHeight) + 'px' }"
         :title="`${unit.property_name} — ${unit.name}`"
       >
         <template v-if="sidebarCollapsed">
           <div class="gantt-timeline__unit-abbr">{{ abbreviateUnit(unit.name) }}</div>
+        </template>
+        <template v-else-if="density === 'compact'">
+          <!-- FT-033: compact mode — single-line unit name only. Property
+               name stays in :title tooltip (line above) for hover access. -->
+          <div class="gantt-timeline__unit-name">{{ unit.name }}</div>
         </template>
         <template v-else>
           <div class="gantt-timeline__unit-property">{{ unit.property_name }}</div>
@@ -56,8 +61,8 @@
             :view-end="viewEnd"
             :pixels-per-ms="pixelsPerMs"
             :total-width="totalWidth"
-            :base-row-height="baseRowHeight"
-            :item-height="itemHeight"
+            :base-row-height="effectiveRowHeight"
+            :item-height="effectiveItemHeight"
             :special-mode="specialMode"
             @show-booking="$emit('show-booking', $event)"
             @show-tooltip="$emit('show-tooltip', $event)"
@@ -114,6 +119,31 @@ const props = defineProps({
   // FT-030: collapsed sidebar — narrows to 48px and shows 2-letter
   // abbreviations instead of property+unit name.
   sidebarCollapsed: { type: Boolean, default: false },
+  // FT-033: row density mode — 'comfortable' (default) or 'compact'.
+  // Derives effectiveRowHeight + effectiveItemHeight when provided.
+  density: { type: String, default: 'comfortable', validator: (v) => ['comfortable', 'compact'].includes(v) },
+})
+
+// FT-033: density → row/item height mapping.
+// `base` is aligned with what GanttTimelineRow's `computedRowHeight` produces
+// for the minimum-occupied (1-lane) row: Math.max(base, 1 * (item + 2) + 6).
+// For compact: item=22 → lane-forced minimum = 30. Setting base=30 keeps the
+// sidebar's default (before Row emits row-height-changed) in lockstep with
+// the timeline row — no transient top-edge drift during mount or toggle.
+// For comfortable: item=28 → lane-forced minimum = 36. base=36 also matches.
+const DENSITY_MAP = {
+  comfortable: { base: 36, item: 28 },
+  compact:     { base: 30, item: 22 },
+}
+
+const effectiveRowHeight = computed(() => {
+  if (props.density === 'compact') return DENSITY_MAP.compact.base
+  return props.baseRowHeight
+})
+
+const effectiveItemHeight = computed(() => {
+  if (props.density === 'compact') return DENSITY_MAP.compact.item
+  return props.itemHeight
 })
 
 defineEmits(['show-booking', 'show-tooltip', 'hide-tooltip', 'context-menu', 'toggle-sidebar'])
@@ -181,11 +211,20 @@ onUnmounted(() => {
 
 defineExpose({
   pixelsPerMs, totalWidth, todayInRange, todayLeft, dayWidthPx, rowHeights, onRowHeightChanged, scrollToToday, scrollToDate, updateViewport,
+  // FT-033
+  effectiveRowHeight, effectiveItemHeight,
 })
 </script>
 
 <style scoped>
 .gantt-timeline {
+  /* FT-033 bugfix: header natural height grew to ~64px after FT-026 switched
+     to Geologica/Geist fonts. Corner was hard-coded 50px, causing a 13-14px
+     vertical drift between sidebar column (starting at y=50) and timeline
+     rows (starting at y=64 inside scroll). Single source of truth via CSS
+     custom property keeps corner, today-column, and today-marker offsets
+     all aligned with the natural header height. */
+  --gantt-header-height: 64px;
   display: grid;
   grid-template-columns: 240px 1fr;
   grid-template-rows: auto 1fr;
@@ -223,7 +262,7 @@ defineExpose({
   display: flex;
   align-items: center;
   gap: 4px;
-  height: 50px;
+  height: var(--gantt-header-height);
   box-sizing: border-box;
 }
 
@@ -249,6 +288,10 @@ defineExpose({
   justify-content: center;
   overflow: hidden;
   box-sizing: border-box;
+  /* FT-033: no CSS transition on height — sidebar must stay exactly in
+     lockstep with timeline rows (which snap instantly via Row's
+     computedRowHeight). Animating one side only produces visible drift
+     during the transition window. */
 }
 
 .gantt-timeline__unit-property {
@@ -299,7 +342,7 @@ defineExpose({
 
 .gantt-timeline__today-marker {
   position: absolute;
-  top: 50px; /* below header */
+  top: var(--gantt-header-height); /* below header */
   bottom: 0;
   width: 2px;
   background: rgb(var(--v-theme-primary));
@@ -311,7 +354,7 @@ defineExpose({
    tint (~5%). Sits behind rows so items/heat-cells/gaps paint on top. */
 .gantt-timeline__today-column {
   position: absolute;
-  top: 50px; /* below header — aligns with marker */
+  top: var(--gantt-header-height); /* below header — aligns with marker */
   bottom: 0;
   background: rgba(var(--v-theme-primary), 0.05);
   pointer-events: none;

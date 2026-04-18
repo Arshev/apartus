@@ -133,6 +133,18 @@ describe('useGanttShortcuts', () => {
       mountWithShortcuts()
       expect(() => press('KeyS')).not.toThrow()
     })
+
+    it('D calls toggleDensity (FT-033)', () => {
+      const toggleDensity = vi.fn()
+      mountWithShortcuts({ toggleDensity })
+      press('KeyD')
+      expect(toggleDensity).toHaveBeenCalledTimes(1)
+    })
+
+    it('D is a no-op when toggleDensity handler is missing (backward-compat)', () => {
+      mountWithShortcuts()
+      expect(() => press('KeyD')).not.toThrow()
+    })
   })
 
   describe('? — help dialog', () => {

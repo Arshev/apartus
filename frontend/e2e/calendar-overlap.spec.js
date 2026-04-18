@@ -264,6 +264,27 @@ test.describe('Gantt Calendar (CHK-07)', () => {
     )
   })
 
+  // FT-033 Density toggle
+  test('density toggle shrinks rows and D shortcut also toggles (FT-033, SC-01,02,03)', async ({ page }) => {
+    await page.waitForSelector('.gantt-item', { timeout: 10000 })
+
+    // Measure initial row height.
+    const initialHeight = await page.locator('.gantt-timeline__unit-cell').first().evaluate((el) => el.getBoundingClientRect().height)
+    expect(initialHeight).toBeGreaterThanOrEqual(32) // comfortable baseRowHeight 36 (±lane)
+
+    // Click density button → compact.
+    await page.locator('[data-testid="density-btn"]').click()
+    await page.waitForTimeout(250) // transition 0.15s + margin
+    const compactHeight = await page.locator('.gantt-timeline__unit-cell').first().evaluate((el) => el.getBoundingClientRect().height)
+    expect(compactHeight).toBeLessThan(initialHeight)
+
+    // Press `D` → back to comfortable.
+    await page.keyboard.press('D')
+    await page.waitForTimeout(250)
+    const reExpandedHeight = await page.locator('.gantt-timeline__unit-cell').first().evaluate((el) => el.getBoundingClientRect().height)
+    expect(reExpandedHeight).toBeGreaterThanOrEqual(compactHeight + 4) // relaxed check
+  })
+
   // FT-030 Sidebar collapse
   test('sidebar toggle collapses to 48px and S shortcut toggles back (FT-030, SC-01,02,03)', async ({ page }) => {
     await page.waitForSelector('.gantt-item', { timeout: 10000 })

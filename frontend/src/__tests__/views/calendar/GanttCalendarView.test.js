@@ -777,11 +777,11 @@ describe('GanttCalendarView', () => {
 
   // --- FT-029 Keyboard shortcuts integration ---
   describe('keyboard shortcuts (FT-029)', () => {
-    it('exposes shortcutRows with 7 entries (FT-030 adds S)', async () => {
+    it('exposes shortcutRows with 8 entries (FT-030 S, FT-033 D)', async () => {
       const wrapper = setup()
       await wrapper.vm.$nextTick()
-      expect(wrapper.vm.shortcutRows).toHaveLength(7)
-      expect(wrapper.vm.shortcutRows.map((r) => r.key)).toEqual(['/', 'T', '[', ']', 'S', 'Esc', '?'])
+      expect(wrapper.vm.shortcutRows).toHaveLength(8)
+      expect(wrapper.vm.shortcutRows.map((r) => r.key)).toEqual(['/', 'T', '[', ']', 'S', 'D', 'Esc', '?'])
     })
 
     it('shiftRange moves anchorDate by ±rangeDays days', async () => {
@@ -879,6 +879,70 @@ describe('GanttCalendarView', () => {
       // other fields still restored
       expect(wrapper.vm.rangeDays).toBe(30)
       expect(wrapper.vm.specialMode).toBe('handover')
+    })
+  })
+
+  // --- FT-033 Density toggle ---
+  describe('density toggle (FT-033)', () => {
+    it('density defaults to "comfortable"', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.density).toBe('comfortable')
+    })
+
+    it('toggleDensity flips between comfortable and compact', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleDensity()
+      expect(wrapper.vm.density).toBe('compact')
+      wrapper.vm.toggleDensity()
+      expect(wrapper.vm.density).toBe('comfortable')
+    })
+
+    it('persists density to localStorage', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      wrapper.vm.toggleDensity()
+      await wrapper.vm.$nextTick()
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY))
+      expect(stored.density).toBe('compact')
+    })
+
+    it('restores density from localStorage on mount', async () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ rangeDays: 14, density: 'compact' }),
+      )
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      expect(wrapper.vm.density).toBe('compact')
+    })
+
+    it('ignores invalid density (non-enum value)', async () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ rangeDays: 14, density: 'spacious' }),
+      )
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      expect(wrapper.vm.density).toBe('comfortable')
+    })
+
+    it('legacy payload without density defaults to comfortable', async () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ rangeDays: 30 }),
+      )
+      const wrapper = setup()
+      await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick()
+      expect(wrapper.vm.density).toBe('comfortable')
+    })
+
+    it('shortcutRows includes D entry (8 total)', async () => {
+      const wrapper = setup()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.shortcutRows).toHaveLength(8)
+      expect(wrapper.vm.shortcutRows.map((r) => r.key)).toEqual(['/', 'T', '[', ']', 'S', 'D', 'Esc', '?'])
     })
   })
 })

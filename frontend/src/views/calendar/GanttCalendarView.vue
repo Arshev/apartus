@@ -109,6 +109,18 @@
         </v-menu>
 
         <v-btn icon="mdi-refresh" variant="text" :loading="loading" @click="loadData" :title="$t('calendar.gantt.toolbar.refresh')" data-testid="refresh-btn" />
+
+        <!-- FT-033: density toggle. Tonal variant when compact (active state);
+             text variant otherwise. Same active-pattern as mode buttons (FT-026). -->
+        <v-btn
+          icon="mdi-format-line-spacing"
+          :variant="density === 'compact' ? 'tonal' : 'text'"
+          :title="`${$t('calendar.gantt.density.toggle')} (D)`"
+          :aria-label="$t('calendar.gantt.density.toggle')"
+          :aria-pressed="density === 'compact'"
+          data-testid="density-btn"
+          @click="toggleDensity"
+        />
       </div>
     </div>
 
@@ -124,6 +136,7 @@
       :view-end="viewEnd"
       :special-mode="specialMode"
       :sidebar-collapsed="sidebarCollapsed"
+      :density="density"
       @toggle-sidebar="toggleSidebar"
       @show-booking="onShowBooking"
       @show-tooltip="onShowTooltip"
@@ -287,6 +300,9 @@ const helpOpen = ref(false)
 const helpCloseBtnEl = ref(null)
 // FT-030: sidebar collapse state (toggle via `S` shortcut or corner button).
 const sidebarCollapsed = ref(false)
+// FT-033: density toggle (toggle via `D` shortcut or toolbar button).
+const density = ref('comfortable')
+const SUPPORTED_DENSITIES = ['comfortable', 'compact']
 const searchQuery = ref('')
 const debouncedQuery = ref('')
 const searchOpen = ref(false)
@@ -377,6 +393,11 @@ function toggleSidebar() {
   sidebarCollapsed.value = !sidebarCollapsed.value
 }
 
+// FT-033: density toggle — also bound to `D` shortcut.
+function toggleDensity() {
+  density.value = density.value === 'compact' ? 'comfortable' : 'compact'
+}
+
 // Shortcut rows — single source of truth for the help dialog table.
 const shortcutRows = [
   { key: '/', label: 'calendar.gantt.shortcuts.keys.search' },
@@ -384,6 +405,7 @@ const shortcutRows = [
   { key: '[', label: 'calendar.gantt.shortcuts.keys.panPrev' },
   { key: ']', label: 'calendar.gantt.shortcuts.keys.panNext' },
   { key: 'S', label: 'calendar.gantt.shortcuts.keys.sidebar' },
+  { key: 'D', label: 'calendar.gantt.shortcuts.keys.density' },
   { key: 'Esc', label: 'calendar.gantt.shortcuts.keys.clear' },
   { key: '?', label: 'calendar.gantt.shortcuts.keys.help' },
 ]
@@ -393,6 +415,7 @@ useGanttShortcuts({
   goToday,
   shiftRange,
   toggleSidebar,
+  toggleDensity,
   onSearchEscape,
   helpOpen,
   searchQuery,
@@ -523,6 +546,10 @@ function loadStoredView() {
     if (typeof parsed.sidebarCollapsed === 'boolean') {
       sidebarCollapsed.value = parsed.sidebarCollapsed
     }
+    // FT-033: restore density. Enum-guard — malformed → default comfortable.
+    if (typeof parsed.density === 'string' && SUPPORTED_DENSITIES.includes(parsed.density)) {
+      density.value = parsed.density
+    }
   } catch (err) {
     // Persistence is best-effort; corrupt JSON or unavailable storage falls
     // back to defaults. Log in dev so regressions are debuggable; silent in
@@ -547,6 +574,7 @@ function persistView() {
         specialMode: specialMode.value,
         searchQuery: searchQuery.value,
         sidebarCollapsed: sidebarCollapsed.value,
+        density: density.value,
       }),
     )
   } catch (err) {
@@ -564,6 +592,7 @@ watch(rangeDays, () => {
 watch(specialMode, () => persistView())
 watch(searchQuery, () => persistView())
 watch(sidebarCollapsed, () => persistView())
+watch(density, () => persistView())
 watch(anchorDate, () => loadData())
 
 // Refetch on tab focus (visibilitychange).
@@ -601,6 +630,8 @@ defineExpose({
   helpOpen, shortcutRows, focusSearchInput, shiftRange,
   // FT-030
   sidebarCollapsed, toggleSidebar,
+  // FT-033
+  density, toggleDensity,
 })
 </script>
 
