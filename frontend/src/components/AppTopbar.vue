@@ -47,9 +47,19 @@ const isDark = computed(() => theme.global.current.value.dark)
 const THEME_STORAGE_KEY = 'apartus-theme'
 const VALID_THEMES = ['apartusLight', 'apartusDark']
 
+// FT-036 P0: sync document.documentElement.class с Vuetify theme.
+// Единый `.dark` class активирует Tailwind `dark:*` utilities +
+// PrimeVue `darkModeSelector: '.dark'` (см. plugins/primevue.js).
+function syncDarkClass(themeName) {
+  const root = typeof document !== 'undefined' ? document.documentElement : null
+  if (!root) return
+  root.classList.toggle('dark', themeName === 'apartusDark')
+}
+
 function toggleTheme() {
   const next = isDark.value ? 'apartusLight' : 'apartusDark'
   theme.global.name.value = next
+  syncDarkClass(next)
   try {
     localStorage.setItem(THEME_STORAGE_KEY, next)
   } catch {
@@ -63,9 +73,14 @@ try {
   const saved = localStorage.getItem(THEME_STORAGE_KEY)
   if (saved && VALID_THEMES.includes(saved)) {
     theme.global.name.value = saved
+    syncDarkClass(saved)
+  } else {
+    // First paint — sync based на Vuetify default.
+    syncDarkClass(theme.global.name.value)
   }
 } catch {
   // Fall back to default theme.
+  syncDarkClass(theme.global.name.value)
 }
 
 async function handleLogout() {
