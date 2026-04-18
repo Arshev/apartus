@@ -67,7 +67,19 @@
           />
         </div>
 
-        <!-- Today marker -->
+        <!-- FT-032: Today column anchor — full-height primary-tint background
+             highlighting today. Sits behind rows (z-index 0) so items, heat
+             cells, idle gaps all paint on top. pointer-events none. -->
+        <div
+          v-if="todayInRange"
+          class="gantt-timeline__today-column"
+          :style="{ left: todayLeft + 'px', width: dayWidthPx + 'px' }"
+          :aria-label="$t('calendar.gantt.todayColumnAriaLabel')"
+          role="presentation"
+          data-testid="today-column"
+        />
+
+        <!-- Today marker (thin vertical line — FT-020 baseline) -->
         <div
           v-if="todayInRange"
           class="gantt-timeline__today-marker"
@@ -130,6 +142,9 @@ const todayInRange = computed(() => {
 
 const todayLeft = computed(() => dateToPixel(startOfDay(new Date()), props.viewStart, pixelsPerMs.value))
 
+// FT-032: width of a single day column in pixels — used for today column tint.
+const dayWidthPx = computed(() => pixelsPerMs.value * MS_PER_DAY)
+
 // Track row heights for sidebar sync. Row emits row-height-changed when
 // its computedRowHeight changes (lanes can grow rows beyond baseRowHeight).
 const rowHeights = ref({})
@@ -165,7 +180,7 @@ onUnmounted(() => {
 })
 
 defineExpose({
-  pixelsPerMs, totalWidth, todayInRange, todayLeft, rowHeights, onRowHeightChanged, scrollToToday, scrollToDate, updateViewport,
+  pixelsPerMs, totalWidth, todayInRange, todayLeft, dayWidthPx, rowHeights, onRowHeightChanged, scrollToToday, scrollToDate, updateViewport,
 })
 </script>
 
@@ -290,5 +305,16 @@ defineExpose({
   background: rgb(var(--v-theme-primary));
   pointer-events: none;
   z-index: 5;
+}
+
+/* FT-032: Today column background tint — full height, whisper-level primary
+   tint (~5%). Sits behind rows so items/heat-cells/gaps paint on top. */
+.gantt-timeline__today-column {
+  position: absolute;
+  top: 50px; /* below header — aligns with marker */
+  bottom: 0;
+  background: rgba(var(--v-theme-primary), 0.05);
+  pointer-events: none;
+  z-index: 0;
 }
 </style>

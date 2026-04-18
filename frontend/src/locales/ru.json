@@ -139,6 +139,7 @@
         "loadFailed": "Не удалось загрузить календарь"
       },
       "today": "Сегодня",
+      "todayColumnAriaLabel": "Сегодняшний день",
       "modes": {
         "handover": "Заезды/выезды",
         "overdue": "Просрочки",

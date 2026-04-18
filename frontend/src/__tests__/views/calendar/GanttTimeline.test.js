@@ -91,6 +91,34 @@ describe('GanttTimeline', () => {
     expect(wrapper.find('[data-testid="today-marker"]').exists()).toBe(false)
   })
 
+  // FT-032 today column anchor
+  it('renders today-column tint when today is in range', async () => {
+    // Choose a viewStart/viewEnd that contains "today" — system date.
+    const today = new Date()
+    const viewStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    const viewEnd = new Date(viewStart)
+    viewEnd.setDate(viewEnd.getDate() + 13)
+    const wrapper = mountWithVuetify(GanttTimeline, {
+      props: {
+        units: [{ id: 1, name: 'U1', property_name: 'P1' }],
+        reservations: [],
+        viewStart,
+        viewEnd,
+      },
+    })
+    await wrapper.vm.$nextTick()
+    expect(wrapper.vm.todayInRange).toBe(true)
+    const col = wrapper.find('[data-testid="today-column"]')
+    expect(col.exists()).toBe(true)
+    // Width is computed from pixelsPerMs * MS_PER_DAY; just assert non-zero.
+    expect(wrapper.vm.dayWidthPx).toBeGreaterThan(0)
+  })
+
+  it('does NOT render today-column when today is out of range', () => {
+    const wrapper = setup('2030-01-01', '2030-01-14')
+    expect(wrapper.find('[data-testid="today-column"]').exists()).toBe(false)
+  })
+
   it('exposes scrollToToday and scrollToDate methods', () => {
     const wrapper = setup('2026-04-15', '2026-04-28')
     expect(typeof wrapper.vm.scrollToToday).toBe('function')

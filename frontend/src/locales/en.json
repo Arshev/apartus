@@ -139,6 +139,7 @@
         "loadFailed": "Failed to load calendar"
       },
       "today": "Today",
+      "todayColumnAriaLabel": "Today",
       "modes": {
         "handover": "Arrivals/Departures",
         "overdue": "Overdue",
