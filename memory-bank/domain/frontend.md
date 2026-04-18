@@ -131,6 +131,18 @@ Apartus frontend — это одно приложение, SPA.
 - `SUPPORTED_SPECIAL_MODES` extended: `['', 'handover', 'overdue', 'idle', 'heatmap']`.
 - **FT-020 NS-02 closed** — все 4 special modes delivered (handover FT-021, overdue FT-022, idle FT-023, heatmap FT-024).
 
+### Sidebar Collapse (FT-030)
+
+Gantt unit sidebar можно свернуть до 48px icon-only колонки — unit cells показывают 2-letter abbreviation («DE», «ST», «DO» etc) вместо property + unit name.
+
+- Toggle button в corner header (`mdi-chevron-left/right`).
+- Keyboard shortcut `S` (wired через FT-029 `useGanttShortcuts`).
+- Persisted в `localStorage('apartus-calendar-view').sidebarCollapsed: boolean`. Restored synchronously в setup (FT-025 ER-03 pattern).
+- Abbreviation via `utils/strings.js#abbreviateUnit(name)` — 2 uppercase chars from first significant word (skip «the», «a», «an»).
+- CSS transition 0.2s ease-out, disabled когда `prefers-reduced-motion: reduce`.
+- `aria-expanded` / `aria-controls` on toggle button.
+- Full name остаётся в `:title` tooltip при hover.
+
 ### Keyboard Shortcuts (FT-029)
 
 Gantt поддерживает 6 keyboard shortcuts (via `composables/useGanttShortcuts.js`):

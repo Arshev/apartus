@@ -9,6 +9,7 @@
 //   T        — jump to today (code: KeyT)
 //   [        — pan one range window earlier (code: BracketLeft)
 //   ]        — pan one range window later (code: BracketRight)
+//   S        — toggle sidebar collapse (FT-030, code: KeyS)
 //   Escape   — close overlay / clear search (code: Escape)
 //   ?        — open help dialog
 //              (code: Slash + shiftKey, OR key === '?' to cover layouts
@@ -44,6 +45,7 @@ export function useGanttShortcuts({
   focusSearchInput,
   goToday,
   shiftRange,
+  toggleSidebar,
   onSearchEscape,
   helpOpen,
   searchQuery,
@@ -82,6 +84,16 @@ export function useGanttShortcuts({
     if (event.code === 'KeyT') {
       goToday()
       event.preventDefault()
+      return
+    }
+
+    // `S` — toggle sidebar collapse (FT-030). Handler optional: only fires if
+    // CalendarView wired it (keeps composable backward-compat with tests).
+    if (event.code === 'KeyS') {
+      if (typeof toggleSidebar === 'function') {
+        toggleSidebar()
+        event.preventDefault()
+      }
       return
     }
 

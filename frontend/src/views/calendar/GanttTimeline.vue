@@ -1,12 +1,24 @@
 <template>
-  <div class="gantt-timeline">
-    <!-- Sticky-left header corner -->
+  <div class="gantt-timeline" :class="{ 'gantt-timeline--sidebar-collapsed': sidebarCollapsed }">
+    <!-- Sticky-left header corner — toggle button when collapsed, label otherwise -->
     <div class="gantt-timeline__corner">
-      {{ $t('calendar.unitColumn') }}
+      <v-btn
+        variant="text"
+        size="small"
+        density="compact"
+        :icon="sidebarCollapsed ? 'mdi-chevron-right' : 'mdi-chevron-left'"
+        :title="`${sidebarCollapsed ? $t('calendar.gantt.sidebar.toggleExpand') : $t('calendar.gantt.sidebar.toggleCollapse')} (S)`"
+        :aria-label="sidebarCollapsed ? $t('calendar.gantt.sidebar.toggleExpand') : $t('calendar.gantt.sidebar.toggleCollapse')"
+        :aria-expanded="!sidebarCollapsed"
+        aria-controls="gantt-sidebar"
+        data-testid="sidebar-toggle"
+        @click="$emit('toggle-sidebar')"
+      />
+      <span v-if="!sidebarCollapsed" class="gantt-timeline__corner-label">{{ $t('calendar.unitColumn') }}</span>
     </div>
 
     <!-- Sticky-left unit column -->
-    <div class="gantt-timeline__sidebar">
+    <div id="gantt-sidebar" class="gantt-timeline__sidebar">
       <div
         v-for="unit in units"
         :key="unit.id"
@@ -14,8 +26,13 @@
         :style="{ height: (rowHeights[unit.id] || baseRowHeight) + 'px' }"
         :title="`${unit.property_name} — ${unit.name}`"
       >
-        <div class="gantt-timeline__unit-property">{{ unit.property_name }}</div>
-        <div class="gantt-timeline__unit-name">{{ unit.name }}</div>
+        <template v-if="sidebarCollapsed">
+          <div class="gantt-timeline__unit-abbr">{{ abbreviateUnit(unit.name) }}</div>
+        </template>
+        <template v-else>
+          <div class="gantt-timeline__unit-property">{{ unit.property_name }}</div>
+          <div class="gantt-timeline__unit-name">{{ unit.name }}</div>
+        </template>
       </div>
     </div>
 
@@ -68,6 +85,7 @@ import GanttTimelineHeader from './GanttTimelineHeader.vue'
 import GanttTimelineRow from './GanttTimelineRow.vue'
 import { dateToPixel } from '../../utils/gantt'
 import { startOfDay } from '../../utils/date'
+import { abbreviateUnit } from '../../utils/strings'
 
 const MS_PER_DAY = 86_400_000
 const DEFAULT_VIEWPORT_WIDTH = 1200
@@ -81,9 +99,12 @@ const props = defineProps({
   baseRowHeight: { type: Number, default: 36 },
   itemHeight: { type: Number, default: 28 },
   specialMode: { type: String, default: '' },
+  // FT-030: collapsed sidebar — narrows to 48px and shows 2-letter
+  // abbreviations instead of property+unit name.
+  sidebarCollapsed: { type: Boolean, default: false },
 })
 
-defineEmits(['show-booking', 'show-tooltip', 'hide-tooltip', 'context-menu'])
+defineEmits(['show-booking', 'show-tooltip', 'hide-tooltip', 'context-menu', 'toggle-sidebar'])
 
 const scrollEl = ref(null)
 const viewportWidth = ref(DEFAULT_VIEWPORT_WIDTH)
@@ -157,13 +178,26 @@ defineExpose({
   border-radius: 8px;
   overflow: hidden;
   background: rgb(var(--v-theme-surface));
+  /* FT-030: smooth sidebar collapse transition. */
+  transition: grid-template-columns 0.2s ease-out;
+}
+
+/* FT-030: collapsed — sidebar shrinks to 48px (minimal icon button width). */
+.gantt-timeline--sidebar-collapsed {
+  grid-template-columns: 48px 1fr;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gantt-timeline {
+    transition: none;
+  }
 }
 
 .gantt-timeline__corner {
   grid-column: 1;
   grid-row: 1;
   background: rgb(var(--v-theme-surface-light));
-  padding: 4px 8px;
+  padding: 4px 4px;
   font-weight: 600;
   font-size: 12px;
   border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
@@ -173,8 +207,15 @@ defineExpose({
   z-index: 4;
   display: flex;
   align-items: center;
+  gap: 4px;
   height: 50px;
   box-sizing: border-box;
+}
+
+.gantt-timeline__corner-label {
+  font-weight: 600;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .gantt-timeline__sidebar {
@@ -208,6 +249,22 @@ defineExpose({
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* FT-030: abbreviation cell — centered uppercase 2-char badge. */
+.gantt-timeline__unit-abbr {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: center;
+  color: rgb(var(--v-theme-on-surface));
+}
+
+/* Reduce cell padding on collapsed to keep text centered in 48px. */
+.gantt-timeline--sidebar-collapsed .gantt-timeline__unit-cell {
+  padding: 6px 4px;
+  align-items: center;
 }
 
 .gantt-timeline__scroll {
