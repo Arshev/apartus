@@ -119,6 +119,49 @@ describe('GanttTimeline', () => {
     expect(wrapper.find('[data-testid="today-column"]').exists()).toBe(false)
   })
 
+  // FT-033 Density toggle
+  describe('density prop (FT-033)', () => {
+    it('density="comfortable" → effectiveRowHeight 36 / effectiveItemHeight 28', async () => {
+      const wrapper = mountWithVuetify(GanttTimeline, {
+        props: {
+          units: [{ id: 1, name: 'U1', property_name: 'P1' }],
+          reservations: [],
+          viewStart: new Date('2026-04-15'),
+          viewEnd: new Date('2026-04-28'),
+          density: 'comfortable',
+        },
+      })
+      expect(wrapper.vm.effectiveRowHeight).toBe(36)
+      expect(wrapper.vm.effectiveItemHeight).toBe(28)
+    })
+
+    it('density="compact" → effectiveRowHeight 28 / effectiveItemHeight 22', async () => {
+      const wrapper = mountWithVuetify(GanttTimeline, {
+        props: {
+          units: [{ id: 1, name: 'U1', property_name: 'P1' }],
+          reservations: [],
+          viewStart: new Date('2026-04-15'),
+          viewEnd: new Date('2026-04-28'),
+          density: 'compact',
+        },
+      })
+      expect(wrapper.vm.effectiveRowHeight).toBe(28)
+      expect(wrapper.vm.effectiveItemHeight).toBe(22)
+    })
+
+    it('density defaults to comfortable when prop omitted', () => {
+      const wrapper = mountWithVuetify(GanttTimeline, {
+        props: {
+          units: [{ id: 1, name: 'U1', property_name: 'P1' }],
+          reservations: [],
+          viewStart: new Date('2026-04-15'),
+          viewEnd: new Date('2026-04-28'),
+        },
+      })
+      expect(wrapper.vm.effectiveRowHeight).toBe(36)
+    })
+  })
+
   it('exposes scrollToToday and scrollToDate methods', () => {
     const wrapper = setup('2026-04-15', '2026-04-28')
     expect(typeof wrapper.vm.scrollToToday).toBe('function')

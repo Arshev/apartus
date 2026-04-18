@@ -23,7 +23,7 @@
         v-for="unit in units"
         :key="unit.id"
         class="gantt-timeline__unit-cell"
-        :style="{ height: (rowHeights[unit.id] || baseRowHeight) + 'px' }"
+        :style="{ height: (rowHeights[unit.id] || effectiveRowHeight) + 'px' }"
         :title="`${unit.property_name} — ${unit.name}`"
       >
         <template v-if="sidebarCollapsed">
@@ -56,8 +56,8 @@
             :view-end="viewEnd"
             :pixels-per-ms="pixelsPerMs"
             :total-width="totalWidth"
-            :base-row-height="baseRowHeight"
-            :item-height="itemHeight"
+            :base-row-height="effectiveRowHeight"
+            :item-height="effectiveItemHeight"
             :special-mode="specialMode"
             @show-booking="$emit('show-booking', $event)"
             @show-tooltip="$emit('show-tooltip', $event)"
@@ -114,6 +114,27 @@ const props = defineProps({
   // FT-030: collapsed sidebar — narrows to 48px and shows 2-letter
   // abbreviations instead of property+unit name.
   sidebarCollapsed: { type: Boolean, default: false },
+  // FT-033: row density mode — 'comfortable' (default) or 'compact'.
+  // Derives effectiveRowHeight + effectiveItemHeight when provided.
+  density: { type: String, default: 'comfortable', validator: (v) => ['comfortable', 'compact'].includes(v) },
+})
+
+// FT-033: density → row/item height mapping. Falls back to baseRowHeight /
+// itemHeight props when density === 'comfortable' (preserves test overrides
+// that pass custom heights directly).
+const DENSITY_MAP = {
+  comfortable: { base: 36, item: 28 },
+  compact:     { base: 28, item: 22 },
+}
+
+const effectiveRowHeight = computed(() => {
+  if (props.density === 'compact') return DENSITY_MAP.compact.base
+  return props.baseRowHeight
+})
+
+const effectiveItemHeight = computed(() => {
+  if (props.density === 'compact') return DENSITY_MAP.compact.item
+  return props.itemHeight
 })
 
 defineEmits(['show-booking', 'show-tooltip', 'hide-tooltip', 'context-menu', 'toggle-sidebar'])
@@ -181,6 +202,8 @@ onUnmounted(() => {
 
 defineExpose({
   pixelsPerMs, totalWidth, todayInRange, todayLeft, dayWidthPx, rowHeights, onRowHeightChanged, scrollToToday, scrollToDate, updateViewport,
+  // FT-033
+  effectiveRowHeight, effectiveItemHeight,
 })
 </script>
 
@@ -249,6 +272,12 @@ defineExpose({
   justify-content: center;
   overflow: hidden;
   box-sizing: border-box;
+  /* FT-033: smooth height transition when density toggles. */
+  transition: height 0.15s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gantt-timeline__unit-cell { transition: none; }
 }
 
 .gantt-timeline__unit-property {

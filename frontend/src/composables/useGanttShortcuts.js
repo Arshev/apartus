@@ -10,6 +10,7 @@
 //   [        — pan one range window earlier (code: BracketLeft)
 //   ]        — pan one range window later (code: BracketRight)
 //   S        — toggle sidebar collapse (FT-030, code: KeyS)
+//   D        — toggle density comfortable/compact (FT-033, code: KeyD)
 //   Escape   — close overlay / clear search (code: Escape)
 //   ?        — open help dialog
 //              (code: Slash + shiftKey, OR key === '?' to cover layouts
@@ -46,6 +47,7 @@ export function useGanttShortcuts({
   goToday,
   shiftRange,
   toggleSidebar,
+  toggleDensity,
   onSearchEscape,
   helpOpen,
   searchQuery,
@@ -92,6 +94,15 @@ export function useGanttShortcuts({
     if (event.code === 'KeyS') {
       if (typeof toggleSidebar === 'function') {
         toggleSidebar()
+        event.preventDefault()
+      }
+      return
+    }
+
+    // `D` — toggle Gantt density (FT-033). Handler optional (same pattern as S).
+    if (event.code === 'KeyD') {
+      if (typeof toggleDensity === 'function') {
+        toggleDensity()
         event.preventDefault()
       }
       return
