@@ -7,7 +7,7 @@ derived_from:
   - ./feature.md
   - ../FT-026-design-refresh/feature.md
 status: active
-delivery_status: planned
+delivery_status: done
 audience: humans_and_agents
 must_not_define:
   - implementation_sequence
