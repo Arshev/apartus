@@ -119,12 +119,16 @@ const props = defineProps({
   density: { type: String, default: 'comfortable', validator: (v) => ['comfortable', 'compact'].includes(v) },
 })
 
-// FT-033: density → row/item height mapping. Falls back to baseRowHeight /
-// itemHeight props when density === 'comfortable' (preserves test overrides
-// that pass custom heights directly).
+// FT-033: density → row/item height mapping.
+// `base` is aligned with what GanttTimelineRow's `computedRowHeight` produces
+// for the minimum-occupied (1-lane) row: Math.max(base, 1 * (item + 2) + 6).
+// For compact: item=22 → lane-forced minimum = 30. Setting base=30 keeps the
+// sidebar's default (before Row emits row-height-changed) in lockstep with
+// the timeline row — no transient top-edge drift during mount or toggle.
+// For comfortable: item=28 → lane-forced minimum = 36. base=36 also matches.
 const DENSITY_MAP = {
   comfortable: { base: 36, item: 28 },
-  compact:     { base: 28, item: 22 },
+  compact:     { base: 30, item: 22 },
 }
 
 const effectiveRowHeight = computed(() => {
@@ -272,12 +276,10 @@ defineExpose({
   justify-content: center;
   overflow: hidden;
   box-sizing: border-box;
-  /* FT-033: smooth height transition when density toggles. */
-  transition: height 0.15s ease-out;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .gantt-timeline__unit-cell { transition: none; }
+  /* FT-033: no CSS transition on height — sidebar must stay exactly in
+     lockstep with timeline rows (which snap instantly via Row's
+     computedRowHeight). Animating one side only produces visible drift
+     during the transition window. */
 }
 
 .gantt-timeline__unit-property {

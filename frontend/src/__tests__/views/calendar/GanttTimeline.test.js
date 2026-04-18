@@ -135,7 +135,10 @@ describe('GanttTimeline', () => {
       expect(wrapper.vm.effectiveItemHeight).toBe(28)
     })
 
-    it('density="compact" → effectiveRowHeight 28 / effectiveItemHeight 22', async () => {
+    it('density="compact" → effectiveRowHeight 30 / effectiveItemHeight 22', async () => {
+      // 30, not 28: aligned with Row's minimum 1-lane computedRowHeight
+      // (max(base, 1*(item+2)+6) = max(30, 30) = 30). This keeps sidebar
+      // cells in lockstep with timeline rows without transient drift.
       const wrapper = mountWithVuetify(GanttTimeline, {
         props: {
           units: [{ id: 1, name: 'U1', property_name: 'P1' }],
@@ -145,7 +148,7 @@ describe('GanttTimeline', () => {
           density: 'compact',
         },
       })
-      expect(wrapper.vm.effectiveRowHeight).toBe(28)
+      expect(wrapper.vm.effectiveRowHeight).toBe(30)
       expect(wrapper.vm.effectiveItemHeight).toBe(22)
     })
 

@@ -45,8 +45,8 @@ Current `baseRowHeight: 36` + `itemHeight: 28` + lane expansion gives effective 
 - `REQ-01` **Density state.** New ref `density: ref<'comfortable' | 'compact'>` в `GanttCalendarView`. Default `'comfortable'` (backward-compat с existing behavior). Passed as prop to `GanttTimeline`.
 - `REQ-02` **Row height mapping.** `GanttTimeline` derives `baseRowHeight` + `itemHeight` from `density` prop:
   - `comfortable` (default): `baseRowHeight: 36`, `itemHeight: 28` (current values)
-  - `compact`: `baseRowHeight: 28`, `itemHeight: 22`
-  Prop `density` passed down; existing `baseRowHeight` / `itemHeight` props remain (backward-compat for direct overrides in tests).
+  - `compact`: `baseRowHeight: 30`, `itemHeight: 22`
+  The `base` value aligns with what `GanttTimelineRow#computedRowHeight` produces for the minimum-occupied (1-lane) row — `Math.max(base, 1 * (item + 2) + 6)`. For compact with item=22 the lane-forced minimum is 30, so base=30 keeps the sidebar cell's default height (before Row emits `row-height-changed`) in lockstep with the timeline row. Prevents transient top-edge drift during mount or density toggle. Prop `density` passed down; existing `baseRowHeight` / `itemHeight` props remain (backward-compat for direct overrides in tests).
 - `REQ-03` **Toolbar toggle button.** В `GanttCalendarView` toolbar, utilities cluster (FT-026): new `v-btn` icon `mdi-format-line-spacing` с title «Плотность (D)» (ru) / «Density (D)» (en). `variant="text"` когда `comfortable`, `variant="tonal"` когда `compact` (consistent с mode-button active pattern FT-026 REQ-06).
 - `REQ-04` **Persistence.** Extend existing `loadStoredView` / `persistView`. New field `density: 'comfortable' | 'compact'`. Backward-compat: legacy payloads default `'comfortable'`. Restored sync в `setup()` (FT-025 ER-03 pattern).
 - `REQ-05` **Keyboard shortcut `D`.** Extend `useGanttShortcuts` composable to accept `toggleDensity` handler. Wire в `GanttCalendarView`. Update `shortcutRows` array для help dialog (FT-029) — add `{ key: 'D', label: '...' }`.
