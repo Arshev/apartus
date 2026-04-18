@@ -108,6 +108,31 @@ export const PRIMEVUE_STUBS = {
       <slot />
     </div>`,
   },
+  Tabs: {
+    name: 'Tabs',
+    props: ['value'],
+    emits: ['update:value'],
+    template: `<div data-stub="p-tabs" :data-active="value">
+      <slot />
+    </div>`,
+  },
+  TabList: passthrough('p-tablist'),
+  Tab: {
+    name: 'Tab',
+    props: ['value'],
+    template: '<button data-stub="p-tab" :data-value="value"><slot /></button>',
+  },
+  TabPanels: passthrough('p-tabpanels'),
+  TabPanel: {
+    name: 'TabPanel',
+    props: ['value'],
+    template: '<div data-stub="p-tabpanel" :data-value="value"><slot /></div>',
+  },
+  ProgressBar: {
+    name: 'ProgressBar',
+    props: ['mode', 'value'],
+    template: '<div data-stub="p-progressbar" :data-mode="mode" />',
+  },
 }
 
 // FT-036 P1: Vuetify shell stubs — only components still used by hybrid

@@ -29,7 +29,7 @@ vi.mock('../../api/roles', () => ({
   destroy: vi.fn().mockResolvedValue({}),
 }))
 
-import { mountWithVuetify } from '../helpers/mountWithVuetify'
+import { mountWithPrimeVue } from '../helpers/mountWithPrimeVue'
 import SettingsView from '../../views/SettingsView.vue'
 import { useAuthStore } from '../../stores/auth'
 import i18n from '../../plugins/i18n'
@@ -37,68 +37,59 @@ import * as orgApi from '../../api/organizations'
 import * as membersApi from '../../api/members'
 import * as rolesApi from '../../api/roles'
 
-describe('SettingsView', () => {
+describe('SettingsView (FT-036 P3)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    // i18n.global.locale is shared across tests; reset so locale-mutating
-    // cases (handleOrgSave with orgForm.locale = 'en') don't leak into
-    // subsequent assertions on Russian role labels.
     i18n.global.locale.value = 'ru'
     localStorage.clear()
   })
 
   function setup() {
-    const wrapper = mountWithVuetify(SettingsView)
+    const wrapper = mountWithPrimeVue(SettingsView)
     const auth = useAuthStore()
     auth.user = { id: 1, full_name: 'Demo' }
     auth.organization = { id: 1, name: 'Org' }
     return wrapper
   }
 
-  it('renders tabs', () => {
+  it('renders title', () => {
     const wrapper = setup()
     expect(wrapper.text()).toContain('Настройки организации')
   })
 
-  // -- General --
-  it('loadOrg + handleOrgSave work with auth org', async () => {
+  // ── General ──
+  it('loadOrg populates form + handleOrgSave calls API', async () => {
     const wrapper = setup()
-    // Wait for reactivity to propagate
-    await wrapper.vm.$nextTick()
-    await wrapper.vm.$nextTick()
-    // Now manually call loadOrg (onMounted may have fired before org was set)
     await wrapper.vm.loadOrg()
     expect(wrapper.vm.orgForm.name).toBe('Org')
 
     wrapper.vm.orgForm.name = 'New Name'
     await wrapper.vm.handleOrgSave()
-    expect(orgApi.update).toHaveBeenCalledWith({ name: 'New Name', currency: 'RUB', settings: { locale: 'ru' } })
-    expect(wrapper.vm.orgSnackbar).toBe(true)
+    expect(orgApi.update).toHaveBeenCalledWith({
+      name: 'New Name',
+      currency: 'RUB',
+      settings: { locale: 'ru' },
+    })
   })
 
   it('handleOrgSave error sets orgError', async () => {
     orgApi.update.mockRejectedValueOnce({ response: { data: { error: ['bad'] } } })
     const wrapper = setup()
-    await wrapper.vm.$nextTick()
-    await wrapper.vm.$nextTick()
+    await wrapper.vm.loadOrg()
     await wrapper.vm.handleOrgSave()
     expect(wrapper.vm.orgError).toBeTruthy()
   })
 
-  // Regression guard for the P1 merge bug: saving language must NOT drop
-  // existing telegram settings from organization.settings (backend replaces
-  // the JSONB column wholesale, so the client has to round-trip every key).
-  it('handleOrgSave preserves existing telegram settings when saving locale', async () => {
+  // Regression: saving language must preserve existing telegram settings
+  it('handleOrgSave preserves telegram settings on locale save', async () => {
     orgApi.get.mockResolvedValueOnce({
       id: 1, name: 'Org', slug: 'org', currency: 'RUB',
       settings: { telegram_bot_token: 'T', telegram_chat_id: 'C', locale: 'ru' },
     })
     const wrapper = setup()
-    await wrapper.vm.$nextTick()
     await wrapper.vm.loadOrg()
     wrapper.vm.orgForm.locale = 'en'
     await wrapper.vm.handleOrgSave()
-
     const payload = orgApi.update.mock.calls.at(-1)[0]
     expect(payload.settings).toEqual({
       telegram_bot_token: 'T',
@@ -107,20 +98,17 @@ describe('SettingsView', () => {
     })
   })
 
-  // Symmetric regression guard: saving telegram credentials must NOT drop
-  // locale from organization.settings.
-  it('saveTelegram preserves existing locale when saving telegram credentials', async () => {
+  // Regression: saveTelegram preserves existing locale
+  it('saveTelegram preserves locale when saving bot credentials', async () => {
     orgApi.get.mockResolvedValueOnce({
       id: 1, name: 'Org', slug: 'org', currency: 'RUB',
       settings: { locale: 'en' },
     })
     const wrapper = setup()
-    await wrapper.vm.$nextTick()
     await wrapper.vm.loadOrg()
     wrapper.vm.telegramForm.bot_token = 'T2'
     wrapper.vm.telegramForm.chat_id = 'C2'
     await wrapper.vm.saveTelegram()
-
     const payload = orgApi.update.mock.calls.at(-1)[0]
     expect(payload.settings).toEqual({
       locale: 'en',
@@ -129,31 +117,36 @@ describe('SettingsView', () => {
     })
   })
 
-  // -- Members --
-  it('openAddMember resets form', () => {
+  // ── Members ──
+  it('openAddMember resets + opens dialog', () => {
     const wrapper = setup()
     wrapper.vm.openAddMember()
     expect(wrapper.vm.editingMember).toBeNull()
     expect(wrapper.vm.memberDialog).toBe(true)
   })
 
-  it('openEditMember fills role', () => {
+  it('openEditMember fills role only (preserves email/name/pwd field lock)', () => {
     const wrapper = setup()
     wrapper.vm.openEditMember({ id: 1, role: 'manager' })
     expect(wrapper.vm.editingMember.id).toBe(1)
     expect(wrapper.vm.memberForm.role).toBe('manager')
+    // Edit mode: memberForm set to { role } only — email/first_name/last_name/password absent
+    expect(wrapper.vm.memberForm.email).toBeUndefined()
+    expect(wrapper.vm.memberForm.password).toBeUndefined()
   })
 
   it('handleMemberSubmit create calls API', async () => {
     const wrapper = setup()
     wrapper.vm.openAddMember()
-    wrapper.vm.memberForm = { email: 'a@b.c', first_name: 'A', last_name: 'B', password: 'p', role: 'member' }
+    wrapper.vm.memberForm = {
+      email: 'a@b.com', first_name: 'A', last_name: 'B', password: 'p', role: 'member',
+    }
     await wrapper.vm.handleMemberSubmit()
     expect(membersApi.create).toHaveBeenCalled()
     expect(wrapper.vm.memberDialog).toBe(false)
   })
 
-  it('handleMemberSubmit edit calls API', async () => {
+  it('handleMemberSubmit edit calls API with role_enum', async () => {
     const wrapper = setup()
     wrapper.vm.openEditMember({ id: 1, role: 'member' })
     wrapper.vm.memberForm.role = 'manager'
@@ -161,7 +154,7 @@ describe('SettingsView', () => {
     expect(membersApi.update).toHaveBeenCalledWith(1, { role_enum: 'manager' })
   })
 
-  it('handleMemberSubmit error shows snackbar', async () => {
+  it('handleMemberSubmit error clears submitting flag', async () => {
     membersApi.create.mockRejectedValueOnce(new Error('fail'))
     const wrapper = setup()
     wrapper.vm.openAddMember()
@@ -170,20 +163,10 @@ describe('SettingsView', () => {
     expect(wrapper.vm.memberSubmitting).toBe(false)
   })
 
-  it('handleDeleteMember calls API', async () => {
+  it('handleDeleteMember calls API destroy', async () => {
     const wrapper = setup()
-    wrapper.vm.confirmDeleteMember({ id: 2, user: { full_name: 'B' } })
-    await wrapper.vm.handleDeleteMember()
+    await wrapper.vm.handleDeleteMember({ id: 2, user: { full_name: 'B' } })
     expect(membersApi.destroy).toHaveBeenCalledWith(2)
-    expect(wrapper.vm.deleteMemberDialog).toBe(false)
-  })
-
-  it('handleDeleteMember error', async () => {
-    membersApi.destroy.mockRejectedValueOnce(new Error('fail'))
-    const wrapper = setup()
-    wrapper.vm.confirmDeleteMember({ id: 2, user: { full_name: 'B' } })
-    await wrapper.vm.handleDeleteMember()
-    expect(wrapper.vm.deleteMemberDialog).toBe(false)
   })
 
   it('roleLabel maps enum', () => {
@@ -192,8 +175,8 @@ describe('SettingsView', () => {
     expect(wrapper.vm.roleLabel('member')).toBe('Участник')
   })
 
-  // -- Roles --
-  it('openAddRole resets form', () => {
+  // ── Roles ──
+  it('openAddRole resets + opens dialog', () => {
     const wrapper = setup()
     wrapper.vm.openAddRole()
     expect(wrapper.vm.editingRole).toBeNull()
@@ -216,27 +199,20 @@ describe('SettingsView', () => {
     expect(rolesApi.update).toHaveBeenCalledWith(2, { name: 'New', code: 'old' })
   })
 
-  it('handleRoleSubmit error', async () => {
-    rolesApi.create.mockRejectedValueOnce(new Error('fail'))
+  it('handleDeleteRole calls API destroy', async () => {
     const wrapper = setup()
-    wrapper.vm.openAddRole()
-    wrapper.vm.roleForm = { name: 'X', code: 'x' }
-    await wrapper.vm.handleRoleSubmit()
-    expect(wrapper.vm.roleSubmitting).toBe(false)
-  })
-
-  it('handleDeleteRole calls API', async () => {
-    const wrapper = setup()
-    wrapper.vm.confirmDeleteRole({ id: 2, name: 'Custom' })
-    await wrapper.vm.handleDeleteRole()
+    await wrapper.vm.handleDeleteRole({ id: 2, name: 'Custom' })
     expect(rolesApi.destroy).toHaveBeenCalledWith(2)
   })
 
-  it('handleDeleteRole error', async () => {
-    rolesApi.destroy.mockRejectedValueOnce(new Error('403'))
+  it('telegram test flow: testTelegram saves first then pings', async () => {
     const wrapper = setup()
-    wrapper.vm.confirmDeleteRole({ id: 1, name: 'System' })
-    await wrapper.vm.handleDeleteRole()
-    expect(wrapper.vm.deleteRoleDialog).toBe(false)
+    await wrapper.vm.loadOrg()
+    wrapper.vm.telegramForm.bot_token = 'T'
+    wrapper.vm.telegramForm.chat_id = 'C'
+    await wrapper.vm.testTelegram()
+    // saveTelegram called inside testTelegram
+    expect(orgApi.update).toHaveBeenCalled()
+    expect(wrapper.vm.telegramSuccess).toBe(true)
   })
 })

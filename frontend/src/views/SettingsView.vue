@@ -1,196 +1,374 @@
 <template>
-  <v-container>
-    <h1 class="text-h4 mb-4">{{ $t('settings.title') }}</h1>
+  <div class="max-w-5xl mx-auto px-4 py-6">
+    <h1 class="text-2xl font-display font-medium tracking-tight mb-6 text-surface-950 dark:text-surface-50">
+      {{ $t('settings.title') }}
+    </h1>
 
-    <v-tabs v-model="tab" class="mb-4">
-      <v-tab value="general">{{ $t('settings.tabs.general') }}</v-tab>
-      <v-tab value="integrations">{{ $t('settings.tabs.integrations') }}</v-tab>
-      <v-tab value="members">{{ $t('settings.tabs.members') }}</v-tab>
-      <v-tab value="roles">{{ $t('settings.tabs.roles') }}</v-tab>
-    </v-tabs>
+    <Tabs v-model:value="tab">
+      <TabList>
+        <Tab value="general">{{ $t('settings.tabs.general') }}</Tab>
+        <Tab value="integrations">{{ $t('settings.tabs.integrations') }}</Tab>
+        <Tab value="members">{{ $t('settings.tabs.members') }}</Tab>
+        <Tab value="roles">{{ $t('settings.tabs.roles') }}</Tab>
+      </TabList>
 
-    <v-window v-model="tab">
-      <v-window-item value="general">
-        <v-alert v-if="orgError" type="error" class="mb-4" closable @click:close="orgError = null">
-          {{ Array.isArray(orgError) ? orgError.join(', ') : orgError }}
-        </v-alert>
-        <v-form @submit.prevent="handleOrgSave" :disabled="orgSaving">
-          <v-text-field v-model="orgForm.name" :label="$t('settings.general.orgName')" class="mb-2" />
-          <v-select v-model="orgForm.currency" :label="$t('settings.general.currency')" :items="currencyList" item-title="label" item-value="code" class="mb-2" />
-          <v-select v-model="orgForm.locale" :label="$t('settings.general.language')" :items="localeOptions" item-title="label" item-value="value" class="mb-2" />
-          <v-btn type="submit" color="primary" :loading="orgSaving">{{ $t('common.save') }}</v-btn>
-        </v-form>
-        <v-snackbar v-model="orgSnackbar" :timeout="3000" color="success">{{ $t('common.messages.saved') }}</v-snackbar>
-      </v-window-item>
+      <TabPanels>
+        <!-- General -->
+        <TabPanel value="general">
+          <div
+            v-if="orgError"
+            class="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 px-3 py-2 text-sm text-red-800 dark:text-red-200 mb-4"
+          >
+            <i class="pi pi-exclamation-circle mt-0.5" aria-hidden="true" />
+            <span class="flex-1">{{ Array.isArray(orgError) ? orgError.join(', ') : orgError }}</span>
+            <button type="button" :aria-label="$t('common.close')" class="text-red-500 hover:text-red-700" @click="orgError = null">
+              <i class="pi pi-times" />
+            </button>
+          </div>
 
-      <v-window-item value="integrations">
-        <h2 class="text-h5 mb-4">{{ $t('settings.integrations.telegramTitle') }}</h2>
-        <v-alert v-if="telegramError" type="error" class="mb-4" closable @click:close="telegramError = null">
-          {{ telegramError }}
-        </v-alert>
-        <v-alert v-if="telegramSuccess" type="success" class="mb-4" closable @click:close="telegramSuccess = false">
-          {{ $t('settings.integrations.testSuccess') }}
-        </v-alert>
-        <v-text-field v-model="telegramForm.bot_token" :label="$t('settings.integrations.botToken')" class="mb-2" />
-        <v-text-field v-model="telegramForm.chat_id" :label="$t('settings.integrations.chatId')" class="mb-2" />
-        <div class="d-flex ga-2 mb-4">
-          <v-btn color="primary" :loading="telegramSaving" @click="saveTelegram">{{ $t('common.save') }}</v-btn>
-          <v-btn variant="outlined" :loading="telegramTesting" @click="testTelegram" :disabled="!telegramForm.bot_token || !telegramForm.chat_id">{{ $t('settings.integrations.testButton') }}</v-btn>
-        </div>
-        <v-card variant="outlined" class="pa-3">
-          <p class="text-body-2 text-medium-emphasis" style="white-space: pre-line">{{ $t('settings.integrations.instructions') }}</p>
-        </v-card>
-      </v-window-item>
-
-      <v-window-item value="members">
-        <div class="d-flex align-center mb-4">
-          <h2 class="text-h5">{{ $t('settings.members.title') }}</h2>
-          <v-spacer />
-          <v-btn color="primary" prepend-icon="mdi-plus" @click="openAddMember">{{ $t('common.add') }}</v-btn>
-        </div>
-
-        <v-alert v-if="membersStore.error" type="error" class="mb-4" closable @click:close="membersStore.error = null">
-          {{ Array.isArray(membersStore.error) ? membersStore.error.join(', ') : membersStore.error }}
-        </v-alert>
-
-        <v-data-table
-          v-if="membersStore.items.length || membersStore.loading"
-          :headers="memberHeaders"
-          :items="membersStore.items"
-          :loading="membersStore.loading"
-          density="comfortable"
-        >
-          <template v-slot:item.user="{ item }">
-            {{ item.user.full_name }} ({{ item.user.email }})
-          </template>
-          <template v-slot:item.role="{ item }">
-            {{ roleLabel(item.role) }}{{ item.role_name ? ` — ${item.role_name}` : '' }}
-          </template>
-          <template v-slot:item.actions="{ item }">
-            <v-btn icon="mdi-pencil" variant="text" size="small" @click="openEditMember(item)" />
-            <v-btn icon="mdi-delete" variant="text" size="small" color="error" @click="confirmDeleteMember(item)" />
-          </template>
-        </v-data-table>
-        <v-empty-state v-else-if="!membersStore.loading" icon="mdi-account-group" :title="$t('settings.members.emptyState.title')" />
-
-        <!-- Add/Edit member dialog -->
-        <v-dialog v-model="memberDialog" max-width="500">
-          <v-card>
-            <v-card-title>{{ editingMember ? $t('settings.members.editTitle') : $t('settings.members.addTitle') }}</v-card-title>
-            <v-card-text>
-              <template v-if="!editingMember">
-                <v-text-field v-model="memberForm.email" :label="$t('settings.members.form.email')" class="mb-2" />
-                <v-text-field v-model="memberForm.first_name" :label="$t('settings.members.form.firstName')" class="mb-2" />
-                <v-text-field v-model="memberForm.last_name" :label="$t('settings.members.form.lastName')" class="mb-2" />
-                <v-text-field v-model="memberForm.password" :label="$t('settings.members.form.password')" type="password" class="mb-2" />
-              </template>
-              <v-select
-                v-model="memberForm.role"
-                :label="$t('settings.members.form.role')"
-                :items="roleOptions"
-                item-title="label"
-                item-value="value"
-                class="mb-2"
+          <form @submit.prevent="handleOrgSave" class="space-y-4 max-w-lg">
+            <div>
+              <label for="org-name" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+                {{ $t('settings.general.orgName') }}
+              </label>
+              <InputText id="org-name" v-model="orgForm.name" class="w-full" />
+            </div>
+            <div>
+              <label for="org-currency" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+                {{ $t('settings.general.currency') }}
+              </label>
+              <Select
+                id="org-currency"
+                v-model="orgForm.currency"
+                :options="currencyList"
+                option-label="label"
+                option-value="code"
+                class="w-full"
               />
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer />
-              <v-btn @click="memberDialog = false">{{ $t('common.cancel') }}</v-btn>
-              <v-btn color="primary" :loading="memberSubmitting" @click="handleMemberSubmit">
-                {{ editingMember ? $t('common.save') : $t('common.add') }}
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+            </div>
+            <div>
+              <label for="org-locale" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+                {{ $t('settings.general.language') }}
+              </label>
+              <Select
+                id="org-locale"
+                v-model="orgForm.locale"
+                :options="localeOptions"
+                option-label="label"
+                option-value="value"
+                class="w-full"
+              />
+            </div>
+            <Button type="submit" :label="$t('common.save')" :loading="orgSaving" />
+          </form>
+        </TabPanel>
 
-        <!-- Delete member dialog -->
-        <v-dialog v-model="deleteMemberDialog" max-width="400">
-          <v-card>
-            <v-card-title>{{ $t('settings.members.dialog.deleteTitle') }}</v-card-title>
-            <v-card-text>{{ $t('settings.members.dialog.deleteText', { name: deletingMember?.user?.full_name }) }}</v-card-text>
-            <v-card-actions>
-              <v-spacer />
-              <v-btn @click="deleteMemberDialog = false">{{ $t('common.cancel') }}</v-btn>
-              <v-btn color="error" @click="handleDeleteMember">{{ $t('common.delete') }}</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+        <!-- Integrations -->
+        <TabPanel value="integrations">
+          <h2 class="text-lg font-display font-medium mb-4 text-surface-900 dark:text-surface-100">
+            {{ $t('settings.integrations.telegramTitle') }}
+          </h2>
 
-        <v-snackbar v-model="memberSnackbar" :timeout="3000" :color="memberSnackbarColor">
-          {{ memberSnackbarText }}
-        </v-snackbar>
-      </v-window-item>
+          <div
+            v-if="telegramError"
+            class="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 px-3 py-2 text-sm text-red-800 dark:text-red-200 mb-4"
+          >
+            <i class="pi pi-exclamation-circle mt-0.5" aria-hidden="true" />
+            <span class="flex-1">{{ telegramError }}</span>
+          </div>
+          <div
+            v-if="telegramSuccess"
+            class="flex items-start gap-2 rounded-lg bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-900 px-3 py-2 text-sm text-green-800 dark:text-green-200 mb-4"
+          >
+            <i class="pi pi-check-circle mt-0.5" aria-hidden="true" />
+            <span class="flex-1">{{ $t('settings.integrations.testSuccess') }}</span>
+          </div>
 
-      <v-window-item value="roles">
-        <div class="d-flex align-center mb-4">
-          <h2 class="text-h5">{{ $t('settings.roles.title') }}</h2>
-          <v-spacer />
-          <v-btn color="primary" prepend-icon="mdi-plus" @click="openAddRole">{{ $t('common.add') }}</v-btn>
-        </div>
+          <div class="space-y-4 max-w-lg">
+            <div>
+              <label for="tg-token" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+                {{ $t('settings.integrations.botToken') }}
+              </label>
+              <InputText id="tg-token" v-model="telegramForm.bot_token" class="w-full" />
+            </div>
+            <div>
+              <label for="tg-chat" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+                {{ $t('settings.integrations.chatId') }}
+              </label>
+              <InputText id="tg-chat" v-model="telegramForm.chat_id" class="w-full" />
+            </div>
+            <div class="flex gap-2">
+              <Button :label="$t('common.save')" :loading="telegramSaving" @click="saveTelegram" />
+              <Button
+                :label="$t('settings.integrations.testButton')"
+                severity="secondary"
+                variant="outlined"
+                :loading="telegramTesting"
+                :disabled="!telegramForm.bot_token || !telegramForm.chat_id"
+                @click="testTelegram"
+              />
+            </div>
+            <div class="rounded-lg border border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-900 p-3">
+              <p class="text-sm text-surface-600 dark:text-surface-400 whitespace-pre-line">
+                {{ $t('settings.integrations.instructions') }}
+              </p>
+            </div>
+          </div>
+        </TabPanel>
 
-        <v-alert v-if="rolesStore.error" type="error" class="mb-4" closable @click:close="rolesStore.error = null">
-          {{ Array.isArray(rolesStore.error) ? rolesStore.error.join(', ') : rolesStore.error }}
-        </v-alert>
+        <!-- Members -->
+        <TabPanel value="members">
+          <div class="flex items-center mb-6">
+            <h2 class="text-lg font-display font-medium text-surface-900 dark:text-surface-100">
+              {{ $t('settings.members.title') }}
+            </h2>
+            <div class="flex-1" />
+            <Button :label="$t('common.add')" icon="pi pi-plus" @click="openAddMember" />
+          </div>
 
-        <v-data-table
-          v-if="rolesStore.items.length || rolesStore.loading"
-          :headers="roleHeaders"
-          :items="rolesStore.items"
-          :loading="rolesStore.loading"
-          density="comfortable"
-        >
-          <template v-slot:item.is_system="{ item }">
-            {{ item.is_system ? $t('common.yes') : $t('common.no') }}
-          </template>
-          <template v-slot:item.actions="{ item }">
-            <v-btn icon="mdi-pencil" variant="text" size="small" @click="openEditRole(item)" :disabled="item.is_system" />
-            <v-btn icon="mdi-delete" variant="text" size="small" color="error" @click="confirmDeleteRole(item)" :disabled="item.is_system" />
-          </template>
-        </v-data-table>
-        <v-empty-state v-else-if="!rolesStore.loading" icon="mdi-shield-account" :title="$t('settings.roles.emptyState.title')" />
+          <div
+            v-if="membersStore.error"
+            class="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 px-3 py-2 text-sm text-red-800 dark:text-red-200 mb-4"
+          >
+            <i class="pi pi-exclamation-circle mt-0.5" aria-hidden="true" />
+            <span class="flex-1">
+              {{ Array.isArray(membersStore.error) ? membersStore.error.join(', ') : membersStore.error }}
+            </span>
+          </div>
 
-        <!-- Role dialog -->
-        <v-dialog v-model="roleDialog" max-width="500">
-          <v-card>
-            <v-card-title>{{ editingRole ? $t('settings.roles.editTitle') : $t('settings.roles.addTitle') }}</v-card-title>
-            <v-card-text>
-              <v-text-field v-model="roleForm.name" :label="$t('settings.roles.form.name')" class="mb-2" />
-              <v-text-field v-model="roleForm.code" :label="$t('settings.roles.form.code')" class="mb-2" />
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer />
-              <v-btn @click="roleDialog = false">{{ $t('common.cancel') }}</v-btn>
-              <v-btn color="primary" :loading="roleSubmitting" @click="handleRoleSubmit">
-                {{ editingRole ? $t('common.save') : $t('common.add') }}
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+          <DataTable
+            v-if="membersStore.items.length || membersStore.loading"
+            :value="membersStore.items"
+            :loading="membersStore.loading"
+            size="small"
+            striped-rows
+            data-key="id"
+            class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden"
+          >
+            <Column field="user" :header="$t('settings.members.columns.member')">
+              <template #body="{ data }">
+                {{ data.user.full_name }} ({{ data.user.email }})
+              </template>
+            </Column>
+            <Column field="role" :header="$t('settings.members.columns.role')">
+              <template #body="{ data }">
+                {{ roleLabel(data.role) }}{{ data.role_name ? ` — ${data.role_name}` : '' }}
+              </template>
+            </Column>
+            <Column :header="''" header-style="width: 120px; text-align: right">
+              <template #body="{ data }">
+                <div class="flex justify-end gap-1">
+                  <button
+                    type="button"
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
+                    :title="$t('common.edit')"
+                    @click="openEditMember(data)"
+                  >
+                    <i class="pi pi-pencil text-sm" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                    :title="$t('common.delete')"
+                    @click="confirmDeleteMember(data)"
+                  >
+                    <i class="pi pi-trash text-sm" aria-hidden="true" />
+                  </button>
+                </div>
+              </template>
+            </Column>
+          </DataTable>
+          <div
+            v-else-if="!membersStore.loading"
+            class="text-center py-12 border-2 border-dashed border-surface-200 dark:border-surface-700 rounded-xl"
+          >
+            <i class="pi pi-users text-4xl text-surface-400 mb-3" aria-hidden="true" />
+            <h3 class="text-base font-medium text-surface-900 dark:text-surface-100">
+              {{ $t('settings.members.emptyState.title') }}
+            </h3>
+          </div>
 
-        <!-- Delete role dialog -->
-        <v-dialog v-model="deleteRoleDialog" max-width="400">
-          <v-card>
-            <v-card-title>{{ $t('settings.roles.dialog.deleteTitle') }}</v-card-title>
-            <v-card-text>{{ $t('settings.roles.dialog.deleteText', { name: deletingRole?.name }) }}</v-card-text>
-            <v-card-actions>
-              <v-spacer />
-              <v-btn @click="deleteRoleDialog = false">{{ $t('common.cancel') }}</v-btn>
-              <v-btn color="error" @click="handleDeleteRole">{{ $t('common.delete') }}</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+          <Dialog
+            v-model:visible="memberDialog"
+            :header="editingMember ? $t('settings.members.editTitle') : $t('settings.members.addTitle')"
+            modal
+            :style="{ width: '500px' }"
+          >
+            <div class="space-y-3">
+              <template v-if="!editingMember">
+                <div>
+                  <label for="m-email" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+                    {{ $t('settings.members.form.email') }}
+                  </label>
+                  <InputText id="m-email" v-model="memberForm.email" type="email" class="w-full" />
+                </div>
+                <div>
+                  <label for="m-first" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+                    {{ $t('settings.members.form.firstName') }}
+                  </label>
+                  <InputText id="m-first" v-model="memberForm.first_name" class="w-full" />
+                </div>
+                <div>
+                  <label for="m-last" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+                    {{ $t('settings.members.form.lastName') }}
+                  </label>
+                  <InputText id="m-last" v-model="memberForm.last_name" class="w-full" />
+                </div>
+                <div>
+                  <label for="m-pwd" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+                    {{ $t('settings.members.form.password') }}
+                  </label>
+                  <InputText id="m-pwd" v-model="memberForm.password" type="password" class="w-full" />
+                </div>
+              </template>
+              <div>
+                <label for="m-role" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+                  {{ $t('settings.members.form.role') }}
+                </label>
+                <Select
+                  id="m-role"
+                  v-model="memberForm.role"
+                  :options="roleOptions"
+                  option-label="label"
+                  option-value="value"
+                  class="w-full"
+                />
+              </div>
+            </div>
+            <template #footer>
+              <Button :label="$t('common.cancel')" severity="secondary" variant="text" @click="memberDialog = false" />
+              <Button
+                :label="editingMember ? $t('common.save') : $t('common.add')"
+                :loading="memberSubmitting"
+                @click="handleMemberSubmit"
+              />
+            </template>
+          </Dialog>
+        </TabPanel>
 
-        <v-snackbar v-model="roleSnackbar" :timeout="3000" :color="roleSnackbarColor">
-          {{ roleSnackbarText }}
-        </v-snackbar>
-      </v-window-item>
-    </v-window>
-  </v-container>
+        <!-- Roles -->
+        <TabPanel value="roles">
+          <div class="flex items-center mb-6">
+            <h2 class="text-lg font-display font-medium text-surface-900 dark:text-surface-100">
+              {{ $t('settings.roles.title') }}
+            </h2>
+            <div class="flex-1" />
+            <Button :label="$t('common.add')" icon="pi pi-plus" @click="openAddRole" />
+          </div>
+
+          <div
+            v-if="rolesStore.error"
+            class="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 px-3 py-2 text-sm text-red-800 dark:text-red-200 mb-4"
+          >
+            <i class="pi pi-exclamation-circle mt-0.5" aria-hidden="true" />
+            <span class="flex-1">
+              {{ Array.isArray(rolesStore.error) ? rolesStore.error.join(', ') : rolesStore.error }}
+            </span>
+          </div>
+
+          <DataTable
+            v-if="rolesStore.items.length || rolesStore.loading"
+            :value="rolesStore.items"
+            :loading="rolesStore.loading"
+            size="small"
+            striped-rows
+            data-key="id"
+            class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden"
+          >
+            <Column field="name" :header="$t('settings.roles.columns.name')" />
+            <Column field="code" :header="$t('settings.roles.columns.code')" />
+            <Column field="is_system" :header="$t('settings.roles.columns.isSystem')">
+              <template #body="{ data }">
+                {{ data.is_system ? $t('common.yes') : $t('common.no') }}
+              </template>
+            </Column>
+            <Column field="members_count" :header="$t('settings.roles.columns.membersCount')" />
+            <Column :header="''" header-style="width: 120px; text-align: right">
+              <template #body="{ data }">
+                <div class="flex justify-end gap-1">
+                  <button
+                    type="button"
+                    :disabled="data.is_system"
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    :title="$t('common.edit')"
+                    @click="openEditRole(data)"
+                  >
+                    <i class="pi pi-pencil text-sm" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    :disabled="data.is_system"
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    :title="$t('common.delete')"
+                    @click="confirmDeleteRole(data)"
+                  >
+                    <i class="pi pi-trash text-sm" aria-hidden="true" />
+                  </button>
+                </div>
+              </template>
+            </Column>
+          </DataTable>
+          <div
+            v-else-if="!rolesStore.loading"
+            class="text-center py-12 border-2 border-dashed border-surface-200 dark:border-surface-700 rounded-xl"
+          >
+            <i class="pi pi-id-card text-4xl text-surface-400 mb-3" aria-hidden="true" />
+            <h3 class="text-base font-medium text-surface-900 dark:text-surface-100">
+              {{ $t('settings.roles.emptyState.title') }}
+            </h3>
+          </div>
+
+          <Dialog
+            v-model:visible="roleDialog"
+            :header="editingRole ? $t('settings.roles.editTitle') : $t('settings.roles.addTitle')"
+            modal
+            :style="{ width: '500px' }"
+          >
+            <div class="space-y-3">
+              <div>
+                <label for="r-name" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+                  {{ $t('settings.roles.form.name') }}
+                </label>
+                <InputText id="r-name" v-model="roleForm.name" class="w-full" />
+              </div>
+              <div>
+                <label for="r-code" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1">
+                  {{ $t('settings.roles.form.code') }}
+                </label>
+                <InputText id="r-code" v-model="roleForm.code" class="w-full" />
+              </div>
+            </div>
+            <template #footer>
+              <Button :label="$t('common.cancel')" severity="secondary" variant="text" @click="roleDialog = false" />
+              <Button
+                :label="editingRole ? $t('common.save') : $t('common.add')"
+                :loading="roleSubmitting"
+                @click="handleRoleSubmit"
+              />
+            </template>
+          </Dialog>
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
+  </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useConfirm } from 'primevue/useconfirm'
+import { useToast } from 'primevue/usetoast'
+import Tabs from 'primevue/tabs'
+import TabList from 'primevue/tablist'
+import Tab from 'primevue/tab'
+import TabPanels from 'primevue/tabpanels'
+import TabPanel from 'primevue/tabpanel'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import Select from 'primevue/select'
+import Dialog from 'primevue/dialog'
 import { useAuthStore } from '../stores/auth'
 import { useMembersStore } from '../stores/members'
 import { useRolesStore } from '../stores/roles'
@@ -203,10 +381,59 @@ const { t } = useI18n()
 const authStore = useAuthStore()
 const membersStore = useMembersStore()
 const rolesStore = useRolesStore()
+const confirm = useConfirm()
+const toast = useToast()
 
 const tab = ref('general')
 
-// -- Telegram tab --
+// ── General ──
+const orgForm = ref({ name: '', currency: 'RUB', locale: 'ru' })
+const currencyList = CURRENCY_LIST
+const localeOptions = [
+  { label: 'Русский', value: 'ru' },
+  { label: 'English', value: 'en' },
+]
+const orgSaving = ref(false)
+const orgError = ref(null)
+const orgSettings = ref({})
+
+async function loadOrg() {
+  if (!authStore.organization?.id) return
+  try {
+    const org = await organizationsApi.get()
+    orgSettings.value = org.settings || {}
+    orgForm.value.name = org.name
+    orgForm.value.currency = org.currency || 'RUB'
+    orgForm.value.locale = orgSettings.value.locale || 'ru'
+    telegramForm.value.bot_token = orgSettings.value.telegram_bot_token || ''
+    telegramForm.value.chat_id = orgSettings.value.telegram_chat_id || ''
+  } catch (e) {
+    if (import.meta.env.DEV) console.error(e)
+    orgError.value = t('settings.general.loadError')
+  }
+}
+
+async function handleOrgSave() {
+  orgSaving.value = true
+  orgError.value = null
+  try {
+    const nextSettings = { ...orgSettings.value, locale: orgForm.value.locale }
+    const updated = await organizationsApi.update({
+      name: orgForm.value.name,
+      currency: orgForm.value.currency,
+      settings: nextSettings,
+    })
+    orgSettings.value = updated?.settings || nextSettings
+    setAppLocale(orgForm.value.locale)
+    toast.add({ severity: 'success', summary: t('common.messages.saved'), life: 3000 })
+  } catch (e) {
+    orgError.value = e.response?.data?.error || t('common.messages.error')
+  } finally {
+    orgSaving.value = false
+  }
+}
+
+// ── Integrations (Telegram) ──
 const telegramForm = ref({ bot_token: '', chat_id: '' })
 const telegramSaving = ref(false)
 const telegramTesting = ref(false)
@@ -226,7 +453,7 @@ async function saveTelegram() {
     orgSettings.value = updated?.settings || nextSettings
     telegramSuccess.value = false
   } catch (e) {
-    console.error(e)
+    if (import.meta.env.DEV) console.error(e)
     telegramError.value = t('settings.integrations.saveError')
   } finally {
     telegramSaving.value = false
@@ -239,72 +466,17 @@ async function testTelegram() {
   telegramSuccess.value = false
   try {
     await saveTelegram()
-    const response = await apiClient.post('/organization/test_telegram')
+    await apiClient.post('/organization/test_telegram')
     telegramSuccess.value = true
   } catch (e) {
-    console.error(e)
+    if (import.meta.env.DEV) console.error(e)
     telegramError.value = t('settings.integrations.testError')
   } finally {
     telegramTesting.value = false
   }
 }
 
-// -- General tab --
-const orgForm = ref({ name: '', currency: 'RUB', locale: 'ru' })
-const currencyList = CURRENCY_LIST
-const localeOptions = [
-  { label: 'Русский', value: 'ru' },
-  { label: 'English', value: 'en' },
-]
-const orgSaving = ref(false)
-const orgError = ref(null)
-const orgSnackbar = ref(false)
-// Mirrors the server's full settings JSON so locale + telegram saves don't
-// overwrite each other (backend replaces the whole JSON column on update).
-const orgSettings = ref({})
-
-async function loadOrg() {
-  if (!authStore.organization?.id) return
-  try {
-    const org = await organizationsApi.get()
-    orgSettings.value = org.settings || {}
-    orgForm.value.name = org.name
-    orgForm.value.currency = org.currency || 'RUB'
-    orgForm.value.locale = orgSettings.value.locale || 'ru'
-    telegramForm.value.bot_token = orgSettings.value.telegram_bot_token || ''
-    telegramForm.value.chat_id = orgSettings.value.telegram_chat_id || ''
-  } catch (e) { console.error(e);
-    orgError.value = t('settings.general.loadError')
-  }
-}
-
-async function handleOrgSave() {
-  orgSaving.value = true
-  orgError.value = null
-  try {
-    const nextSettings = { ...orgSettings.value, locale: orgForm.value.locale }
-    const updated = await organizationsApi.update({
-      name: orgForm.value.name,
-      currency: orgForm.value.currency,
-      settings: nextSettings,
-    })
-    orgSettings.value = updated?.settings || nextSettings
-    setAppLocale(orgForm.value.locale)
-    orgSnackbar.value = true
-  } catch (e) {
-    orgError.value = e.response?.data?.error || t('common.messages.error')
-  } finally {
-    orgSaving.value = false
-  }
-}
-
-// -- Members tab --
-const memberHeaders = computed(() => [
-  { title: t('settings.members.columns.member'), key: 'user' },
-  { title: t('settings.members.columns.role'), key: 'role' },
-  { title: '', key: 'actions', sortable: false, align: 'end' },
-])
-
+// ── Members ──
 const roleOptions = computed(() => [
   { label: t('settings.members.roles.member'), value: 'member' },
   { label: t('settings.members.roles.manager'), value: 'manager' },
@@ -319,11 +491,6 @@ const memberDialog = ref(false)
 const editingMember = ref(null)
 const memberForm = ref({ email: '', first_name: '', last_name: '', password: '', role: 'member' })
 const memberSubmitting = ref(false)
-const deleteMemberDialog = ref(false)
-const deletingMember = ref(null)
-const memberSnackbar = ref(false)
-const memberSnackbarText = ref('')
-const memberSnackbarColor = ref('success')
 
 function openAddMember() {
   editingMember.value = null
@@ -342,62 +509,47 @@ async function handleMemberSubmit() {
   try {
     if (editingMember.value) {
       await membersStore.update(editingMember.value.id, { role_enum: memberForm.value.role })
-      memberSnackbarText.value = t('settings.members.messages.roleUpdated')
+      toast.add({ severity: 'success', summary: t('settings.members.messages.roleUpdated'), life: 3000 })
     } else {
       await membersStore.create(memberForm.value)
-      memberSnackbarText.value = t('settings.members.messages.memberAdded')
+      toast.add({ severity: 'success', summary: t('settings.members.messages.memberAdded'), life: 3000 })
     }
-    memberSnackbarColor.value = 'success'
-    memberSnackbar.value = true
     memberDialog.value = false
-  } catch (e) { console.error(e);
-    memberSnackbarText.value = membersStore.error || t('common.messages.error')
-    memberSnackbarColor.value = 'error'
-    memberSnackbar.value = true
+  } catch (e) {
+    if (import.meta.env.DEV) console.error(e)
+    toast.add({ severity: 'error', summary: membersStore.error || t('common.messages.error'), life: 3000 })
   } finally {
     memberSubmitting.value = false
   }
 }
 
 function confirmDeleteMember(member) {
-  deletingMember.value = member
-  deleteMemberDialog.value = true
+  confirm.require({
+    message: t('settings.members.dialog.deleteText', { name: member.user?.full_name }),
+    header: t('settings.members.dialog.deleteTitle'),
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: t('common.delete'),
+    rejectLabel: t('common.cancel'),
+    acceptProps: { severity: 'danger' },
+    accept: () => handleDeleteMember(member),
+  })
 }
 
-async function handleDeleteMember() {
+async function handleDeleteMember(member) {
   try {
-    await membersStore.destroy(deletingMember.value.id)
-    memberSnackbarText.value = t('settings.members.messages.memberDeleted')
-    memberSnackbarColor.value = 'success'
-    memberSnackbar.value = true
-  } catch (e) { console.error(e);
-    memberSnackbarText.value = membersStore.error || t('common.messages.error')
-    memberSnackbarColor.value = 'error'
-    memberSnackbar.value = true
-  } finally {
-    deleteMemberDialog.value = false
-    deletingMember.value = null
+    await membersStore.destroy(member.id)
+    toast.add({ severity: 'success', summary: t('settings.members.messages.memberDeleted'), life: 3000 })
+  } catch (e) {
+    if (import.meta.env.DEV) console.error(e)
+    toast.add({ severity: 'error', summary: membersStore.error || t('common.messages.error'), life: 3000 })
   }
 }
 
-// -- Roles tab --
-const roleHeaders = computed(() => [
-  { title: t('settings.roles.columns.name'), key: 'name' },
-  { title: t('settings.roles.columns.code'), key: 'code' },
-  { title: t('settings.roles.columns.isSystem'), key: 'is_system' },
-  { title: t('settings.roles.columns.membersCount'), key: 'members_count' },
-  { title: '', key: 'actions', sortable: false, align: 'end' },
-])
-
+// ── Roles ──
 const roleDialog = ref(false)
 const editingRole = ref(null)
 const roleForm = ref({ name: '', code: '' })
 const roleSubmitting = ref(false)
-const deleteRoleDialog = ref(false)
-const deletingRole = ref(null)
-const roleSnackbar = ref(false)
-const roleSnackbarText = ref('')
-const roleSnackbarColor = ref('success')
 
 function openAddRole() {
   editingRole.value = null
@@ -416,41 +568,39 @@ async function handleRoleSubmit() {
   try {
     if (editingRole.value) {
       await rolesStore.update(editingRole.value.id, roleForm.value)
-      roleSnackbarText.value = t('settings.roles.messages.updated')
+      toast.add({ severity: 'success', summary: t('settings.roles.messages.updated'), life: 3000 })
     } else {
       await rolesStore.create(roleForm.value)
-      roleSnackbarText.value = t('settings.roles.messages.created')
+      toast.add({ severity: 'success', summary: t('settings.roles.messages.created'), life: 3000 })
     }
-    roleSnackbarColor.value = 'success'
-    roleSnackbar.value = true
     roleDialog.value = false
-  } catch (e) { console.error(e);
-    roleSnackbarText.value = rolesStore.error || t('common.messages.error')
-    roleSnackbarColor.value = 'error'
-    roleSnackbar.value = true
+  } catch (e) {
+    if (import.meta.env.DEV) console.error(e)
+    toast.add({ severity: 'error', summary: rolesStore.error || t('common.messages.error'), life: 3000 })
   } finally {
     roleSubmitting.value = false
   }
 }
 
 function confirmDeleteRole(role) {
-  deletingRole.value = role
-  deleteRoleDialog.value = true
+  confirm.require({
+    message: t('settings.roles.dialog.deleteText', { name: role.name }),
+    header: t('settings.roles.dialog.deleteTitle'),
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: t('common.delete'),
+    rejectLabel: t('common.cancel'),
+    acceptProps: { severity: 'danger' },
+    accept: () => handleDeleteRole(role),
+  })
 }
 
-async function handleDeleteRole() {
+async function handleDeleteRole(role) {
   try {
-    await rolesStore.destroy(deletingRole.value.id)
-    roleSnackbarText.value = t('settings.roles.messages.deleted')
-    roleSnackbarColor.value = 'success'
-    roleSnackbar.value = true
-  } catch (e) { console.error(e);
-    roleSnackbarText.value = rolesStore.error || t('common.messages.error')
-    roleSnackbarColor.value = 'error'
-    roleSnackbar.value = true
-  } finally {
-    deleteRoleDialog.value = false
-    deletingRole.value = null
+    await rolesStore.destroy(role.id)
+    toast.add({ severity: 'success', summary: t('settings.roles.messages.deleted'), life: 3000 })
+  } catch (e) {
+    if (import.meta.env.DEV) console.error(e)
+    toast.add({ severity: 'error', summary: rolesStore.error || t('common.messages.error'), life: 3000 })
   }
 }
 
@@ -461,14 +611,12 @@ onMounted(() => {
 })
 
 defineExpose({
-  tab, orgForm, orgSaving, orgError, orgSnackbar, orgSettings, handleOrgSave, loadOrg,
-  telegramForm, saveTelegram,
-  memberHeaders, roleOptions, roleLabel,
+  tab, orgForm, orgSaving, orgError, orgSettings, handleOrgSave, loadOrg,
+  telegramForm, saveTelegram, testTelegram, telegramError, telegramSuccess,
+  roleOptions, roleLabel,
   memberDialog, editingMember, memberForm, memberSubmitting,
-  deleteMemberDialog, deletingMember, memberSnackbar, memberSnackbarText, memberSnackbarColor,
   openAddMember, openEditMember, handleMemberSubmit, confirmDeleteMember, handleDeleteMember,
-  roleHeaders, roleDialog, editingRole, roleForm, roleSubmitting,
-  deleteRoleDialog, deletingRole, roleSnackbar, roleSnackbarText, roleSnackbarColor,
+  roleDialog, editingRole, roleForm, roleSubmitting,
   openAddRole, openEditRole, handleRoleSubmit, confirmDeleteRole, handleDeleteRole,
 })
 </script>
