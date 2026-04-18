@@ -2,29 +2,33 @@ import { describe, it, expect } from 'vitest'
 import { abbreviateUnit } from '../../utils/strings.js'
 
 describe('utils/strings.abbreviateUnit', () => {
-  describe('standard unit names from seed', () => {
-    it('"Deluxe Suite 201" → "DE"', () => {
-      expect(abbreviateUnit('Deluxe Suite 201')).toBe('DE')
+  describe('standard unit names from seed (digit-aware per FT-032)', () => {
+    it('"Deluxe Suite 201" → "D2" (letter + first digit)', () => {
+      expect(abbreviateUnit('Deluxe Suite 201')).toBe('D2')
     })
 
-    it('"Standard Room 101" → "ST"', () => {
-      expect(abbreviateUnit('Standard Room 101')).toBe('ST')
+    it('"Standard Room 101" → "S1"', () => {
+      expect(abbreviateUnit('Standard Room 101')).toBe('S1')
     })
 
-    it('"Main Studio" → "MA"', () => {
+    it('"Main Studio" → "MA" (no digits, two-letter rule)', () => {
       expect(abbreviateUnit('Main Studio')).toBe('MA')
     })
 
-    it('"Sofa bed" → "SO"', () => {
+    it('"Sofa bed" → "SO" (no digits, two-letter rule)', () => {
       expect(abbreviateUnit('Sofa bed')).toBe('SO')
     })
 
-    it('"Dorm 6A" → "DO"', () => {
-      expect(abbreviateUnit('Dorm 6A')).toBe('DO')
+    it('"Dorm 6A" → "D6"', () => {
+      expect(abbreviateUnit('Dorm 6A')).toBe('D6')
     })
 
-    it('"Dorm 8B" → "DO"', () => {
-      expect(abbreviateUnit('Dorm 8B')).toBe('DO')
+    it('"Dorm 8B" → "D8" (distinct from Dorm 6A — the FT-032 fix)', () => {
+      expect(abbreviateUnit('Dorm 8B')).toBe('D8')
+    })
+
+    it('collision resolved: "Dorm 6A" and "Dorm 8B" abbreviate differently', () => {
+      expect(abbreviateUnit('Dorm 6A')).not.toBe(abbreviateUnit('Dorm 8B'))
     })
   })
 
@@ -43,12 +47,16 @@ describe('utils/strings.abbreviateUnit', () => {
   })
 
   describe('Cyrillic names', () => {
-    it('"Люкс 101" → "ЛЮ"', () => {
-      expect(abbreviateUnit('Люкс 101')).toBe('ЛЮ')
+    it('"Люкс 101" → "Л1" (digit-aware)', () => {
+      expect(abbreviateUnit('Люкс 101')).toBe('Л1')
     })
 
-    it('"Студия Морская" → "СТ"', () => {
+    it('"Студия Морская" → "СТ" (no digits — two-letter rule)', () => {
       expect(abbreviateUnit('Студия Морская')).toBe('СТ')
+    })
+
+    it('"Номер 12 Б" → "Н1"', () => {
+      expect(abbreviateUnit('Номер 12 Б')).toBe('Н1')
     })
   })
 
