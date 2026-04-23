@@ -18,6 +18,7 @@
 **Session initialized.** Loaded: problem, architecture, schema, autonomy, testing, coding-style, features, feature-flow, state-schema.
 
 Затем проверь:
+
 - `git status && git branch --show-current`
 - резолвер: `bash /Users/artshevko/dev/apartus/.claude/hooks/resolve-active-feature.sh`
 - если есть активная фича — `/phase-status`

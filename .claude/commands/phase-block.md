@@ -11,12 +11,14 @@
    - прочее → `adhoc`
 4. Если kind = `open_question` или `approval_gate` и в `feature.md` / `implementation-plan.md` ещё нет соответствующего `OQ-*` / `AG-*` — предложи создать и покажи, где и как добавить.
 5. Добавь блокер в `blockers` массив state.yml:
+
    ```yaml
    - id: <OQ-XX | AG-XX | null>
      kind: <kind>
      description: "<описание>"
      since: <текущая дата>
    ```
+
 6. Обнови `last_updated` и, если уместно, `next_action` (например: «Дождаться ответа по <описание>»).
 7. Покажи diff.
 

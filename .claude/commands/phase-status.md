@@ -9,16 +9,16 @@
 5. Прочитай `<dir>/state.yml`.
 6. Выведи в формате:
 
-```
-Фича:        <FT-XXX> — <title из feature.md>
-Phase:       <phase>
-Current step: <current_step или —>
-Next action: <next_action>
-Blockers:    <список или «нет»>
-Branch:      <branch или —>
-Updated:     <last_updated>
-Note:        <last_session_note или —>
-```
+   ```text
+   Фича:        <FT-XXX> — <title из feature.md>
+   Phase:       <phase>
+   Current step: <current_step или —>
+   Next action: <next_action>
+   Blockers:    <список или «нет»>
+   Branch:      <branch или —>
+   Updated:     <last_updated>
+   Note:        <last_session_note или —>
+   ```
 
 7. Если `phase == execution` и `current_step` задан — прочитай соответствующий STEP в `implementation-plan.md` и приведи одной строкой его Goal.
 8. Ничего не меняй в файлах.

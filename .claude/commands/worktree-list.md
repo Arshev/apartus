@@ -18,12 +18,12 @@ Inventory всех worktree проекта с feature-статусами.
 
 4. Выведи таблицу:
 
-```
-FT-ID    Phase          Worktree path                                Branch                          PR       Last commit    Flags
-FT-004   execution      /Users/artshevko/dev/apartus-worktrees/FT-004 feature/ft-004-...             merged   3 days ago     stale-merged
-FT-007   plan_ready     /Users/artshevko/dev/apartus-worktrees/FT-007 feature/ft-007-entity-tagging-ui open   2 hours ago    —
-—        —              /Users/artshevko/dev/apartus                  main                            —        1 hour ago     main
-```
+   ```text
+   FT-ID    Phase          Worktree path                                Branch                          PR       Last commit    Flags
+   FT-004   execution      /Users/artshevko/dev/apartus-worktrees/FT-004 feature/ft-004-...             merged   3 days ago     stale-merged
+   FT-007   plan_ready     /Users/artshevko/dev/apartus-worktrees/FT-007 feature/ft-007-entity-tagging-ui open   2 hours ago    —
+   —        —              /Users/artshevko/dev/apartus                  main                            —        1 hour ago     main
+   ```
 
 5. Отдельной секцией — предложения:
    - Для каждой `stale-merged` → «запусти `/feature-archive FT-NNN`»
