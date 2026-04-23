@@ -1,7 +1,6 @@
 ---
 title: "Priming Prompt: Plan Draft"
 doc_kind: governance
-doc_function: prompt
 purpose: Создание implementation-plan.md для active feature.md с discovery context, STEP-*, PRE-*, AG-*, OQ-*.
 derived_from:
   - ../../dna/governance.md

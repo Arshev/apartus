@@ -1,7 +1,6 @@
 ---
 title: "Priming Prompt: Bug Fix"
 doc_kind: governance
-doc_function: prompt
 purpose: Bug-fix цикл report → reproduction → root cause → regression test (first) → fix → docs sync → review.
 derived_from:
   - ../../dna/governance.md

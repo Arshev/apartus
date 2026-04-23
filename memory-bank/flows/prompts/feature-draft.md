@@ -1,7 +1,6 @@
 ---
 title: "Priming Prompt: Feature Draft"
 doc_kind: governance
-doc_function: prompt
 purpose: Создание нового feature package (feature.md draft) с корректным frontmatter, секциями What/How/Verify и минимальным набором stable IDs.
 derived_from:
   - ../../dna/governance.md

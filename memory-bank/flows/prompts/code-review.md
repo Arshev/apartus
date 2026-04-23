@@ -1,7 +1,6 @@
 ---
 title: "Priming Prompt: Code Review"
 doc_kind: governance
-doc_function: prompt
 purpose: Agent-first code review после реализации, перед human review/PR. Запускается отдельным агентом с чистым контекстом.
 derived_from:
   - ../../dna/governance.md

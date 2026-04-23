@@ -1,7 +1,6 @@
 ---
 title: "Priming Prompt: Session Start"
 doc_kind: governance
-doc_function: prompt
 purpose: Праймеринг агента в начале новой сессии. Читает routing table + ключевые memory-bank документы, фиксирует контекст.
 derived_from:
   - ../../dna/governance.md
@@ -18,7 +17,7 @@ audience: humans_and_agents
 
 Прочитай в этом порядке:
 
-1. `CLAUDE.md` — routing table и критичные правила
+1. `memory-bank/README.md` — навигация по durable knowledge layer
 2. `AGENTS.md` — структура проекта, команды, naming
 3. `memory-bank/dna/principles.md` — SSoT, atomicity, progressive disclosure
 4. `memory-bank/domain/problem.md` — продукт, users, workflows, MVP scope

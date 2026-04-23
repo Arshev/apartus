@@ -1,7 +1,6 @@
 ---
 title: "Priming Prompt: Implement"
 doc_kind: governance
-doc_function: prompt
 purpose: Выполнение implementation-plan.md STEP за STEP с evidence, agent-first code review, simplify review, upstream sync.
 derived_from:
   - ../../dna/governance.md

@@ -1,7 +1,6 @@
 ---
 title: "Priming Prompt: Feature Review"
 doc_kind: governance
-doc_function: prompt
 purpose: Ревью feature.md по gate Draft → Design Ready. Запускается отдельным агентом с чистым контекстом (автор ≠ ревьюер).
 derived_from:
   - ../../dna/governance.md

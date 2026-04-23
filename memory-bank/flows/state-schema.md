@@ -27,11 +27,13 @@ audience: humans_and_agents
 
 Активная фича для session/tab определяется по убыванию приоритета:
 
-1. **`CLAUDE_ACTIVE_FEATURE` env var** — явный override. Задаётся до запуска Claude, если нужно работать над фичей без переключения ветки.
-2. **Git branch regex** — текущая ветка (`git branch --show-current`) матчится по `[Ff][Tt][-_/]?[0-9]+`. Первое совпадение нормализуется в `FT-NNN` (zero-padded до 3 цифр). Для апартусовских ID вида `FT-HW1-01-*`/`FT-HW2-FE2-*` регэкс также захватывает префикс `FT-HW\d-...` — матч идёт по существованию каталога `memory-bank/features/<id>-*/`.
+1. **`CLAUDE_ACTIVE_FEATURE` env var** — явный override. Задаётся до запуска Claude, если нужно работать над фичей без переключения ветки. Обязательный путь для архивных HW-фич (`FT-HW1-*`, `FT-HW2-FE*`), т.к. branch regex их не покрывает.
+2. **Git branch regex** — текущая ветка (`git branch --show-current`) матчится по `[Ff][Tt][-_/]?[0-9]{3}`. Первое совпадение нормализуется в `FT-NNN` (zero-padded до 3 цифр). Пример: `feature/ft-025-search-filters` → `FT-025`.
 3. **Empty** — нет активной фичи. Вкладка работает в bugfix/refactor/docs-режиме без привязки к feature package.
 
 Существование соответствующего `state.yml` проверяется перед возвратом — если файла нет, резолвер вернёт пусто, даже если ветка формально матчит.
+
+**Для архивных HW-фич** (`FT-HW1-01` .. `FT-HW2-FE5`): branch regex не захватывает `HW`-префикс. Используй env var, напр. `CLAUDE_ACTIVE_FEATURE=FT-HW2-FE5 claude`.
 
 ### Usage Chain
 
@@ -90,15 +92,16 @@ blockers:
 
 ## Branch Naming Convention
 
-Для корректной работы резолвера feature-ветка обязана содержать `FT-NNN` (или `FT-HW<N>-<FE><N>` для архивных апартусовских пакетов):
+Для корректной работы резолвера feature-ветка, привязанная к feature package, обязана содержать `FT-NNN`:
 
-- `feat/ft-025-search-filters` ✓
-- `feat/FT-028-empty-state` ✓
-- `fix/ft020-race-condition` ✓
-- `feat/ft-hw2-fe5-branches-tree-ui` ✓
-- `feat/dismissal` ✗ — резолвер вернёт пусто, придётся задавать `CLAUDE_ACTIVE_FEATURE`
+- `feature/ft-025-search-filters` ✓ → резолвится в `FT-025`
+- `feature/FT-028-empty-state` ✓ → `FT-028`
+- `fix/ft020-race-condition` ✓ → `FT-020`
+- `feature/dismissal` ✗ — резолвер вернёт пусто; для bugfix/refactor без фичи это OK.
 
-Конвенция зафиксирована в [`../engineering/git-workflow.md`](../engineering/git-workflow.md).
+Для HW-архивных фич branch regex не работает — всегда через env var (см. §Resolver Priority).
+
+Canonical branch-naming правила: [`../engineering/git-workflow.md`](../engineering/git-workflow.md).
 
 ## Что state.yml НЕ содержит
 

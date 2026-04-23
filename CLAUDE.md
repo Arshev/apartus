@@ -2,9 +2,11 @@
 
 ## Старт сессии
 
-В начале новой сессии запусти priming prompt [`memory-bank/flows/prompts/session-start.md`](memory-bank/flows/prompts/session-start.md) — он прочитает ключевые memory-bank документы и зафиксирует контекст. Этого достаточно для большинства задач. Дополнительные файлы читай только если их требует конкретная задача — через Routing Table ниже.
+Быстрый путь: проверь `git status` + текущую ветку, посмотри в Routing Table ниже и прочитай только то, что нужно задаче. Этого достаточно в большинстве случаев.
 
-**Before working:** проверь `git status` и текущую ветку. Кратко подтверди контекст (проект, активная фича / phase / что делаем) и приступай. Feature phase резолвится по ветке через [`memory-bank/flows/state-schema.md`](memory-bank/flows/state-schema.md) и хранится в `memory-bank/features/FT-NNN/state.yml`.
+Для полного праймеринга (новая сессия на незнакомой части проекта) — опциональный priming prompt [`memory-bank/flows/prompts/session-start.md`](memory-bank/flows/prompts/session-start.md) прочитает ключевые memory-bank документы и зафиксирует контекст.
+
+**Before working:** кратко подтверди контекст (проект, активная фича / phase / что делаем) и приступай. Feature phase резолвится по ветке через [`memory-bank/flows/state-schema.md`](memory-bank/flows/state-schema.md) и хранится в `memory-bank/features/FT-NNN/state.yml`.
 
 ## Предпочтение dedicated tools над Bash
 

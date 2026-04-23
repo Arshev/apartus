@@ -1,7 +1,6 @@
 ---
 title: "Priming Prompt: Docs Sync"
 doc_kind: governance
-doc_function: prompt
 purpose: Upstream-first синхронизация canonical owners и downstream-документов после изменения кода/схемы/контракта.
 derived_from:
   - ../../dna/governance.md

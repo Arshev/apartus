@@ -55,7 +55,7 @@ audience: humans_and_agents
 
 1. **Автор ≠ ревьюер.** Агент, создавший `feature.md` или `implementation-plan.md`, не может проводить ревью этого же документа. Review ОБЯЗАН быть запущен как отдельный проход с чистым контекстом (отдельный agent или новая сессия).
 2. **Draft → Active только через review.** Перевод `status: draft → active` допустим только после прохождения review gate с 0 замечаний. Агент не переводит статус самостоятельно после собственного drafting.
-3. **Review — полный проход.** Review промпт (`.prompts/feature-review.md`, `.prompts/plan-review.md`) выполняется полностью по checklist. Результат "0 замечаний" допустим, но должен быть обоснован проверкой каждого пункта, а не по умолчанию.
+3. **Review — полный проход.** Review промпт (`memory-bank/flows/prompts/feature-review.md`, `memory-bank/flows/prompts/plan-review.md`) выполняется полностью по checklist. Результат "0 замечаний" допустим, но должен быть обоснован проверкой каждого пункта, а не по умолчанию.
 4. **Итерации review.** Типичные числа — в [`../flows/review-criteria.md`](../flows/review-criteria.md) (feature.md: 2-5, plan: 1-3, code: 1-2). Первый проход часто находит 3-10 замечаний — это нормально. "0 замечаний с первого прохода" — подозрительный результат, перепроверить. Цикл: draft → review → fix → re-review → ... → 0 замечаний → status: active.
 5. **Implementation-plan обязателен.** Для любой новой фичи `implementation-plan.md` создаётся между Design Ready и Execution. Пропуск допустим только для архивных фич (FT-001..018, known gap).
 6. **Simplify review — отдельный проход.** Никогда не пропускается, даже для small features. Выполняется после функционального тестирования, до closure.

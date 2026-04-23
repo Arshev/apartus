@@ -1,7 +1,6 @@
 ---
 title: "Priming Prompt: Plan Review"
 doc_kind: governance
-doc_function: prompt
 purpose: Ревью implementation-plan.md по gate Design Ready → Plan Ready. Запускается отдельным агентом с чистым контекстом (автор ≠ ревьюер).
 derived_from:
   - ../../dna/governance.md

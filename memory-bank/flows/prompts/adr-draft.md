@@ -1,7 +1,6 @@
 ---
 title: "Priming Prompt: ADR Draft"
 doc_kind: governance
-doc_function: prompt
 purpose: Создание нового Architecture Decision Record из шаблона с корректным decision_status и записью в реестре.
 derived_from:
   - ../../dna/governance.md
