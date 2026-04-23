@@ -37,9 +37,10 @@ audience: humans_and_agents
 
 ### Usage Chain
 
-- Priming prompt [`prompts/session-start.md`](prompts/session-start.md) инструктирует агента прочитать `state.yml` активной фичи в начале сессии.
-- При закрытии сессии / перед PR агент обновляет `state.yml` вручную (hook автоматизации — запланирован, пока ручной шаг).
-- Slash-команды (`/phase-status`, `/phase-advance`, `/phase-block`, `/phase-list`) — запланированы, см. `memory-bank/flows/README.md`. До появления команд — правка файла вручную по схеме ниже.
+- `SessionStart` hook (`.claude/hooks/session-start.sh`) вызывает резолвер (`.claude/hooks/resolve-active-feature.sh`) и печатает `state.yml` активной фичи в контекст сессии.
+- `Stop` hook (`.claude/hooks/stop-remind-state.sh`) напоминает обновить state.yml, если в вкладке правились файлы фичи без обновления state.
+- Slash-команды: `/phase-status` (просмотр), `/phase-advance` (переход по gate), `/phase-block "..."` (добавить blocker), `/phase-list` (обзор всех in-flight фич), `/feature-start`, `/feature-archive`, `/worktree-list`. Определения — в [`.claude/commands/`](../../.claude/commands/).
+- Fallback для ручного priming'а — `/start-session` или [`prompts/session-start.md`](prompts/session-start.md).
 
 ## Schema
 
@@ -112,11 +113,12 @@ Canonical branch-naming правила: [`../engineering/git-workflow.md`](../en
 
 `state.yml` — минимальный pointer на текущее состояние, не журнал.
 
-## Планируемые slash-команды
+## Slash-команды
 
-До появления в `.claude/commands/` (запланировано):
+Живут в `.claude/commands/`:
 
 - `/phase-status [FT-XXX]` — читает `state.yml`, выводит в консоль. Без аргумента — активная фича.
-- `/phase-advance [FT-XXX]` — проверяет gate-предикаты, обновляет `phase` / `current_step` / `next_action`.
+- `/phase-advance [FT-XXX]` — проверяет gate-предикаты (включая «автор ≠ ревьюер»), обновляет `phase` / `current_step` / `next_action`.
 - `/phase-block <description> [FT-XXX]` — добавляет blocker.
 - `/phase-list` — показывает все фичи не в `done`/`cancelled`.
+- `/feature-start FT-NNN "title"`, `/feature-archive FT-NNN`, `/worktree-list` — worktree lifecycle (из main-checkout).

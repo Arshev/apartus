@@ -2,11 +2,11 @@
 
 ## Старт сессии
 
-Быстрый путь: проверь `git status` + текущую ветку, посмотри в Routing Table ниже и прочитай только то, что нужно задаче. Этого достаточно в большинстве случаев.
+SessionStart hook (`.claude/hooks/session-start.sh`) автоматически выводит в контекст session brief (`.claude/hooks/session-brief.md`) и state активной фичи вкладки (резолв по git-ветке через `.claude/hooks/resolve-active-feature.sh`). Этого достаточно для большинства задач — читай дополнительные файлы только если того требует задача, через Routing Table ниже.
 
-Для полного праймеринга (новая сессия на незнакомой части проекта) — опциональный priming prompt [`memory-bank/flows/prompts/session-start.md`](memory-bank/flows/prompts/session-start.md) прочитает ключевые memory-bank документы и зафиксирует контекст.
+Для полного manual priming'а (если hook не сработал или нужен углублённый context) — `/start-session` или promо-промпт [`memory-bank/flows/prompts/session-start.md`](memory-bank/flows/prompts/session-start.md).
 
-**Before working:** кратко подтверди контекст (проект, активная фича / phase / что делаем) и приступай. Feature phase резолвится по ветке через [`memory-bank/flows/state-schema.md`](memory-bank/flows/state-schema.md) и хранится в `memory-bank/features/FT-NNN/state.yml`.
+**Before working:** кратко подтверди контекст (проект, активная фича / phase / что делаем) и приступай. Schema состояния и правила резолвера: [`memory-bank/flows/state-schema.md`](memory-bank/flows/state-schema.md). HW-архивные фичи (`FT-HW1-*`, `FT-HW2-FE*`) не покрываются branch regex — задавай `CLAUDE_ACTIVE_FEATURE=FT-HW2-FE5` явно.
 
 ## Предпочтение dedicated tools над Bash
 
@@ -55,9 +55,10 @@
 | Терминология | [`memory-bank/glossary.md`](memory-bank/glossary.md) |
 | Карта зависимостей документов | [`memory-bank/dependency-tree.md`](memory-bank/dependency-tree.md) |
 
-## Slash-команды (запланированы)
-
-Пока не реализованы — lifecycle-шаги запускаются через promо-промпты из [`memory-bank/flows/prompts/`](memory-bank/flows/prompts/). После появления в `.claude/commands/`:
+## Slash-команды
 
 - `/phase-status [FT-NNN]`, `/phase-advance [FT-NNN]`, `/phase-block "desc" [FT-NNN]`, `/phase-list` — state фичи.
-- `/feature-start FT-NNN "title"`, `/worktree-list`, `/feature-archive FT-NNN` — worktree lifecycle.
+- `/feature-start FT-NNN "title"`, `/worktree-list`, `/feature-archive FT-NNN` — worktree lifecycle (из main-checkout).
+- `/start-session` — fallback priming (если SessionStart hook не сработал).
+
+Полные описания: [`.claude/commands/`](.claude/commands/). Promo-промпты (copy-paste для фичевых lifecycle-шагов — draft, review, implement, docs-sync): [`memory-bank/flows/prompts/`](memory-bank/flows/prompts/).
