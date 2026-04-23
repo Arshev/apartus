@@ -5,7 +5,7 @@
 3. Для каждой оставшейся возьми `title` из первой строки тела `feature.md` (заголовок `# FT-XXX: ...`).
 4. Выведи таблицу в формате:
 
-```
+```text
 FT-ID       Phase          Step       Branch                          Updated      Next action
 FT-036      draft          —          feature/ft-036-stack-migration  2026-04-22   Заполнить What/Problem/Scope
 FT-007      plan_ready     —          feature/ft-007-...              2026-04-20   Review плана

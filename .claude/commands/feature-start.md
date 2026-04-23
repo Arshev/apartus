@@ -25,6 +25,7 @@
    - Создай `README.md` из `memory-bank/flows/templates/feature/README.md` (embedded body).
    - Создай `feature.md` из `memory-bank/flows/templates/feature/short.md` (embedded body), заменив `FT-XXX` на `FT-NNN` и `Feature Name` на переданный title.
    - Создай `state.yml` со значениями:
+
      ```yaml
      feature: FT-NNN
      phase: draft
@@ -35,6 +36,7 @@
      last_updated: <сегодня YYYY-MM-DD>
      last_session_note: "Bootstrap через /feature-start"
      ```
+
    - Обнови `memory-bank/features/README.md`: добавь строку в Instantiated Features с `(draft)`.
 
 4. **Создание ветки и worktree.**
@@ -50,7 +52,7 @@
 
 6. **Отчёт.**
 
-```
+```text
 ✓ Фича FT-NNN создана.
 
 Файлы:
