@@ -47,6 +47,8 @@ memory-bank/dna/principles.md
     ├── memory-bank/flows/feature-flow.md
     ├── memory-bank/flows/review-criteria.md
     ├── memory-bank/flows/workflows.md
+    ├── memory-bank/flows/state-schema.md
+    ├── memory-bank/flows/prompts/README.md
     ├── memory-bank/flows/templates/README.md
     ├── memory-bank/flows/templates/adr/ADR-XXX.md
     ├── memory-bank/flows/templates/prd/PRD-XXX.md
@@ -68,7 +70,9 @@ memory-bank/dna/principles.md
 
 - [`memory-bank/flows/feature-flow.md`](memory-bank/flows/feature-flow.md) зависит от `dna/governance.md` и `dna/frontmatter.md`.
 - [`memory-bank/flows/workflows.md`](memory-bank/flows/workflows.md) зависит от `dna/governance.md` и `flows/feature-flow.md`.
-- [`memory-bank/flows/README.md`](memory-bank/flows/README.md) зависит от `dna/governance.md`, `flows/feature-flow.md`, `flows/workflows.md` и `flows/templates/README.md`.
+- [`memory-bank/flows/state-schema.md`](memory-bank/flows/state-schema.md) зависит от `dna/governance.md`, `flows/feature-flow.md` и `engineering/git-workflow.md`.
+- [`memory-bank/flows/prompts/README.md`](memory-bank/flows/prompts/README.md) и каждый конкретный промпт зависят от `dna/governance.md`, `flows/feature-flow.md` и соответствующих engineering-правил (autonomy-boundaries, testing-policy).
+- [`memory-bank/flows/README.md`](memory-bank/flows/README.md) зависит от `dna/governance.md`, `flows/feature-flow.md`, `flows/workflows.md`, `flows/state-schema.md`, `flows/prompts/README.md` и `flows/templates/README.md`.
 
 ### Feature-related Docs
 
@@ -92,6 +96,7 @@ memory-bank/dna/principles.md
 
 - Все `features/FT-*/feature.md` зависят от `domain/problem.md` (и опционально от domain/architecture.md, domain/schema.md).
 - Все `features/FT-*/implementation-plan.md` зависят от sibling `feature.md`.
+- Все `features/FT-*/state.yml` — машинные snapshots состояния фичи по схеме из `flows/state-schema.md`. Не переопределяют `feature.md`, дополняют его.
 - Use cases (UC-001..005) зависят от `domain/problem.md`.
 
 ## Reading Order

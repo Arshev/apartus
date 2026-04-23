@@ -106,3 +106,19 @@ audience: humans_and_agents
 ## Embedded Template Contract
 
 `Embedded template contract` — та часть wrapper-template, которая копируется в новый instantiated документ. Содержит frontmatter и body целевого артефакта.
+
+## State File
+
+`State file` (`state.yml`) — машинно-читаемый снимок текущего состояния feature package (`memory-bank/features/FT-NNN/state.yml`). Отвечает на вопрос «где мы сейчас»: `phase`, `current_step`, `blockers`, `branch`. Дополняет `feature.md` (canonical scope) и `implementation-plan.md` (derived plan), но не переопределяет их. Schema и правила — в [`flows/state-schema.md`](flows/state-schema.md).
+
+## Phase
+
+`Phase` — lifecycle-стадия фичи внутри `state.yml`: `bootstrap`, `draft`, `design_ready`, `plan_ready`, `execution`, `done`, `cancelled`. Отражает прохождение gate-ов из `flows/feature-flow.md` в машинной форме.
+
+## Blocker
+
+`Blocker` — запись в `state.yml.blockers[]` о том, что мешает перейти к следующему шагу. Kind: `open_question` (OQ из плана), `approval_gate` (AG из плана), `external` (зависимость от другой команды/сервиса), `adhoc` (возникло в сессии).
+
+## Active Feature Resolver
+
+`Active feature resolver` — правило определения активной фичи для текущей session/tab: сначала `CLAUDE_ACTIVE_FEATURE` env var, затем git branch regex (`[Ff][Tt][-_/]?[0-9]+`), иначе пусто. Multi-tab safe: нет одного глобального указателя, у каждой вкладки своя активная фича через свою ветку. Canonical: [`flows/state-schema.md`](flows/state-schema.md).
