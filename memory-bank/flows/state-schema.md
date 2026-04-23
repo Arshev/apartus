@@ -37,7 +37,7 @@ audience: humans_and_agents
 
 ### Usage Chain
 
-- Priming prompt [`prompts/session-start.md`](prompts/README.md) инструктирует агента прочитать `state.yml` активной фичи в начале сессии.
+- Priming prompt [`prompts/session-start.md`](prompts/session-start.md) инструктирует агента прочитать `state.yml` активной фичи в начале сессии.
 - При закрытии сессии / перед PR агент обновляет `state.yml` вручную (hook автоматизации — запланирован, пока ручной шаг).
 - Slash-команды (`/phase-status`, `/phase-advance`, `/phase-block`, `/phase-list`) — запланированы, см. `memory-bank/flows/README.md`. До появления команд — правка файла вручную по схеме ниже.
 
