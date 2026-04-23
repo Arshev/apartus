@@ -1,0 +1,8 @@
+feature: FT-026
+phase: done
+current_step: null
+next_action: "Архивировано. Реализация в проде."
+blockers: []
+branch: null
+last_updated: 2026-04-23
+last_session_note: "Закрыта до внедрения state.yml. Snapshot для совместимости."
