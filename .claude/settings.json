@@ -1,0 +1,28 @@
+{
+  "enabledPlugins": {
+    "ralph-loop@claude-plugins-official": false
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/artshevko/dev/apartus/.claude/hooks/session-start.sh",
+            "statusMessage": "Загружаю session context + active feature state..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/artshevko/dev/apartus/.claude/hooks/stop-remind-state.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
