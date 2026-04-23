@@ -1,3 +1,15 @@
+---
+title: "Priming Prompt: Session Start"
+doc_kind: governance
+doc_function: prompt
+purpose: Праймеринг агента в начале новой сессии. Читает routing table + ключевые memory-bank документы, фиксирует контекст.
+derived_from:
+  - ../../dna/governance.md
+  - ../../dna/lifecycle.md
+status: active
+audience: humans_and_agents
+---
+
 # Session Start — Priming Prompt
 
 Запускается в начале каждой новой сессии для полного праймеринга агента.
@@ -25,7 +37,7 @@
 2. **Проверь текущее состояние** — `git status`, `git log --oneline -5`, посмотри есть ли uncommitted work.
 3. **Определи scope** — спроси пользователя о задаче текущей сессии, если она не очевидна из контекста.
 
-Staleness check high-churn docs выполняется при feature closure (docs-sync проход), не при session-start. См. [`memory-bank/dna/lifecycle.md`](../memory-bank/dna/lifecycle.md) секция "Staleness Detection".
+Staleness check high-churn docs выполняется при feature closure (docs-sync проход), не при session-start. См. [`memory-bank/dna/lifecycle.md`](../../dna/lifecycle.md) секция "Staleness Detection".
 
 ## Output
 

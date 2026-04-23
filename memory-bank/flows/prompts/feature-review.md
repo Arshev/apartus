@@ -1,8 +1,22 @@
+---
+title: "Priming Prompt: Feature Review"
+doc_kind: governance
+doc_function: prompt
+purpose: Ревью feature.md по gate Draft → Design Ready. Запускается отдельным агентом с чистым контекстом (автор ≠ ревьюер).
+derived_from:
+  - ../../dna/governance.md
+  - ../feature-flow.md
+  - ../review-criteria.md
+  - ../../engineering/autonomy-boundaries.md
+status: active
+audience: humans_and_agents
+---
+
 # Prompt: Feature Review (Draft → Design Ready)
 
-**ENFORCEMENT:** Автор feature.md НЕ МОЖЕТ быть ревьюером. Review ОБЯЗАН выполняться отдельным агентом с чистым контекстом (Agent tool с subagent_type), НЕ тем же агентом, который писал draft. См. [`memory-bank/engineering/autonomy-boundaries.md`](../memory-bank/engineering/autonomy-boundaries.md) секция "Lifecycle Enforcement".
+**ENFORCEMENT:** Автор feature.md НЕ МОЖЕТ быть ревьюером. Review ОБЯЗАН выполняться отдельным агентом с чистым контекстом (Agent tool с subagent_type), НЕ тем же агентом, который писал draft. См. [`memory-bank/engineering/autonomy-boundaries.md`](../../engineering/autonomy-boundaries.md) секция "Lifecycle Enforcement".
 
-Ты ревьюишь `feature.md` по gate "Draft → Design Ready" из [`memory-bank/flows/feature-flow.md`](../memory-bank/flows/feature-flow.md).
+Ты ревьюишь `feature.md` по gate "Draft → Design Ready" из [`memory-bank/flows/feature-flow.md`](../feature-flow.md).
 
 ## Checklist
 
@@ -21,7 +35,7 @@
 
 ## Review criteria
 
-Canonical source: [`memory-bank/flows/review-criteria.md`](../memory-bank/flows/review-criteria.md).
+Canonical source: [`memory-bank/flows/review-criteria.md`](../review-criteria.md).
 
 Базовый набор — **TAUS** (Testable, Ambiguous-free, Uniform, Scoped). Для критичных фич (auth, payments, compliance) или когда TAUS не ловит проблемы — расширенный набор IEEE 830 (Correct, Consistent, Necessary, Feasible, Traceable, Grounded).
 
@@ -35,4 +49,4 @@ Canonical source: [`memory-bank/flows/review-criteria.md`](../memory-bank/flows/
 
 Если 0 замечаний — напиши "0 замечаний, feature.md готов к переводу в `status: active` (Design Ready)".
 
-Типичные итерации и правило эскалации — в [`memory-bank/flows/review-criteria.md`](../memory-bank/flows/review-criteria.md). Если замечания не уменьшаются за 3 итерации — проблема upstream, эскалируй.
+Типичные итерации и правило эскалации — в [`memory-bank/flows/review-criteria.md`](../review-criteria.md). Если замечания не уменьшаются за 3 итерации — проблема upstream, эскалируй.

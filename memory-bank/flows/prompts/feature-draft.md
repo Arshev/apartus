@@ -1,17 +1,29 @@
+---
+title: "Priming Prompt: Feature Draft"
+doc_kind: governance
+doc_function: prompt
+purpose: Создание нового feature package (feature.md draft) с корректным frontmatter, секциями What/How/Verify и минимальным набором stable IDs.
+derived_from:
+  - ../../dna/governance.md
+  - ../feature-flow.md
+status: active
+audience: humans_and_agents
+---
+
 # Prompt: Feature Draft
 
 Ты создаёшь новый feature package в `memory-bank/features/FT-<id>-<slug>/`.
 
 ## Grounding (обязательно до записи файлов)
 
-1. Прочитай [`memory-bank/dna/principles.md`](../memory-bank/dna/principles.md) и [`memory-bank/flows/feature-flow.md`](../memory-bank/flows/feature-flow.md) — lifecycle, gates, stable identifiers.
-2. Прочитай [`memory-bank/domain/problem.md`](../memory-bank/domain/problem.md) и [`memory-bank/domain/architecture.md`](../memory-bank/domain/architecture.md) — продуктовый и технический контекст.
-3. Прочитай [`memory-bank/engineering/coding-style.md`](../memory-bank/engineering/coding-style.md) и [`memory-bank/engineering/testing-policy.md`](../memory-bank/engineering/testing-policy.md).
+1. Прочитай [`memory-bank/dna/principles.md`](../../dna/principles.md) и [`memory-bank/flows/feature-flow.md`](../feature-flow.md) — lifecycle, gates, stable identifiers.
+2. Прочитай [`memory-bank/domain/problem.md`](../../domain/problem.md) и [`memory-bank/domain/architecture.md`](../../domain/architecture.md) — продуктовый и технический контекст.
+3. Прочитай [`memory-bank/engineering/coding-style.md`](../../engineering/coding-style.md) и [`memory-bank/engineering/testing-policy.md`](../../engineering/testing-policy.md).
 4. Посмотри похожие существующие фичи в `memory-bank/features/` как эталон структуры.
 
 ## Задача
 
-1. Выбери template: `short` или `large` (см. [`memory-bank/flows/templates/feature/`](../memory-bank/flows/templates/feature/)). `short` допустим только если все правила выполняются — при сомнении бери `large`.
+1. Выбери template: `short` или `large` (см. [`memory-bank/flows/templates/feature/`](../templates/feature/)). `short` допустим только если все правила выполняются — при сомнении бери `large`.
 2. Создай директорию `memory-bank/features/FT-<id>-<slug>/` и файлы:
    - `README.md` — routing index
    - `feature.md` — canonical intent + design + verify

@@ -1,3 +1,17 @@
+---
+title: "Priming Prompt: Implement"
+doc_kind: governance
+doc_function: prompt
+purpose: Выполнение implementation-plan.md STEP за STEP с evidence, agent-first code review, simplify review, upstream sync.
+derived_from:
+  - ../../dna/governance.md
+  - ../feature-flow.md
+  - ../../engineering/autonomy-boundaries.md
+  - ../../engineering/git-workflow.md
+status: active
+audience: humans_and_agents
+---
+
 # Prompt: Implement (Execution → Done)
 
 Выполняй `implementation-plan.md` STEP за STEP.
@@ -7,7 +21,7 @@
 1. Прочитай sibling `feature.md` — canonical owner scope/verify.
 2. Прочитай `implementation-plan.md` целиком.
 3. Убедись что `feature.md` → `status: active`, `delivery_status: in_progress`, `implementation-plan.md` → `status: active`.
-4. Прочитай [`memory-bank/engineering/coding-style.md`](../memory-bank/engineering/coding-style.md), [`memory-bank/engineering/testing-policy.md`](../memory-bank/engineering/testing-policy.md), [`memory-bank/engineering/autonomy-boundaries.md`](../memory-bank/engineering/autonomy-boundaries.md), [`memory-bank/engineering/git-workflow.md`](../memory-bank/engineering/git-workflow.md) (branching, commit conventions).
+4. Прочитай [`memory-bank/engineering/coding-style.md`](../../engineering/coding-style.md), [`memory-bank/engineering/testing-policy.md`](../../engineering/testing-policy.md), [`memory-bank/engineering/autonomy-boundaries.md`](../../engineering/autonomy-boundaries.md), [`memory-bank/engineering/git-workflow.md`](../../engineering/git-workflow.md) (branching, commit conventions).
 
 ## Цикл исполнения
 
@@ -23,10 +37,10 @@
 ## После всех STEP
 
 1. Запусти все `CHK-*` из feature.md — все pass/fail результаты в evidence.
-2. **Agent-first code review** — запусти `.prompts/code-review.md` как отдельный проход. Проверь соответствие спеке, безопасность, тесты, архитектуру. Итерируй до 0 замечаний.
-3. **Simplify review** — отдельный проход. Правила: [`memory-bank/engineering/testing-policy.md`](../memory-bank/engineering/testing-policy.md) секция "Simplify Review".
+2. **Agent-first code review** — запусти `memory-bank/flows/prompts/code-review.md` как отдельный проход. Проверь соответствие спеке, безопасность, тесты, архитектуру. Итерируй до 0 замечаний.
+3. **Simplify review** — отдельный проход. Правила: [`memory-bank/engineering/testing-policy.md`](../../engineering/testing-policy.md) секция "Simplify Review".
 4. **Acceptance** — прогонись по `SC-*` end-to-end.
-5. Обнови upstream по lifecycle rules ([`memory-bank/dna/lifecycle.md`](../memory-bank/dna/lifecycle.md)):
+5. Обнови upstream по lifecycle rules ([`memory-bank/dna/lifecycle.md`](../../dna/lifecycle.md)):
    - Если код изменил schema → обнови `memory-bank/domain/schema.md`.
    - Если решение нетривиальное → новый ADR.
    - Обнови `feature.md` → `delivery_status: done`, `implementation-plan.md` → `status: archived`.
