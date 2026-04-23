@@ -91,38 +91,101 @@
         </ul>
       </section>
 
-      <!-- FT-031: Upcoming — clean lists without icon-on-heading / bullet-dot-icons. -->
+      <!-- Upcoming: dated + clickable rows with urgency cue (Today/Tomorrow/date). -->
       <section class="dashboard__upcoming" data-testid="dashboard-upcoming">
         <v-row>
           <v-col cols="12" md="6">
-            <h2 class="dashboard__upcoming-heading">{{ $t('dashboard.checkIns') }}</h2>
-            <ul v-if="data.upcoming_check_ins.length" class="dashboard__upcoming-list">
-              <li
+            <header class="dashboard__upcoming-head">
+              <v-icon size="20" color="medium-emphasis" icon="mdi-login-variant" />
+              <h2 class="dashboard__upcoming-title">{{ $t('dashboard.checkIns') }}</h2>
+              <v-chip
+                v-if="data.upcoming_check_ins.length"
+                size="x-small"
+                variant="tonal"
+                density="comfortable"
+                class="dashboard__upcoming-count"
+              >
+                {{ data.upcoming_check_ins.length }}
+              </v-chip>
+            </header>
+
+            <v-list v-if="data.upcoming_check_ins.length" class="dashboard__upcoming-list" density="comfortable" lines="two" nav>
+              <v-list-item
                 v-for="r in data.upcoming_check_ins"
                 :key="r.id"
-                class="dashboard__upcoming-item"
+                :to="`/reservations/${r.id}/edit`"
+                class="dashboard__upcoming-row"
+                :class="`is-${urgency(r.check_in)}`"
+                rounded="md"
               >
-                <span class="dashboard__upcoming-name">{{ r.guest_name || $t('common.blocking') }}</span>
-                <span class="dashboard__upcoming-unit text-medium-emphasis">{{ r.unit_name }}</span>
-                <span class="dashboard__upcoming-date text-tabular">{{ r.check_in }}</span>
-              </li>
-            </ul>
-            <div v-else class="dashboard__upcoming-empty text-medium-emphasis">{{ $t('dashboard.noCheckIns') }}</div>
+                <template #prepend>
+                  <time class="dashboard__upcoming-when text-tabular" :datetime="r.check_in">
+                    {{ relativeDate(r.check_in) }}
+                  </time>
+                </template>
+                <v-list-item-title class="dashboard__upcoming-name">
+                  {{ r.guest_name || $t('common.blocking') }}
+                </v-list-item-title>
+                <v-list-item-subtitle class="dashboard__upcoming-unit">
+                  {{ r.unit_name }}
+                </v-list-item-subtitle>
+                <template #append>
+                  <v-icon size="14" color="medium-emphasis" icon="mdi-chevron-right" class="dashboard__upcoming-chevron" />
+                </template>
+              </v-list-item>
+            </v-list>
+
+            <div v-else class="dashboard__upcoming-empty">
+              <v-icon size="20" color="primary" icon="mdi-check-circle-outline" />
+              <span class="text-medium-emphasis">{{ $t('dashboard.noCheckIns') }}</span>
+            </div>
           </v-col>
+
           <v-col cols="12" md="6">
-            <h2 class="dashboard__upcoming-heading">{{ $t('dashboard.checkOuts') }}</h2>
-            <ul v-if="data.upcoming_check_outs.length" class="dashboard__upcoming-list">
-              <li
+            <header class="dashboard__upcoming-head">
+              <v-icon size="20" color="medium-emphasis" icon="mdi-logout-variant" />
+              <h2 class="dashboard__upcoming-title">{{ $t('dashboard.checkOuts') }}</h2>
+              <v-chip
+                v-if="data.upcoming_check_outs.length"
+                size="x-small"
+                variant="tonal"
+                density="comfortable"
+                class="dashboard__upcoming-count"
+              >
+                {{ data.upcoming_check_outs.length }}
+              </v-chip>
+            </header>
+
+            <v-list v-if="data.upcoming_check_outs.length" class="dashboard__upcoming-list" density="comfortable" lines="two" nav>
+              <v-list-item
                 v-for="r in data.upcoming_check_outs"
                 :key="r.id"
-                class="dashboard__upcoming-item"
+                :to="`/reservations/${r.id}/edit`"
+                class="dashboard__upcoming-row"
+                :class="`is-${urgency(r.check_out)}`"
+                rounded="md"
               >
-                <span class="dashboard__upcoming-name">{{ r.guest_name || $t('common.blocking') }}</span>
-                <span class="dashboard__upcoming-unit text-medium-emphasis">{{ r.unit_name }}</span>
-                <span class="dashboard__upcoming-date text-tabular">{{ r.check_out }}</span>
-              </li>
-            </ul>
-            <div v-else class="dashboard__upcoming-empty text-medium-emphasis">{{ $t('dashboard.noCheckOuts') }}</div>
+                <template #prepend>
+                  <time class="dashboard__upcoming-when text-tabular" :datetime="r.check_out">
+                    {{ relativeDate(r.check_out) }}
+                  </time>
+                </template>
+                <v-list-item-title class="dashboard__upcoming-name">
+                  {{ r.guest_name || $t('common.blocking') }}
+                </v-list-item-title>
+                <v-list-item-subtitle class="dashboard__upcoming-unit">
+                  {{ r.unit_name }}
+                </v-list-item-subtitle>
+                <template #append>
+                  <v-icon size="14" color="medium-emphasis" icon="mdi-chevron-right" class="dashboard__upcoming-chevron" />
+                </template>
+              </v-list-item>
+            </v-list>
+
+            <div v-else class="dashboard__upcoming-empty">
+              <v-icon size="20" color="primary" icon="mdi-check-circle-outline" />
+              <span class="text-medium-emphasis">{{ $t('dashboard.noCheckOuts') }}</span>
+            </div>
           </v-col>
         </v-row>
       </section>
@@ -136,8 +199,11 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import * as dashboardApi from '../api/dashboard'
 import { formatMoney } from '../utils/currency'
+import { useRelativeDate } from '../composables/useRelativeDate'
 
 const { t } = useI18n()
+// Shared urgency/relativeDate bucketing — same rule across modules.
+const { urgency, relativeDate } = useRelativeDate()
 
 const authStore = useAuthStore()
 const data = ref(null)
@@ -354,52 +420,94 @@ defineExpose({ data, loading, error, formatPrice, loadDashboard, totalReservatio
   color: rgb(var(--v-theme-on-surface));
 }
 
-/* ── Upcoming ─────────────────────────────────────────────────────── */
-.dashboard__upcoming-heading {
-  font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0;
-  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
-  margin-bottom: var(--space-sm, 12px);
-}
-
-.dashboard__upcoming-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.dashboard__upcoming-item {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: baseline;
-  gap: var(--space-md, 16px);
-  padding: var(--space-sm, 12px) 0;
+/* ── Upcoming (Заезды / Выезды) ───────────────────────────────────── */
+.dashboard__upcoming-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs, 8px);
+  padding-bottom: var(--space-xs, 10px);
+  margin-bottom: var(--space-2xs, 4px);
   border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
-  font-size: 14px;
 }
 
-.dashboard__upcoming-item:last-child { border-bottom: none; }
-
-.dashboard__upcoming-name {
-  font-weight: 500;
+.dashboard__upcoming-title {
+  flex: 1;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
   color: rgb(var(--v-theme-on-surface));
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.dashboard__upcoming-count {
+  font-variant-numeric: tabular-nums;
+}
+
+/* v-list nav density leaves its own paddings; trim to editorial rhythm. */
+.dashboard__upcoming-list {
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+/* The date anchor in the prepend slot — fixed-width column so names align. */
+.dashboard__upcoming-when {
+  display: inline-block;
+  width: 70px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
   white-space: nowrap;
 }
 
-.dashboard__upcoming-unit {
-  font-size: 13px;
+/* Urgency tiers — today loud, tomorrow medium, later quiet. */
+.dashboard__upcoming-row.is-today .dashboard__upcoming-when {
+  color: rgb(var(--v-theme-primary));
+  font-weight: 700;
 }
 
-.dashboard__upcoming-date {
-  font-size: 13px;
-  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+.dashboard__upcoming-row.is-tomorrow .dashboard__upcoming-when {
+  color: rgb(var(--v-theme-on-surface));
+  font-weight: 600;
+}
+
+.dashboard__upcoming-row.is-past .dashboard__upcoming-when {
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+.dashboard__upcoming-name {
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.dashboard__upcoming-unit {
+  font-size: 12px !important;
+  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity)) !important;
+  opacity: 1 !important;
+}
+
+/* Chevron: invisible by default, fades in on hover/focus of the row. */
+.dashboard__upcoming-chevron {
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+}
+
+.dashboard__upcoming-row:hover .dashboard__upcoming-chevron,
+.dashboard__upcoming-row:focus-within .dashboard__upcoming-chevron {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard__upcoming-chevron { transition: none; }
 }
 
 .dashboard__upcoming-empty {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm, 10px);
   padding: var(--space-md, 16px) 0;
   font-size: 14px;
 }

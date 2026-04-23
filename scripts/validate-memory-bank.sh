@@ -58,7 +58,7 @@ echo ""
 # --- 2. Broken links in READMEs ---
 echo "--- Links ---"
 LINKS_OK=true
-for f in CLAUDE.md AGENTS.md dependency-tree.md .prompts/README.md $(find memory-bank -name 'README.md' -not -path '*/flows/templates/*' | sort); do
+for f in CLAUDE.md AGENTS.md dependency-tree.md $(find memory-bank -name 'README.md' -not -path '*/flows/templates/*' | sort); do
   [ -f "$f" ] || continue
   DIR=$(dirname "$f")
 
@@ -100,7 +100,7 @@ echo "--- Orphans ---"
 ORPHAN_OK=true
 
 # Collect all link targets from all .md files in memory-bank + root
-ALL_LINKS=$(grep -rohE '\]\([^)]+\)' memory-bank/ CLAUDE.md AGENTS.md .prompts/README.md dependency-tree.md 2>/dev/null \
+ALL_LINKS=$(grep -rohE '\]\([^)]+\)' memory-bank/ CLAUDE.md AGENTS.md dependency-tree.md 2>/dev/null \
   | sed 's/^]//' | tr -d '()' | grep -v '^http' | grep -v '^#' | sort -u)
 
 for f in $(find memory-bank -name '*.md' \

@@ -1,3 +1,15 @@
+---
+title: "Priming Prompt: Plan Draft"
+doc_kind: governance
+purpose: Создание implementation-plan.md для active feature.md с discovery context, STEP-*, PRE-*, AG-*, OQ-*.
+derived_from:
+  - ../../dna/governance.md
+  - ../feature-flow.md
+  - ../templates/feature/implementation-plan.md
+status: active
+audience: humans_and_agents
+---
+
 # Prompt: Implementation Plan Draft
 
 Создай `implementation-plan.md` для существующей `feature.md` со `status: active`.
@@ -5,8 +17,8 @@
 ## Grounding (обязательно)
 
 1. Прочитай sibling `feature.md` — это canonical owner scope/architecture/acceptance. План не переопределяет эти факты.
-2. Прочитай [`memory-bank/flows/feature-flow.md`](../memory-bank/flows/feature-flow.md) секцию Plan.
-3. Прочитай [`memory-bank/flows/templates/feature/implementation-plan.md`](../memory-bank/flows/templates/feature/implementation-plan.md) как шаблон.
+2. Прочитай [`memory-bank/flows/feature-flow.md`](../feature-flow.md) секцию Plan.
+3. Прочитай [`memory-bank/flows/templates/feature/implementation-plan.md`](../templates/feature/implementation-plan.md) как шаблон.
 4. **Discovery** — пройдись по текущему репо:
    - какие релевантные файлы/модули уже существуют
    - какие локальные паттерны использовать (reference implementations из `engineering/coding-style.md`)

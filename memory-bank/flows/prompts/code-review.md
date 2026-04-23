@@ -1,12 +1,24 @@
+---
+title: "Priming Prompt: Code Review"
+doc_kind: governance
+purpose: Agent-first code review после реализации, перед human review/PR. Запускается отдельным агентом с чистым контекстом.
+derived_from:
+  - ../../dna/governance.md
+  - ../review-criteria.md
+  - ../../engineering/autonomy-boundaries.md
+status: active
+audience: humans_and_agents
+---
+
 # Prompt: Code Review (Agent-First)
 
-**ENFORCEMENT:** Выполняется ПОСЛЕ реализации (все STEP-* пройдены), ПЕРЕД human review / PR. Запускается как отдельный проход через Agent tool (subagent_type: quality-engineer или code-reviewer) с чистым контекстом. Агент ревьюит код по критериям из [`memory-bank/flows/review-criteria.md`](../memory-bank/flows/review-criteria.md).
+**ENFORCEMENT:** Выполняется ПОСЛЕ реализации (все STEP-* пройдены), ПЕРЕД human review / PR. Запускается как отдельный проход через Agent tool (subagent_type: quality-engineer или code-reviewer) с чистым контекстом. Агент ревьюит код по критериям из [`memory-bank/flows/review-criteria.md`](../review-criteria.md).
 
 ## Grounding
 
 1. Прочитай sibling `feature.md` — canonical AC (SC-*, CHK-*, EVID-*).
 2. Прочитай `implementation-plan.md` — какие STEP-* были выполнены, какие touchpoints затронуты.
-3. Прочитай [`memory-bank/flows/review-criteria.md`](../memory-bank/flows/review-criteria.md) секция "Критерии code review".
+3. Прочитай [`memory-bank/flows/review-criteria.md`](../review-criteria.md) секция "Критерии code review".
 4. Посмотри `git diff` или измененные файлы.
 
 ## Checklist

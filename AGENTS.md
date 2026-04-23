@@ -9,7 +9,7 @@
 | `memory-bank/` | Durable knowledge layer | [`memory-bank/README.md`](memory-bank/README.md) |
 | `backend/` | Rails 8 API | [`memory-bank/domain/architecture.md`](memory-bank/domain/architecture.md) |
 | `frontend/` | Vue 3 SPA | [`memory-bank/domain/frontend.md`](memory-bank/domain/frontend.md) |
-| `.prompts/` | Операционные промпты | [`.prompts/README.md`](.prompts/README.md) |
+| `memory-bank/flows/prompts/` | Операционные промпты | [`memory-bank/flows/prompts/README.md`](memory-bank/flows/prompts/README.md) |
 
 ## Команды
 

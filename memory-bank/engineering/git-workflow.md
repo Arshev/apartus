@@ -17,7 +17,13 @@ audience: humans_and_agents
 
 ## Branches
 
-- Тематические ветки — `hw-N` (курсовые модули), `feature/<slug>`, `fix/<slug>`.
+- Тематические ветки:
+  - `feature/ft-NNN-<slug>` — работа, привязанная к feature package (`memory-bank/features/FT-NNN-*`). `FT-NNN` в имени ветки обязателен — от него зависит active-feature resolver из [`../flows/state-schema.md`](../flows/state-schema.md).
+  - `fix/ft-NNN-<slug>` — bugfix, затрагивающий конкретную фичу.
+  - `fix/<slug>` — bugfix без привязки к feature package.
+  - `chore/<slug>` — governance/docs/tooling изменения.
+  - `hw-N` — курсовые модули (исторические).
+- Для архивных HW-фич (`FT-HW1-*`, `FT-HW2-FE*`) — резолвер не парсит `HW`-префикс, нужно задавать `CLAUDE_ACTIVE_FEATURE=FT-HW2-FE5` явно.
 - Все коммиты идут в тематическую ветку, финал — один PR в `main`.
 
 ## Commits

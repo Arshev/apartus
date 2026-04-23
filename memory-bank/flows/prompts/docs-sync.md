@@ -1,6 +1,17 @@
+---
+title: "Priming Prompt: Docs Sync"
+doc_kind: governance
+purpose: Upstream-first синхронизация canonical owners и downstream-документов после изменения кода/схемы/контракта.
+derived_from:
+  - ../../dna/governance.md
+  - ../../dna/lifecycle.md
+status: active
+audience: humans_and_agents
+---
+
 # Prompt: Docs Sync (Upstream First)
 
-Ты только что изменил код / поведение / схему / контракт. Нужно прогнать upstream-first sync по [`memory-bank/dna/lifecycle.md`](../memory-bank/dna/lifecycle.md).
+Ты только что изменил код / поведение / схему / контракт. Нужно прогнать upstream-first sync по [`memory-bank/dna/lifecycle.md`](../../dna/lifecycle.md).
 
 ## Алгоритм
 
@@ -23,7 +34,7 @@
 
 ## Freshness markers
 
-После обновления canonical owner — обнови `last_verified: YYYY-MM-DD` в frontmatter high-churn документов (schema.md, testing-policy.md, features/README.md, api-reference.md, frontend.md). Подробнее: [`memory-bank/dna/lifecycle.md`](../memory-bank/dna/lifecycle.md) секция "Staleness Detection".
+После обновления canonical owner — обнови `last_verified: YYYY-MM-DD` в frontmatter high-churn документов (schema.md, testing-policy.md, features/README.md, api-reference.md, frontend.md). Подробнее: [`memory-bank/dna/lifecycle.md`](../../dna/lifecycle.md) секция "Staleness Detection".
 
 ## Выход
 

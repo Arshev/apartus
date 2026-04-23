@@ -8,6 +8,8 @@
     "edit": "Edit",
     "retry": "Retry",
     "today": "Today",
+    "tomorrow": "Tomorrow",
+    "openReservation": "Open reservation",
     "ok": "OK",
     "yes": "Yes",
     "no": "No",
@@ -87,10 +89,10 @@
       "checkedOut": "Checked out",
       "cancelled": "Cancelled"
     },
-    "checkIns": "Check-ins (7 days)",
-    "checkOuts": "Check-outs (7 days)",
-    "noCheckIns": "No upcoming check-ins",
-    "noCheckOuts": "No upcoming check-outs",
+    "checkIns": "Check-ins",
+    "checkOuts": "Check-outs",
+    "noCheckIns": "No check-ins in the next 7 days",
+    "noCheckOuts": "No check-outs in the next 7 days",
     "messages": {
       "loadError": "Failed to load data"
     }
@@ -342,6 +344,17 @@
       "checkedIn": "Checked in",
       "checkedOut": "Checked out",
       "cancelled": "Cancelled"
+    },
+    "actions": {
+      "checkIn": "Check in",
+      "checkOut": "Check out"
+    },
+    "confirm": {
+      "cancelTitle": "Cancel reservation?",
+      "cancelText": "Guest {guest} · {dates}. This action cannot be undone.",
+      "cancelAccept": "Yes, cancel",
+      "checkOutTitle": "Check out guest?",
+      "checkOutText": "Guest {guest} · {dates}. Status will change to checked-out."
     },
     "form": {
       "unit": "Unit",

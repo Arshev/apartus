@@ -13,53 +13,88 @@
 
     <v-row>
       <v-col v-for="col in columns" :key="col.status" cols="12" md="4">
-        <v-card variant="outlined">
-          <div class="d-flex align-center px-4 py-3">
-            <v-icon size="12" :color="col.color" class="mr-2">mdi-circle</v-icon>
-            <span class="text-body-1 font-weight-bold">{{ col.title }}</span>
-            <v-chip size="x-small" class="ml-2" :color="col.color" variant="tonal">{{ col.items.length }}</v-chip>
-          </div>
-          <v-divider />
-          <div class="pa-2">
+        <!-- Flattened: no wrapping card. Editorial section header + task list. -->
+        <section class="taskboard__column">
+          <header class="taskboard__column-head">
+            <h2 class="taskboard__column-title">{{ col.title }}</h2>
+            <v-chip
+              v-if="col.items.length"
+              size="x-small"
+              variant="tonal"
+              density="comfortable"
+              class="taskboard__column-count"
+            >
+              {{ col.items.length }}
+            </v-chip>
+          </header>
+
+          <div v-if="col.items.length" class="taskboard__cards">
             <v-card
               v-for="task in col.items"
               :key="task.id"
-              class="mb-2 task-card"
-              :class="`border-priority-${task.priority}`"
-              variant="flat"
+              variant="outlined"
+              rounded="md"
+              class="taskboard__card"
+              @click="openEdit(task)"
             >
-              <v-card-text class="pa-3 pb-1">
-                <div class="text-body-2 font-weight-medium mb-1">{{ task.title }}</div>
-                <div class="d-flex flex-wrap align-center" style="gap:6px">
-                  <span v-if="task.due_date" class="d-flex align-center text-caption text-medium-emphasis">
-                    <v-icon size="12" class="mr-1">mdi-calendar-outline</v-icon>{{ task.due_date }}
+              <v-card-text class="px-3 pt-3 pb-1">
+                <div class="taskboard__card-title">{{ task.title }}</div>
+                <div class="taskboard__card-meta">
+                  <span
+                    v-if="task.due_date"
+                    class="taskboard__card-due"
+                    :class="`is-${dueUrgency(task.due_date)}`"
+                  >
+                    <v-icon size="12" class="mr-1">mdi-calendar-outline</v-icon>
+                    {{ relativeDate(task.due_date) }}
                   </span>
-                  <span v-if="task.assigned_to_name" class="d-flex align-center text-caption text-medium-emphasis">
-                    <v-icon size="12" class="mr-1">mdi-account-outline</v-icon>{{ task.assigned_to_name }}
+                  <span v-if="task.assigned_to_name" class="taskboard__card-assignee">
+                    <v-icon size="12" class="mr-1">mdi-account-outline</v-icon>
+                    {{ task.assigned_to_name }}
                   </span>
                 </div>
               </v-card-text>
-              <div class="d-flex align-center px-3 pb-2" style="gap:4px">
-                <v-chip size="x-small" :color="priorityColor(task.priority)" variant="flat" label>
+              <div class="taskboard__card-footer" @click.stop>
+                <v-chip
+                  size="x-small"
+                  variant="tonal"
+                  density="comfortable"
+                  :color="priorityColor(task.priority)"
+                  class="taskboard__priority-chip"
+                >
+                  <span
+                    class="taskboard__priority-dot"
+                    :style="{ background: `rgb(var(--v-theme-${priorityColor(task.priority)}))` }"
+                  />
                   {{ priorityLabel(task.priority) }}
                 </v-chip>
                 <v-spacer />
                 <v-btn
                   v-if="task.status !== 'completed'"
                   size="x-small"
-                  variant="tonal"
+                  variant="text"
                   color="primary"
                   @click="moveForward(task)"
                 >
                   {{ task.status === 'pending' ? $t('tasks.moveToWork') : $t('tasks.complete') }}
                 </v-btn>
-                <v-btn size="x-small" icon="mdi-pencil" variant="text" @click="openEdit(task)" />
-                <v-btn size="x-small" icon="mdi-delete" variant="text" color="error" @click="confirmDelete(task)" />
+                <v-btn
+                  size="x-small"
+                  icon="mdi-delete-outline"
+                  variant="text"
+                  color="error"
+                  :aria-label="$t('common.delete')"
+                  @click="confirmDelete(task)"
+                />
               </div>
             </v-card>
-            <div v-if="!col.items.length" class="text-medium-emphasis text-caption text-center pa-6">{{ $t('tasks.emptyColumn') }}</div>
           </div>
-        </v-card>
+
+          <div v-else class="taskboard__empty">
+            <v-icon size="20" color="medium-emphasis" icon="mdi-check-circle-outline" />
+            <span class="text-medium-emphasis">{{ $t('tasks.emptyColumn') }}</span>
+          </div>
+        </section>
       </v-col>
     </v-row>
 
@@ -87,7 +122,7 @@
         <v-card-actions>
           <v-spacer />
           <v-btn @click="deleteDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="error" @click="handleDelete">{{ $t('common.delete') }}</v-btn>
+          <v-btn color="error" variant="flat" @click="handleDelete">{{ $t('common.delete') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -100,14 +135,17 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useTasksStore } from '../stores/tasks'
+import { useRelativeDate } from '../composables/useRelativeDate'
+import { parseIsoDate, startOfDay } from '../utils/date'
 
 const { t } = useI18n()
 const store = useTasksStore()
+const { relativeDate } = useRelativeDate()
 
 const columns = computed(() => [
-  { status: 'pending', title: t('tasks.columns.pending'), color: 'warning', items: store.pending },
-  { status: 'in_progress', title: t('tasks.columns.inProgress'), color: 'info', items: store.inProgress },
-  { status: 'completed', title: t('tasks.columns.completed'), color: 'success', items: store.completed },
+  { status: 'pending', title: t('tasks.columns.pending'), items: store.pending },
+  { status: 'in_progress', title: t('tasks.columns.inProgress'), items: store.inProgress },
+  { status: 'completed', title: t('tasks.columns.completed'), items: store.completed },
 ])
 
 const priorities = computed(() => [
@@ -126,6 +164,22 @@ const categories = computed(() => [
 const priorityColors = { low: 'priority-low', medium: 'priority-medium', high: 'priority-high', urgent: 'priority-urgent' }
 function priorityColor(p) { return priorityColors[p] || 'grey' }
 function priorityLabel(p) { return priorities.value.find((pr) => pr.value === p)?.label || p }
+
+/**
+ * Urgency class for due_date — overdue tasks get a visual warning signal
+ * via color (not a side-stripe per Impeccable BAN #1).
+ * @returns {'overdue' | 'today' | 'tomorrow' | 'later'}
+ */
+function dueUrgency(iso) {
+  if (!iso) return 'later'
+  const d = parseIsoDate(iso)
+  const today = startOfDay(new Date())
+  const diffDays = Math.round((d.getTime() - today.getTime()) / 86400000)
+  if (diffDays < 0) return 'overdue'
+  if (diffDays === 0) return 'today'
+  if (diffDays === 1) return 'tomorrow'
+  return 'later'
+}
 
 const formDialog = ref(false)
 const editing = ref(null)
@@ -158,10 +212,11 @@ async function handleSubmit() {
       await store.create(form.value)
     }
     formDialog.value = false
-    snackbarText.value = t(editing.value ? 'common.messages.saved' : 'common.messages.saved')
+    snackbarText.value = t('common.messages.saved')
     snackbarColor.value = 'success'
     snackbar.value = true
-  } catch (e) { console.error(e)
+  } catch (e) {
+    console.error(e)
     snackbarText.value = store.error || t('common.messages.error')
     snackbarColor.value = 'error'
     snackbar.value = true
@@ -174,7 +229,8 @@ async function moveForward(task) {
   const next = task.status === 'pending' ? 'in_progress' : 'completed'
   try {
     await store.update(task.id, { status: next })
-  } catch (e) { console.error(e)
+  } catch (e) {
+    console.error(e)
     snackbarText.value = store.error || t('common.messages.error')
     snackbarColor.value = 'error'
     snackbar.value = true
@@ -189,7 +245,8 @@ async function handleDelete() {
     snackbarText.value = t('common.messages.deleted')
     snackbarColor.value = 'success'
     snackbar.value = true
-  } catch (e) { console.error(e)
+  } catch (e) {
+    console.error(e)
     snackbarText.value = store.error || t('common.messages.error')
     snackbarColor.value = 'error'
     snackbar.value = true
@@ -201,19 +258,133 @@ async function handleDelete() {
 onMounted(() => store.fetchAll())
 
 defineExpose({
-  columns, priorities, categories, priorityColor, priorityLabel,
+  columns, priorities, categories, priorityColor, priorityLabel, dueUrgency,
   openCreate, openEdit, handleSubmit, moveForward, confirmDelete, handleDelete,
   editing, form, formSubmitting,
 })
 </script>
 
 <style scoped>
-.task-card {
-  border-left: 3px solid transparent;
-  background: rgb(var(--v-theme-surface-light));
+/* ── Column shell (flat — no wrapping card) ──────────────────────────── */
+.taskboard__column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
-.border-priority-low    { border-left-color: rgb(var(--v-theme-priority-low)); }
-.border-priority-medium { border-left-color: rgb(var(--v-theme-priority-medium)); }
-.border-priority-high   { border-left-color: rgb(var(--v-theme-priority-high)); }
-.border-priority-urgent { border-left-color: rgb(var(--v-theme-priority-urgent)); }
+
+.taskboard__column-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+}
+
+.taskboard__column-title {
+  flex: 1;
+  margin: 0;
+  font-family: var(--font-display, inherit);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+}
+
+.taskboard__column-count {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Task cards — outlined, clickable, no decorative side stripe ────── */
+.taskboard__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.taskboard__card {
+  cursor: pointer;
+  transition: border-color 0.12s ease-out, background-color 0.12s ease-out;
+}
+
+.taskboard__card:hover {
+  border-color: rgba(var(--v-theme-on-surface), 0.22);
+  background: rgba(var(--v-theme-primary), 0.03);
+}
+
+.taskboard__card-title {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  margin-bottom: 6px;
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.taskboard__card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.taskboard__card-due,
+.taskboard__card-assignee {
+  display: inline-flex;
+  align-items: center;
+  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+  font-variant-numeric: tabular-nums;
+}
+
+/* Due-date urgency: overdue/today loud, tomorrow medium, later muted. */
+.taskboard__card-due.is-overdue {
+  color: rgb(var(--v-theme-error));
+  font-weight: 600;
+}
+
+.taskboard__card-due.is-today {
+  color: rgb(var(--v-theme-primary));
+  font-weight: 600;
+}
+
+.taskboard__card-due.is-tomorrow {
+  color: rgb(var(--v-theme-on-surface));
+  font-weight: 500;
+}
+
+/* ── Card footer: priority chip + move/delete actions ──────────────── */
+.taskboard__card-footer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px 8px;
+}
+
+/* Tonal priority chip with 6px color-dot indicator — same pattern as
+   reservation status chip. Replaces the variant="flat" screaming fill. */
+.taskboard__priority-chip :deep(.v-chip__content) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.taskboard__priority-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Empty column state — positive framing, consistent with Dashboard ─ */
+.taskboard__empty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 8px;
+  font-size: 13px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .taskboard__card { transition: none; }
+}
 </style>

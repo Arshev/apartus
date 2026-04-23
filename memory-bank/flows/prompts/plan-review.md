@@ -1,6 +1,19 @@
+---
+title: "Priming Prompt: Plan Review"
+doc_kind: governance
+purpose: Ревью implementation-plan.md по gate Design Ready → Plan Ready. Запускается отдельным агентом с чистым контекстом (автор ≠ ревьюер).
+derived_from:
+  - ../../dna/governance.md
+  - ../feature-flow.md
+  - ../review-criteria.md
+  - ../../engineering/autonomy-boundaries.md
+status: active
+audience: humans_and_agents
+---
+
 # Prompt: Plan Review (Design Ready → Plan Ready)
 
-**ENFORCEMENT:** Автор implementation-plan.md НЕ МОЖЕТ быть ревьюером. Review ОБЯЗАН выполняться отдельным агентом с чистым контекстом. См. [`memory-bank/engineering/autonomy-boundaries.md`](../memory-bank/engineering/autonomy-boundaries.md) секция "Lifecycle Enforcement".
+**ENFORCEMENT:** Автор implementation-plan.md НЕ МОЖЕТ быть ревьюером. Review ОБЯЗАН выполняться отдельным агентом с чистым контекстом. См. [`memory-bank/engineering/autonomy-boundaries.md`](../../engineering/autonomy-boundaries.md) секция "Lifecycle Enforcement".
 
 Ревью `implementation-plan.md` по gate "Design Ready → Plan Ready".
 

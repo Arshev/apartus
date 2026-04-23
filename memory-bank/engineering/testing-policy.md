@@ -120,7 +120,7 @@ cd frontend && yarn build
 ## Verification Context Separation
 
 1. **Функциональная верификация** — tests pass, SC-* покрыты
-2. **Agent-first code review** — соответствие спеке, безопасность, архитектура (см. [`.prompts/code-review.md`](../../.prompts/code-review.md))
+2. **Agent-first code review** — соответствие спеке, безопасность, архитектура (см. [`flows/prompts/code-review.md`](../flows/prompts/code-review.md))
 3. **Simplify review** — код минимально сложен
 4. **Acceptance** — end-to-end по `SC-*`
 
