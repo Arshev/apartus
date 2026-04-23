@@ -12,7 +12,7 @@
    - `execution` → `done`
 4. Прочитай `memory-bank/flows/feature-flow.md` раздел «Transition Gates» и возьми чеклист предикатов для перехода `<current> → <target>`.
 5. Проверь каждый предикат против `feature.md`, `implementation-plan.md` и файловой системы. Для каждого пункта укажи pass/fail с обоснованием.
-6. **Lifecycle enforcement (apartus):** для переходов `draft → design_ready`, `design_ready → plan_ready`, `execution → done` — убедись, что review был запущен отдельным агентом с чистым контекстом (автор ≠ ревьюер, см. `memory-bank/engineering/autonomy-boundaries.md`). Нет — stop: «Review gate не пройден. Запусти prompt из `memory-bank/flows/prompts/` отдельным агентом».
+6. **Lifecycle enforcement (apartus):** для переходов `draft → design_ready` (feature review), `design_ready → plan_ready` (plan review), `plan_ready → execution` (plan review sign-off; опционально, если не выполнен одновременно с шагом 4), `execution → done` (code review + simplify review) — убедись, что соответствующий review был запущен отдельным агентом с чистым контекстом (автор ≠ ревьюер, см. `memory-bank/engineering/autonomy-boundaries.md`). Промпты: `memory-bank/flows/prompts/{feature-review,plan-review,code-review}.md`. Нет подтверждения — stop: «Review gate не пройден. Запусти prompt отдельным агентом».
 7. Если все предикаты pass:
    - обнови `state.yml`: `phase`, `current_step` (для execution — первый нерешённый STEP; иначе null), `next_action` (конкретное следующее действие), `last_updated` на текущую дату.
    - если переход в `done` — также выставь `feature.md` → `delivery_status: done` и `implementation-plan.md` → `status: archived`.

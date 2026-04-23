@@ -12,7 +12,7 @@ audience: humans_and_agents
 
 # Priming Prompts
 
-Промпты для типовых flow. Каждый промпт самодостаточен — копируешь в новую сессию как отправной input. До появления slash-команд (`/feature-start`, `/phase-advance` — запланированы, см. [`../state-schema.md`](../state-schema.md)) это основной способ запуска lifecycle-шагов.
+Промпты для типовых flow. Каждый промпт самодостаточен — копируешь в новую сессию как отправной input. Это источник истины lifecycle-шагов (content); slash-команды в [`../../../.claude/commands/`](../../../.claude/commands/) (`/feature-start`, `/phase-advance`, `/phase-block`, `/phase-status`, `/phase-list`, `/feature-archive`, `/worktree-list`, `/start-session`) — автоматизированный путь поверх них.
 
 | Промпт | Когда использовать |
 |---|---|

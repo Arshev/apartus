@@ -10,7 +10,10 @@
 1. **Проверка окружения.**
    - Убедись, что текущий `pwd` = `/Users/artshevko/dev/apartus`. Если нет — остановись с сообщением «Запусти из main-checkout».
    - Убедись, что текущая ветка = `main` (иначе есть риск создать worktree от лишнего commit). `git branch --show-current` должно вернуть `main`.
-   - `git fetch origin main && git status` — рабочее дерево чисто, main up-to-date. Иначе — покажи diff и спроси подтверждение.
+   - `git fetch origin main` — синхронизируй с remote.
+   - `git status --porcelain` — рабочее дерево должно быть чистым (пустой output). Если non-empty:
+     - untracked только в `.claude/skills/`, `frontend/test-results/`, `artifacts/` — продолжай, не блокировать.
+     - любые `M`/`A`/`D` tracked файлы или чужие untracked — stop с diff и текстом «закоммить / stash перед созданием worktree».
 
 2. **Валидация аргументов.**
    - Распарси FT-NNN. Нормализуй: `FT-7` → `FT-007` (zero-pad до 3 цифр). HW-префиксы (`FT-HW1-*`, `FT-HW2-FE*`) — только для архивных пакетов, новая фича должна быть `FT-NNN`.
@@ -41,7 +44,8 @@
 
 5. **Init worktree.**
    - Apartus использует `init.sh` в корне репо для активации mise/direnv. В новом worktree: `cd ~/dev/apartus-worktrees/<FT-NNN> && bash init.sh`.
-   - При наличии symlinkable runtime-файлов (master.key, credentials, .env*, frontend/.env*) — настраивай симлинки вручную от main-checkout до появления `bin/worktree-init`.
+   - **Skill-collaboration:** если в сессии активен superpowers-skill `github-workflow:worktree-init-script`, он автоматически обнаружит `init.sh` и запустит его после `git worktree add` — не дублируй вызов, просто убедись, что skill сработал.
+   - При наличии symlinkable runtime-файлов (master.key, credentials, .env*, frontend/.env*) — настраивай симлинки вручную от main-checkout до появления `bin/worktree-init` (gap).
    - Выведи пользователю, что нужно сделать.
 
 6. **Отчёт.**
