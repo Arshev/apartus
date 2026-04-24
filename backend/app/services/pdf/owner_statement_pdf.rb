@@ -1,7 +1,5 @@
 module Pdf
   class OwnerStatementPdf < BasePdf
-    FALLBACK_NOTICE = "Конвертация недоступна — показано в валюте организации".freeze
-
     def initialize(organization, data)
       super(organization)
       @data = data
@@ -13,7 +11,7 @@ module Pdf
       header("Акт собственника")
 
       if @data[:currency_fallback_reason].present?
-        text FALLBACK_NOTICE, size: 10, color: "cc0000"
+        text BasePdf::FALLBACK_NOTICE, size: 10, color: "cc0000"
         move_down 10
       end
 

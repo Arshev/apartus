@@ -1,0 +1,33 @@
+
+Api::V1::Dashboard
+  without auth
+    returns 401
+  GET /api/v1/dashboard
+    returns all expected keys
+    does not count units from other orgs
+    with known data
+      total_units matches actual unit count
+      occupied_units counts units with active reservations today
+      occupancy_rate = occupied / total (as decimal)
+      occupancy_rate is 0 when no reservations
+      revenue_this_month sums active reservation prices overlapping current month
+      upcoming_check_ins returns confirmed reservations in next 7 days, ordered by check_in
+      upcoming_check_ins item includes unit_name and guest_name
+      upcoming_check_outs returns checked_in reservations checking out in 7 days
+      reservations_by_status returns counts per status
+  as member without finances.view
+    returns 403
+  FT-039 — ?currency= override
+    NEG-01 — missing param → org currency, additive fields null
+    SC-02 — RUB org, ?currency=USD → revenue_this_month converted
+    NEG-02 — RateNotFound fallback
+/Users/artshevko/.local/share/mise/installs/ruby/3.4.8/lib/ruby/gems/3.4.0/gems/rspec-rails-7.1.1/lib/rspec/rails/matchers/have_http_status.rb:219: warning: Status code :unprocessable_entity is deprecated and will be removed in a future version of Rack. Please use :unprocessable_content instead.
+    NEG-03 — invalid currency → 422
+
+Finished in 0.47212 seconds (files took 0.65646 seconds to load)
+17 examples, 0 failures
+
+Coverage report generated for RSpec to /Users/artshevko/dev/apartus-worktrees/FT-039/backend/coverage.
+Line Coverage: 10.55% (341 / 3231)
+Line coverage (10.55%) is below the expected minimum coverage (98.00%).
+SimpleCov failed with exit 2 due to a coverage related error

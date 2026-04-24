@@ -3,11 +3,26 @@
     <div class="d-flex align-center mb-6">
       <h1 class="text-h5 font-weight-bold">{{ $t('reports.title') }}</h1>
       <v-spacer />
+      <v-select
+        v-model="selectedCurrency"
+        :label="$t('reports.displayCurrency')"
+        :items="currencyOptions"
+        item-title="title"
+        item-value="value"
+        density="compact"
+        hide-details
+        class="mr-4"
+        style="max-width: 240px"
+        @update:model-value="loadReport"
+      />
       <v-btn variant="outlined" prepend-icon="mdi-file-pdf-box" @click="downloadPdf" :loading="downloading">{{ $t('reports.downloadPdf') }}</v-btn>
     </div>
 
     <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
     <v-alert v-if="error" type="error" class="mb-4">{{ error }}</v-alert>
+    <v-alert v-if="data?.currency_fallback_reason === 'rate_not_found'" type="warning" class="mb-4">
+      {{ $t('reports.messages.currencyFallbackNotice') }}
+    </v-alert>
 
     <template v-if="data">
       <!-- Finance KPI — full-color like RentProg -->
@@ -115,21 +130,28 @@ import { useI18n } from 'vue-i18n'
 import * as reportsApi from '../api/reports'
 import { downloadFinancialReport } from '../api/pdfExport'
 import { useAuthStore } from '../stores/auth'
-import { formatMoney } from '../utils/currency'
+import { formatMoney, CURRENCY_LIST } from '../utils/currency'
 
 const { t } = useI18n()
 const data = ref(null)
 const loading = ref(false)
 const error = ref(null)
 const downloading = ref(false)
+const selectedCurrency = ref(null)
+const authStore = useAuthStore()
+
+const currencyOptions = computed(() => [
+  { title: t('reports.displayCurrencyAuto'), value: null },
+  ...CURRENCY_LIST.map((c) => ({ title: c.label, value: c.code })),
+])
 
 async function downloadPdf() {
   downloading.value = true
-  try { await downloadFinancialReport() }
-  catch (e) { console.error(e) }
+  try {
+    await downloadFinancialReport(selectedCurrency.value ? { currency: selectedCurrency.value } : {})
+  } catch (e) { console.error(e) }
   finally { downloading.value = false }
 }
-const authStore = useAuthStore()
 
 const categoryKeys = ['maintenance', 'utilities', 'cleaning', 'supplies', 'other']
 function expenseCategoryLabel(cat) {
@@ -137,16 +159,17 @@ function expenseCategoryLabel(cat) {
   return cat
 }
 
-const currency = computed(() => authStore.organization?.currency || 'RUB')
+const displayCurrency = computed(() => data.value?.currency || authStore.organization?.currency || 'RUB')
 function formatPrice(cents) {
-  return formatMoney(cents, currency.value)
+  return formatMoney(cents, displayCurrency.value)
 }
 
 async function loadReport() {
   loading.value = true
   error.value = null
   try {
-    data.value = await reportsApi.financial()
+    const params = selectedCurrency.value ? { currency: selectedCurrency.value } : {}
+    data.value = await reportsApi.financial(params)
   } catch (e) { console.error(e);
     error.value = t('reports.messages.loadError')
   } finally {
@@ -156,5 +179,5 @@ async function loadReport() {
 
 onMounted(() => loadReport())
 
-defineExpose({ data, loading, error, formatPrice, loadReport, expenseCategoryLabel })
+defineExpose({ data, loading, error, formatPrice, loadReport, expenseCategoryLabel, selectedCurrency })
 </script>

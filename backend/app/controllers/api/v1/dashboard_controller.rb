@@ -3,6 +3,8 @@ module Api
     class DashboardController < BaseController
       def show
         authorize :dashboard, :show?
+        target = validated_target_currency
+        return if performed?
         today = Date.current
         month_start = today.beginning_of_month
         month_end = today.end_of_month
@@ -57,7 +59,7 @@ module Api
           .group(:status)
           .count
 
-        render json: {
+        data = {
           total_units: total_units,
           occupied_units: occupied_units,
           occupancy_rate: occupancy_rate,
@@ -71,9 +73,48 @@ module Api
             cancelled: status_counts["cancelled"] || 0
           }
         }
+
+        apply_currency_conversion!(data, target: target)
+        render json: data
       end
 
       private
+
+      def validated_target_currency
+        return nil if params[:currency].blank?
+        code = params[:currency]
+        unless CurrencyConfig.codes.include?(code)
+          render json: { error: [ "Invalid currency code: #{code}" ] }, status: :unprocessable_entity
+          return nil
+        end
+        code
+      end
+
+      # FT-039: dashboard conversion — only revenue_this_month is cents.
+      # effective_at = Date.current (snapshot, no from/to).
+      def apply_currency_conversion!(data, target:)
+        org = Current.organization
+        if target.blank? || target == org.currency
+          data.merge!(currency: org.currency, fx_rate_x1e10: nil, currency_fallback_reason: nil)
+          return
+        end
+
+        original = data[:revenue_this_month]
+        begin
+          converted = CurrencyConverter.convert(
+            amount_cents: original, from: org.currency, to: target,
+            at: Date.current, organization: org
+          )
+          data[:revenue_this_month] = converted
+          data[:currency] = target
+          data[:fx_rate_x1e10] = original.positive? ? (converted * (10**10)) / original : nil
+          data[:currency_fallback_reason] = nil
+        rescue CurrencyConverter::RateNotFound
+          data[:currency] = org.currency
+          data[:fx_rate_x1e10] = nil
+          data[:currency_fallback_reason] = "rate_not_found"
+        end
+      end
 
       def reservation_summary(r)
         {

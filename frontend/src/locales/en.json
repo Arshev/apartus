@@ -604,8 +604,11 @@
     },
     "revenueByProperty": "Revenue by property",
     "expensesByCategory": "Expenses by category",
+    "displayCurrency": "Display currency",
+    "displayCurrencyAuto": "Auto — organization currency",
     "messages": {
-      "loadError": "Failed to load report"
+      "loadError": "Failed to load report",
+      "currencyFallbackNotice": "Conversion unavailable — shown in organization currency"
     }
   },
   "settings": {

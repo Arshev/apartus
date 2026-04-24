@@ -604,8 +604,11 @@
     },
     "revenueByProperty": "Выручка по объектам",
     "expensesByCategory": "Расходы по категориям",
+    "displayCurrency": "Валюта отображения",
+    "displayCurrencyAuto": "Авто — валюта организации",
     "messages": {
-      "loadError": "Не удалось загрузить отчёт"
+      "loadError": "Не удалось загрузить отчёт",
+      "currencyFallbackNotice": "Конвертация недоступна — показано в валюте организации"
     }
   },
   "settings": {

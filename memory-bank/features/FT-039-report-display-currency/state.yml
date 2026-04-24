@@ -1,0 +1,8 @@
+feature: FT-039
+phase: done
+current_step: null
+next_action: "Commit, push, PR, merge."
+blockers: []
+branch: feature/ft-039-report-display-currency
+last_updated: 2026-04-24
+last_session_note: "FT-039 DONE. Brief 9→0 (2 iter), Plan 0 (1 iter), Code review (Claude 0 + Codex 0 P0/P1 = 0 replays — lessons FT-038 applied preventively). Backend 1205/1205, Frontend 812/812."
