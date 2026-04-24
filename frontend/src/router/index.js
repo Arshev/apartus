@@ -141,6 +141,12 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/settings/currency-rates',
+    name: 'CurrencyRates',
+    component: () => import('../views/settings/CurrencyRatesView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/widget/:slug',
     name: 'BookingWidget',
     component: () => import('../views/BookingWidgetView.vue'),
