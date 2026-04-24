@@ -4,4 +4,5 @@ class Owner < ApplicationRecord
 
   validates :name, presence: true, length: { maximum: 255 }
   validates :commission_rate, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 10000, only_integer: true }
+  validates :preferred_currency, inclusion: { in: CurrencyConfig.codes }, allow_nil: true
 end
