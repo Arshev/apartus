@@ -23,6 +23,7 @@ Cross-feature пользовательские сценарии. Каждый UC
 | [UC-003](UC-003-owner-payout.md) | Owner Payout Cycle | active | Менеджер | FT-007, 012, 017 | 2026-04-12 |
 | [UC-004](UC-004-channel-sync.md) | Channel Sync (iCal) | active | Менеджер | FT-011 | 2026-04-12 |
 | [UC-005](UC-005-onboarding.md) | Organization Onboarding | active | Новый пользователь | FT-015, 016, 018 | 2026-04-12 |
+| [UC-006](UC-006-daily-fx-fetch.md) | Daily FX Fetch & Manual Overrides | active | Система / Admin org | FT-037 | 2026-04-24 |
 
 ## Шаблон
 

@@ -24,7 +24,10 @@ canonical_for:
 - `Membership#permissions` returns: owner → ALL_PERMISSIONS; else role.permissions or [].
 - Pundit policies use `Current.membership&.can?(permission)`.
 
-## Permission Codes (20)
+## Permission Codes (19)
+
+> Note: `permissions.md` ранее заявлял 20, но `ALL_PERMISSIONS` в `app/models/concerns/permissions.rb` до FT-037 содержал 18. После FT-037 — 19 (+ `currency_rates.manage`). Рассогласование 20↔18 в pre-FT-037 доке — out of scope FT-037.
+
 
 | Code | Semantics | UI Features Gated |
 |------|-----------|-------------------|
@@ -46,12 +49,13 @@ canonical_for:
 | finance.manage | Create/edit/delete expenses | Expense CRUD buttons |
 | finance.view | View expenses, dashboard, reports, owner statements | Dashboard, Reports, Expenses, Owner Statements |
 | settings.manage | Manage organization settings | Settings tabs |
+| currency_rates.manage | Create/edit/delete manual currency override rates (FT-037) | Settings → Currency Rates: manual overrides CRUD. API rates read-only for everyone. |
 
 ## Preset Roles
 
 | Role | Code | System | Permissions |
 |------|------|--------|-------------|
-| Администратор | admin | Yes (locked) | ALL 20 permissions |
+| Администратор | admin | Yes (locked) | ALL 19 permissions (including `currency_rates.manage`) |
 | Менеджер | manager | Yes (locked) | All except organizations.manage, members.manage, roles.manage, settings.manage |
 | Просмотр | viewer | Yes (locked) | All *.view permissions only |
 

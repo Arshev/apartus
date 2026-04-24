@@ -81,6 +81,19 @@ Each organization has `currency` field (string, default "RUB").
 | `centsToUnits(cents)` | 5000 | 50 |
 | `unitsToCents(units)` | 49.99 | 4999 (rounded) |
 
-## No FX / No Multi-Currency
+## Conversion (FT-037)
 
-All money within one organization is in one currency. No exchange rates, no cross-currency transactions. Currency is display-only — backend stores cents regardless of currency.
+FT-037 вводит инфраструктуру конвертации валют — без мутации хранимых сумм:
+
+- **Storage:** per-org валюта остаётся single (FT-015 invariant). Сохранённые `*_cents` — всегда в исходной валюте записи; конвертация — compute-only.
+- **ExchangeRate model:** хранит курсы пары `(base_currency, quote_currency, effective_date, source, organization_id)`. `source=api, organization_id IS NULL` — глобальные курсы из currencyapi.com; `source=manual, organization_id IS NOT NULL` — ручные per-org override. Инвариант enforce'ится DB CHECK constraint (см. [ADR-016](../adr/ADR-016-db-check-enforces-exchange-rate-invariant.md)).
+- **Rate precision:** integer `rate_x1e10` (`major_target_per_major_source * 10**10`).
+- **CurrencyConverter service:** `CurrencyConverter.convert(amount_cents:, from:, to:, at:, organization:)` — priority `manual-for-org > api-global`, fallback `max(effective_date) <= at`. Для non-USD пар — runtime triangulation через USD без persist. Same-currency short-circuit без DB.
+- **Formula** (учитывает разницу decimals): `result_minor = half_even_div(amount_minor * rate_x1e10 * 10**(target_dec - source_dec), 10**10 * 10**max(source_dec - target_dec, 0))`. Integer-only (ADR-004).
+- **Fetch:** `FetchExchangeRatesJob` (Solid Queue, daily at 00:30 UTC) делает ровно один HTTP-запрос `base=USD, currencies=<10 non-USD>`. Upsert idempotent. Quota-sensitive (paid API).
+- **UI:** `/settings/currency-rates` (permission `currency_rates.manage`, включено в admin preset; `role_enum: :owner` bypass). Две панели: API rates read-only, manual overrides mutable.
+- **Консюмеры:** reports/dashboard/PDF/owner module пока НЕ используют CurrencyConverter — отдельные фичи после FT-037 (NS-02).
+
+## Legacy note
+
+До FT-037 действовало правило «No FX / No Multi-Currency». FT-037 заменяет его — в рамках FT-015 per-org currency появляется контракт для отображения сумм в других валютах.

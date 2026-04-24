@@ -1,0 +1,35 @@
+
+ExchangeRate
+  validations
+    is expected to validate that :base_currency cannot be empty/falsy
+    is expected to validate that :quote_currency cannot be empty/falsy
+    is expected to validate that :rate_x1e10 cannot be empty/falsy
+    is expected to validate that :effective_date cannot be empty/falsy
+    is expected to validate that :source cannot be empty/falsy
+    is expected to validate that :source is either ‹"api"› or ‹"manual"›
+    is expected to validate that :base_currency is either ‹"RUB"›, ‹"USD"›, ‹"EUR"›, ‹"THB"›, ‹"AED"›, ‹"TRY"›, ‹"KZT"›, ‹"GEL"›, ‹"UZS"›, ‹"GBP"›, or ‹"IDR"›
+    is expected to validate that :quote_currency is either ‹"RUB"›, ‹"USD"›, ‹"EUR"›, ‹"THB"›, ‹"AED"›, ‹"TRY"›, ‹"KZT"›, ‹"GEL"›, ‹"UZS"›, ‹"GBP"›, or ‹"IDR"›
+    rejects non-positive rate
+    rejects base == quote (FM-08)
+    rejects effective_date > 30 days in the future (FM-09)
+    source and organization consistency
+      api source requires organization_id to be nil
+      manual source requires organization_id
+  scopes
+    .global returns only organization_id IS NULL rows
+    .for_organization filters by organization
+    .effective_on <= date, ordered desc
+  DB CHECK constraints (ADR-016, NEG-11)
+    rejects raw insert with source=api AND organization_id != NULL
+    rejects raw insert with source=manual AND organization_id IS NULL
+    rejects rate_x1e10 <= 0 at DB level
+  unique constraint
+    prevents duplicate (base, quote, date, source, org) rows
+
+Finished in 0.11664 seconds (files took 0.68502 seconds to load)
+20 examples, 0 failures
+
+Coverage report generated for RSpec to /Users/artshevko/dev/apartus-worktrees/FT-037/backend/coverage.
+Line Coverage: 2.73% (89 / 3257)
+Line coverage (2.73%) is below the expected minimum coverage (98.00%).
+SimpleCov failed with exit 2 due to a coverage related error

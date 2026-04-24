@@ -1,0 +1,46 @@
+
+Api::V1::ExchangeRates
+  without auth
+    returns 401
+  GET /api/v1/exchange_rates
+    returns api_rates + own manual_overrides; hides other-org overrides (NEG-04)
+  POST /api/v1/exchange_rates
+    SC-05 — creates manual override and converter uses it for current org
+/Users/artshevko/.local/share/mise/installs/ruby/3.4.8/lib/ruby/gems/3.4.0/gems/rspec-rails-7.1.1/lib/rspec/rails/matchers/have_http_status.rb:219: warning: Status code :unprocessable_entity is deprecated and will be removed in a future version of Rack. Please use :unprocessable_content instead.
+    NEG-05 — rejects rate_x1e10 <= 0
+/Users/artshevko/.local/share/mise/installs/ruby/3.4.8/lib/ruby/gems/3.4.0/gems/rspec-rails-7.1.1/lib/rspec/rails/matchers/have_http_status.rb:219: warning: Status code :unprocessable_entity is deprecated and will be removed in a future version of Rack. Please use :unprocessable_content instead.
+    NEG-06 — rejects currency outside CurrencyConfig
+/Users/artshevko/.local/share/mise/installs/ruby/3.4.8/lib/ruby/gems/3.4.0/gems/rspec-rails-7.1.1/lib/rspec/rails/matchers/have_http_status.rb:219: warning: Status code :unprocessable_entity is deprecated and will be removed in a future version of Rack. Please use :unprocessable_content instead.
+    NEG-07 — rejects duplicate (base, quote, date, source=manual, org)
+    NEG-03 — without permission
+      returns 403
+  PATCH /api/v1/exchange_rates/:id
+    updates own manual rate
+    EC-04 — returns 404 for other-org rate (not in own-org scope)
+    EC-05 / NEG-08 — returns 403 for API row (organization_id IS NULL)
+  DELETE /api/v1/exchange_rates/:id
+    deletes own manual rate
+
+ExchangeRatePolicy
+  permission gating
+    without currency_rates.manage permission
+      denies all actions
+    with currency_rates.manage permission
+      allows index / show / create
+      allows update/destroy on own-org manual row
+      denies update/destroy on API row (organization_id IS NULL) — EC-05, NEG-08
+      denies update/destroy on other org's manual row (defense-in-depth)
+    as owner (role_enum bypass)
+      allows all actions on own manual row
+      still denies mutation of global API row
+  Scope.resolve (NEG-04 multi-tenant isolation)
+    returns global rows OR own-org rows, never other-org rows
+    returns none when no current organization
+
+Finished in 0.39531 seconds (files took 0.66515 seconds to load)
+20 examples, 0 failures
+
+Coverage report generated for RSpec to /Users/artshevko/dev/apartus-worktrees/FT-037/backend/coverage.
+Line Coverage: 8.96% (282 / 3149)
+Line coverage (8.95%) is below the expected minimum coverage (98.00%).
+SimpleCov failed with exit 2 due to a coverage related error
