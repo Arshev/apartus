@@ -20,4 +20,8 @@ module CurrencyConfig
   def self.config_for(code)
     CURRENCIES[code] || CURRENCIES["USD"]
   end
+
+  def self.decimal_places(code)
+    config_for(code).fetch(:decimal_places)
+  end
 end

@@ -17,7 +17,8 @@ module Permissions
     "reservations.view",
     "finance.manage",
     "finance.view",
-    "settings.manage"
+    "settings.manage",
+    "currency_rates.manage"
   ].freeze
 
   PRESET_ROLES = {
