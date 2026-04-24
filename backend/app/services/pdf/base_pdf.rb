@@ -4,6 +4,11 @@ module Pdf
 
     FONT_DIR = Rails.root.join("app/assets/fonts")
 
+    # Shared between all PDF descendants that support currency-override
+    # fallback rendering (FT-038 owner statements, FT-039 financial reports).
+    # RU-only literal — backend i18n out of scope (FT-038 REQ-07 / FT-039 REQ-08).
+    FALLBACK_NOTICE = "Конвертация недоступна — показано в валюте организации".freeze
+
     def initialize(organization)
       @organization = organization
       @currency = CurrencyConfig.config_for(organization.currency)

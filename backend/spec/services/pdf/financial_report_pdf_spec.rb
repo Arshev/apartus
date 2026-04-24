@@ -43,4 +43,33 @@ RSpec.describe Pdf::FinancialReportPdf do
       expect(pdf.b[0..3]).to eq("%PDF")
     end
   end
+
+  describe "FT-039 — currency override + fallback notice" do
+    let(:org_rub) { create(:organization, currency: "RUB") }
+
+    it "renders with data[:currency] override different from org" do
+      usd_data = data.merge(currency: "USD")
+      pdf = described_class.new(org_rub, usd_data).render_pdf
+      expect(pdf.b[0..3]).to eq("%PDF")
+    end
+
+    it "renders fallback notice when currency_fallback_reason present" do
+      fallback_data = data.merge(currency_fallback_reason: "rate_not_found")
+      pdf_with = described_class.new(org_rub, fallback_data).render_pdf
+      pdf_without = described_class.new(org_rub, data).render_pdf
+      expect(pdf_with.b[0..3]).to eq("%PDF")
+      expect(pdf_with.bytesize).to be > pdf_without.bytesize
+    end
+
+    it "no override when data[:currency] equals org currency" do
+      same_data = data.merge(currency: "RUB")
+      pdf = described_class.new(org_rub, same_data).render_pdf
+      expect(pdf.b[0..3]).to eq("%PDF")
+    end
+
+    it "no override when data[:currency] is nil (default path)" do
+      pdf = described_class.new(org_rub, data).render_pdf
+      expect(pdf.b[0..3]).to eq("%PDF")
+    end
+  end
 end
