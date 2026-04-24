@@ -748,5 +748,31 @@
   "languages": {
     "ru": "Русский",
     "en": "English"
+  },
+  "currencyRates": {
+    "title": "Курсы валют",
+    "addOverride": "Добавить переопределение",
+    "apiRatesHeading": "Курсы из API (read-only)",
+    "apiRatesEmpty": "Курсы ещё не загружены. Ежедневный job подтянет их из currencyapi.com после настройки API-ключа.",
+    "manualOverridesHeading": "Ручные переопределения (только для вашей организации)",
+    "manualOverridesEmpty": "Пока нет ручных курсов. Используется курс из API.",
+    "editTitle": "Редактировать курс",
+    "createTitle": "Новый ручной курс",
+    "deleteTitle": "Удалить курс?",
+    "form": {
+      "baseCurrency": "Базовая валюта",
+      "quoteCurrency": "Котируемая валюта",
+      "rate": "Курс (единиц котируемой за 1 базовой)",
+      "effectiveDate": "Дата вступления в силу",
+      "note": "Примечание"
+    },
+    "table": {
+      "base": "Базовая",
+      "quote": "Котируемая",
+      "rate": "Курс",
+      "effectiveDate": "Дата",
+      "note": "Примечание",
+      "actions": "Действия"
+    }
   }
 }

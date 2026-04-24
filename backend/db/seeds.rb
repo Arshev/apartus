@@ -7,6 +7,10 @@
 #
 # Run: `bin/rails db:seed`
 
+if Rails.env.development?
+  load Rails.root.join("db/seeds/exchange_rates.rb").to_s
+end
+
 ActiveRecord::Base.transaction do
   puts "Seeding comprehensive demo data..."
 

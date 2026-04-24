@@ -10,6 +10,7 @@ class Organization < ApplicationRecord
   has_many :expenses, dependent: :destroy
   has_many :tasks, dependent: :destroy
   has_many :owners, dependent: :destroy
+  has_many :exchange_rates, dependent: :destroy
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: true

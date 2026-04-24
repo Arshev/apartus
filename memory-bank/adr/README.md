@@ -29,5 +29,6 @@ audience: humans_and_agents
 | [ADR-013](ADR-013-has-many-through-m2n.md) | has_many :through for Unit ↔ Amenity M:N | accepted | 2026-04-08 |
 | [ADR-014](ADR-014-adjacency-list-branch-tree.md) | Adjacency list for Branch tree | accepted | 2026-04-09 |
 | [ADR-015](ADR-015-cross-cutting-spec-patches.md) | Cross-cutting features own retrospective spec patches | accepted (historical) | 2026-04-09 |
+| [ADR-016](ADR-016-db-check-enforces-exchange-rate-invariant.md) | DB CHECK constraint enforces ExchangeRate source/tenancy invariant | accepted | 2026-04-24 |
 
 Нумерация монотонная, не переиспользуется. Новые ADR заводятся из шаблона [`../flows/templates/adr/ADR-XXX.md`](../flows/templates/adr/ADR-XXX.md).

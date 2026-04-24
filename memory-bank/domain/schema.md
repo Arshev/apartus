@@ -304,6 +304,21 @@ DB-level `ON DELETE RESTRICT` на `amenity_id` — второй рубеж ин
 | recipient_email | string | optional |
 | queued_at | datetime | not null |
 
+## ExchangeRate (FT-037)
+
+| Field | Type | Notes |
+|---|---|---|
+| id | bigint | PK |
+| base_currency | string(3) | not null, ISO code ∈ CurrencyConfig.codes |
+| quote_currency | string(3) | not null, ISO code ∈ CurrencyConfig.codes, ≠ base |
+| rate_x1e10 | bigint | not null, > 0; `major_target_per_major_source * 10**10` |
+| effective_date | date | not null |
+| source | string | not null, enum: `api` \| `manual` |
+| organization_id | bigint | FK optional; NULL ⇔ source=api, NOT NULL ⇔ source=manual (CHECK constraint) |
+| note | text | optional, manual overrides |
+| Indexes | | `(base, quote, effective_date, source)` unique WHERE organization_id IS NULL; `(base, quote, effective_date, source, organization_id)` unique WHERE organization_id IS NOT NULL |
+| CHECK | | `source='api' AND org IS NULL OR source='manual' AND org IS NOT NULL` (ADR-016); `rate_x1e10 > 0`; `base <> quote` |
+
 ## ER diagram
 
 ```mermaid

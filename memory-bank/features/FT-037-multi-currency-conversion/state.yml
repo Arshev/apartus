@@ -1,0 +1,9 @@
+feature: FT-037
+phase: done
+current_step: null
+next_action: "Коммит, push, PR, merge. AG-03 (prod API key) остаётся pending на момент deploy — job работает с graceful early-return без ключа."
+blockers:
+  - "AG-03 deferred: production API key currencyapi.com billing approval. Не блокирует merge; job имеет graceful early-return (SC-06/FM-10). Активируется после записи ключа в production credentials."
+branch: feature/ft-037-multi-currency-conversion
+last_updated: 2026-04-24
+last_session_note: "FT-037 DONE. Execution → Done gate пройден (code-review #1/#2 + simplify-review #1, отдельные агенты, автор ≠ ревьюер). feature.md: delivery_status=done. implementation-plan.md: status=archived. ADR-016 accepted. UC-006 created. Все 6 CHK зелёные, artefacts в artifacts/ft-037/verify/chk-0{1..6}/. Backend 1171/1171, Frontend 811/811. Регрессий нет."

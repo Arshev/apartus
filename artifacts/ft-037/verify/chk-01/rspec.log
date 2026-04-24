@@ -1,0 +1,34 @@
+
+CurrencyConverter
+  .convert
+    same currency
+      returns amount_cents unchanged and does not query DB
+    SC-01 — same decimals (USD->RUB), manual-over-api priority
+      uses manual override for org A
+      falls back to API rate for org B
+    SC-02 — cross-decimals (USD->UZS, 2->0)
+      returns correct minor UZS
+      round-trips UZS->USD->UZS within 1 minor unit (MET-03)
+    SC-03 — triangulation RUB->EUR via USD
+      computes via USD base
+    fallback by effective_date
+      picks the most recent rate with effective_date <= at
+    inverse rate (X->USD via stored USD->X)
+      computes RUB->USD as 1/USD->RUB
+    NEG-01 — empty DB
+      raises RateNotFound
+    NEG-02 — triangulation incomplete
+      raises RateNotFound when USD->EUR missing for triangulation
+    multi-tenant isolation (EC-04)
+      org A gets manual, org B gets API, no leak
+  .half_even_div
+    rounds half to even
+    rounds below half down, above half up
+
+Finished in 0.14839 seconds (files took 0.69118 seconds to load)
+13 examples, 0 failures
+
+Coverage report generated for RSpec to /Users/artshevko/dev/apartus-worktrees/FT-037/backend/coverage.
+Line Coverage: 4.32% (140 / 3244)
+Line coverage (4.31%) is below the expected minimum coverage (98.00%).
+SimpleCov failed with exit 2 due to a coverage related error

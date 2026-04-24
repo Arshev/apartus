@@ -1,0 +1,30 @@
+
+CurrencyApiClient
+  .latest
+    returns integer rate_x1e10 hash on success
+    raises Unauthorized on 401 (FM-02, NEG-09)
+    raises Error on 5xx
+    raises Error on blank api_key
+    handles partial response (FM-03, NEG-10) — returns only present rates
+    raises InvalidResponse on malformed JSON
+    sends apikey header and encoded currencies
+
+FetchExchangeRatesJob
+  #perform
+    SC-04 — idempotency + exact 1 HTTP request per run
+      creates 10 rows on first run and 0 new rows on second run
+      updates rate_x1e10 via upsert on repeated run with changed rates
+    SC-06 — api key missing
+      early-returns without HTTP call
+    NEG-09 — 401 invalid key (FM-02)
+      discards job without retrying
+    NEG-10 — partial response (FM-03)
+      upserts only present currencies
+
+Finished in 0.07921 seconds (files took 0.69515 seconds to load)
+12 examples, 0 failures
+
+Coverage report generated for RSpec to /Users/artshevko/dev/apartus-worktrees/FT-037/backend/coverage.
+Line Coverage: 2.52% (84 / 3339)
+Line coverage (2.51%) is below the expected minimum coverage (98.00%).
+SimpleCov failed with exit 2 due to a coverage related error

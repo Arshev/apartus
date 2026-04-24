@@ -748,5 +748,31 @@
   "languages": {
     "ru": "Русский",
     "en": "English"
+  },
+  "currencyRates": {
+    "title": "Currency rates",
+    "addOverride": "Add override",
+    "apiRatesHeading": "API rates (read-only)",
+    "apiRatesEmpty": "No rates yet. The daily job will fetch them from currencyapi.com once an API key is configured.",
+    "manualOverridesHeading": "Manual overrides (your organization only)",
+    "manualOverridesEmpty": "No manual overrides. API rates are used.",
+    "editTitle": "Edit rate",
+    "createTitle": "New manual override",
+    "deleteTitle": "Delete rate?",
+    "form": {
+      "baseCurrency": "Base currency",
+      "quoteCurrency": "Quote currency",
+      "rate": "Rate (quote units per 1 base)",
+      "effectiveDate": "Effective date",
+      "note": "Note"
+    },
+    "table": {
+      "base": "Base",
+      "quote": "Quote",
+      "rate": "Rate",
+      "effectiveDate": "Date",
+      "note": "Note",
+      "actions": "Actions"
+    }
   }
 }

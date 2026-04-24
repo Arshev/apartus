@@ -66,6 +66,7 @@ All scoped to current organization via X-Organization-Id.
 | /owners | GET | GET /:id | POST | PATCH /:id | DELETE /:id | GET /:id/statement |
 | /members | GET | — | POST | PATCH /:id | DELETE /:id | — |
 | /roles | GET | — | POST | PATCH /:id | DELETE /:id | — |
+| /exchange_rates | GET (splits `api_rates` + `manual_overrides`) | — | POST | PATCH /:id | DELETE /:id | FT-037 — permission `currency_rates.manage` required для write. GET возвращает `{api_rates: [...], manual_overrides: [...]}`. API rows (source=api, org IS NULL) видны read-only; mutation denied (CON-03, ADR-016). |
 
 ## Nested Resources
 
