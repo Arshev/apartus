@@ -1,0 +1,55 @@
+
+Api::V1::Owners
+  without auth
+    returns 401
+  GET /api/v1/owners
+    returns owners ordered by name
+    includes properties_count
+  GET /api/v1/owners/:id
+    returns the owner with all fields
+    returns 404 for non-existing
+  POST /api/v1/owners
+    creates an owner
+/Users/artshevko/.local/share/mise/installs/ruby/3.4.8/lib/ruby/gems/3.4.0/gems/rspec-rails-7.1.1/lib/rspec/rails/matchers/have_http_status.rb:219: warning: Status code :unprocessable_entity is deprecated and will be removed in a future version of Rack. Please use :unprocessable_content instead.
+    returns 422 for missing name
+  PATCH /api/v1/owners/:id
+    updates the owner
+/Users/artshevko/.local/share/mise/installs/ruby/3.4.8/lib/ruby/gems/3.4.0/gems/rspec-rails-7.1.1/lib/rspec/rails/matchers/have_http_status.rb:219: warning: Status code :unprocessable_entity is deprecated and will be removed in a future version of Rack. Please use :unprocessable_content instead.
+    returns 422 on invalid update
+  DELETE /api/v1/owners/:id
+    deletes the owner
+  GET /api/v1/owners/:id/statement
+    returns all expected keys
+    excludes cancelled reservations from revenue
+    returns zeros for owner with no properties
+    respects from/to date params
+    returns PDF when format=pdf
+    defaults invalid from/to to current month
+    with known financial data
+      commission = revenue * commission_rate / 10000
+      net_payout = revenue - commission - expenses
+      total_revenue sums reservation prices for owner's properties
+      total_expenses sums expenses for owner's properties
+    per-property breakdown
+      properties array has entry per property with revenue/commission/expenses/payout
+    currency conversion (FT-038)
+      EC-03 — no preferred_currency → pre-FT-038 behaviour (no conversion fields significant)
+      EC-03 — preferred_currency == org.currency → no conversion
+      SC-01 — RUB org, USD owner, stored USD→RUB rate → conversion applied
+      NEG-01 — RateNotFound → graceful fallback to org currency
+      NEG-02 — future period clamped to today (FM-02/CON-02)
+/Users/artshevko/.local/share/mise/installs/ruby/3.4.8/lib/ruby/gems/3.4.0/gems/rspec-rails-7.1.1/lib/rspec/rails/matchers/have_http_status.rb:219: warning: Status code :unprocessable_entity is deprecated and will be removed in a future version of Rack. Please use :unprocessable_content instead.
+      NEG-03 — PATCH with invalid preferred_currency → 422, not persisted
+      NEG-04 — foreign org owner → 404 on statement (PCON-01)
+      JSON owner PATCH accepts preferred_currency and persists
+  cross-org isolation
+    returns 404 for other org's owner
+    returns 404 for other org's owner statement
+
+Finished in 0.70548 seconds (files took 0.70315 seconds to load)
+31 examples, 0 failures
+
+Coverage report generated for RSpec to /Users/artshevko/dev/apartus-worktrees/FT-038/backend/coverage.
+Line Coverage: 14.29% (444 / 3107)
+Line coverage (14.29%) is below the expected minimum coverage (98.00%).
+SimpleCov failed with exit 2 due to a coverage related error

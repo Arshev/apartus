@@ -1,0 +1,8 @@
+feature: FT-038
+phase: done
+current_step: null
+next_action: "Коммит, push, PR, merge."
+blockers: []
+branch: feature/ft-038-owner-statement-currency
+last_updated: 2026-04-24
+last_session_note: "FT-038 DONE. Brief review 14→0 (2 iter), Plan review 0 (1 iter), Code review (Claude 8, Codex 2) — все P0/P1 применимые исправлены. Backend 1190+ / 0 (+ 50 FT-038), Frontend 811/811, build ok."
