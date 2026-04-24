@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_10_185436) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_24_173540) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -76,6 +76,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_185436) do
     t.index ["ical_export_token"], name: "index_channels_on_ical_export_token", unique: true
     t.index ["unit_id", "platform"], name: "index_channels_on_unit_id_and_platform"
     t.index ["unit_id"], name: "index_channels_on_unit_id"
+  end
+
+  create_table "exchange_rates", force: :cascade do |t|
+    t.string "base_currency", limit: 3, null: false
+    t.datetime "created_at", null: false
+    t.date "effective_date", null: false
+    t.text "note"
+    t.bigint "organization_id"
+    t.string "quote_currency", limit: 3, null: false
+    t.bigint "rate_x1e10", null: false
+    t.string "source", null: false
+    t.datetime "updated_at", null: false
+    t.index ["base_currency", "quote_currency", "effective_date", "source", "organization_id"], name: "idx_exchange_rates_unique_per_org", unique: true, where: "(organization_id IS NOT NULL)"
+    t.index ["base_currency", "quote_currency", "effective_date", "source"], name: "idx_exchange_rates_unique_global", unique: true, where: "(organization_id IS NULL)"
+    t.index ["organization_id"], name: "index_exchange_rates_on_organization_id"
+    t.check_constraint "base_currency::text <> quote_currency::text", name: "exchange_rates_base_differs_from_quote"
+    t.check_constraint "rate_x1e10 > 0", name: "exchange_rates_rate_positive"
+    t.check_constraint "source::text = 'api'::text AND organization_id IS NULL OR source::text = 'manual'::text AND organization_id IS NOT NULL", name: "exchange_rates_source_tenancy_invariant"
   end
 
   create_table "expenses", force: :cascade do |t|
@@ -297,6 +315,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_185436) do
   add_foreign_key "branches", "branches", column: "parent_branch_id", on_delete: :restrict
   add_foreign_key "branches", "organizations", on_delete: :cascade
   add_foreign_key "channels", "units", on_delete: :cascade
+  add_foreign_key "exchange_rates", "organizations"
   add_foreign_key "expenses", "organizations", on_delete: :cascade
   add_foreign_key "expenses", "properties", on_delete: :nullify
   add_foreign_key "guests", "organizations", on_delete: :cascade
