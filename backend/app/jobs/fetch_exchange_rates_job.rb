@@ -11,6 +11,11 @@ class FetchExchangeRatesJob < ApplicationJob
     Rails.logger.error("[FetchExchangeRatesJob] 401 from currencyapi.com — check api_key. #{error.message}")
   end
 
+  # Malformed response won't heal via retry — don't burn retry budget.
+  discard_on CurrencyApiClient::InvalidResponse do |_job, error|
+    Rails.logger.error("[FetchExchangeRatesJob] malformed response from currencyapi.com — #{error.message}")
+  end
+
   def perform
     api_key = Rails.application.credentials.dig(:currencyapi, :api_key)
     if api_key.blank?

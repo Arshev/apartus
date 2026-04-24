@@ -37,6 +37,8 @@ module Api
         else
           render json: { error: rate.errors.full_messages }, status: :unprocessable_entity
         end
+      rescue ActiveRecord::RecordNotUnique
+        render json: { error: [ "Duplicate rate for this currency pair and date" ] }, status: :unprocessable_entity
       end
 
       def destroy

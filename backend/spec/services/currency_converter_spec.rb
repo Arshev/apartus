@@ -113,6 +113,23 @@ RSpec.describe CurrencyConverter do
       end
     end
 
+    context "precision — no intermediate truncation (Codex P1-1)" do
+      before do
+        # USD↔UZS — largest scale difference in CurrencyConfig.
+        create(:exchange_rate, source: "api", base_currency: "USD", quote_currency: "UZS",
+               rate_x1e10: 127_000_000_000_000, effective_date: today) # 12_700 UZS/USD
+      end
+
+      it "UZS->USD via inverse returns exact 10 USD for 127_000 UZS (not 9_999)" do
+        # Old implementation truncated intermediate rate_x1e10, losing ~7e-7 precision.
+        # New implementation defers to a single half_even_div, so round-trip is exact.
+        result = described_class.convert(
+          amount_cents: 127_000, from: "UZS", to: "USD", at: today, organization: org_a
+        )
+        expect(result).to eq(1_000) # exactly 10.00 USD
+      end
+    end
+
     context "NEG-01 — empty DB" do
       it "raises RateNotFound" do
         expect {

@@ -129,6 +129,20 @@ RSpec.describe "Api::V1::ExchangeRates" do
       expect(response).to have_http_status(:not_found)
     end
 
+    it "returns 422 when PATCH would create duplicate (Codex P1-2)" do
+      first  = create(:exchange_rate, :manual, organization: organization,
+                      base_currency: "USD", quote_currency: "RUB",
+                      rate_x1e10: 1_000_000_000_000, effective_date: Date.current)
+      second = create(:exchange_rate, :manual, organization: organization,
+                      base_currency: "USD", quote_currency: "EUR",
+                      rate_x1e10: 9_200_000_000, effective_date: Date.current)
+      patch "/api/v1/exchange_rates/#{second.id}",
+            params: { exchange_rate: { quote_currency: "RUB", rate_x1e10: 1_100_000_000_000 } },
+            headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+      _ = first
+    end
+
     it "EC-05 / NEG-08 — returns 403 for API row (organization_id IS NULL)" do
       api = create(:exchange_rate, source: "api", organization_id: nil,
                    base_currency: "USD", quote_currency: "EUR", effective_date: Date.current)

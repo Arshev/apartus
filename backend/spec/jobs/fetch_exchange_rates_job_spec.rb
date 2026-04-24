@@ -62,5 +62,13 @@ RSpec.describe FetchExchangeRatesJob do
         expect(ExchangeRate.pluck(:quote_currency)).to match_array(%w[RUB EUR])
       end
     end
+
+    context "malformed JSON (Claude P2-01)" do
+      it "discards job without retry and without upsert" do
+        WebMock.stub_request(:get, /api\.currencyapi\.com/).to_return(status: 200, body: "<html>oops</html>")
+        expect { described_class.perform_now }.not_to raise_error
+        expect(ExchangeRate.count).to eq(0)
+      end
+    end
   end
 end

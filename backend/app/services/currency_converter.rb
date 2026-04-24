@@ -13,22 +13,47 @@ class CurrencyConverter
 
   RATE_SCALE = 10**10
 
+  # Priority: direct > inverse (reverse pair) > triangulate via USD.
+  # Rate is never materialized as an intermediate truncated integer;
+  # all division is deferred to a single final half_even_div to avoid
+  # precision loss for high-scale-difference pairs (USD↔UZS, USD↔IDR).
   def self.convert(amount_cents:, from:, to:, at:, organization:)
     raise ArgumentError, "organization is required" if organization.nil?
     return amount_cents if from == to
 
-    rate_x1e10 = find_rate_x1e10(from: from, to: to, at: at, organization: organization)
-    apply(amount_cents: amount_cents, from: from, to: to, rate_x1e10: rate_x1e10)
-  end
+    scale_up   = 10**[ CurrencyConfig.decimal_places(to) - CurrencyConfig.decimal_places(from), 0 ].max
+    scale_down = 10**[ CurrencyConfig.decimal_places(from) - CurrencyConfig.decimal_places(to), 0 ].max
 
-  def self.find_rate_x1e10(from:, to:, at:, organization:)
-    direct = lookup_direct(base: from, quote: to, at: at, organization: organization)
-    return direct if direct
+    # Direct: rate = stored / RATE_SCALE
+    if (direct = lookup_direct(base: from, quote: to, at: at, organization: organization))
+      return half_even_div(
+        amount_cents * direct * scale_up,
+        RATE_SCALE * scale_down
+      )
+    end
 
-    inverse = lookup_inverse(base: from, quote: to, at: at, organization: organization)
-    return inverse if inverse
+    # Inverse: have quote→base stored; rate(base→quote) = RATE_SCALE / reverse
+    if (reverse = lookup_direct(base: to, quote: from, at: at, organization: organization))
+      return half_even_div(
+        amount_cents * RATE_SCALE * scale_up,
+        reverse * scale_down
+      )
+    end
 
-    return triangulate(from: from, to: to, at: at, organization: organization) if from != "USD" && to != "USD"
+    # Triangulate via USD without materializing intermediate rate.
+    # rate(from→to) = rate(USD→to) / rate(USD→from).
+    # Each USD-pair may be direct or inverse; resolved as (numerator, denominator) fraction.
+    if from != "USD" && to != "USD"
+      from_num, from_den = resolve_rate_fraction(base: "USD", quote: from, at: at, organization: organization)
+      to_num,   to_den   = resolve_rate_fraction(base: "USD", quote: to,   at: at, organization: organization)
+      if from_num && to_num
+        # rate(from→to) = (to_num/to_den) / (from_num/from_den) = (to_num * from_den) / (to_den * from_num)
+        return half_even_div(
+          amount_cents * to_num * from_den * scale_up,
+          to_den * from_num * scale_down
+        )
+      end
+    end
 
     raise RateNotFound.new(from: from, to: to, at: at, organization_id: organization&.id)
   end
@@ -41,39 +66,16 @@ class CurrencyConverter
     api&.rate_x1e10
   end
 
-  def self.lookup_inverse(base:, quote:, at:, organization:)
-    # rate(base -> quote) = 1 / rate(quote -> base)
-    reverse_rate = lookup_direct(base: quote, quote: base, at: at, organization: organization)
-    return nil if reverse_rate.nil?
+  # Returns [numerator, denominator] — an exact rate as a fraction in major units,
+  # without integer truncation. Supports direct and inverse lookup.
+  def self.resolve_rate_fraction(base:, quote:, at:, organization:)
+    direct = lookup_direct(base: base, quote: quote, at: at, organization: organization)
+    return [ direct, RATE_SCALE ] if direct
 
-    # (10**10 * 10**10) / reverse = inverted rate in x1e10 form
-    (RATE_SCALE * RATE_SCALE) / reverse_rate
-  end
+    reverse = lookup_direct(base: quote, quote: base, at: at, organization: organization)
+    return [ RATE_SCALE, reverse ] if reverse
 
-  def self.triangulate(from:, to:, at:, organization:)
-    usd_from = find_rate_x1e10(from: "USD", to: from, at: at, organization: organization)
-    usd_to   = find_rate_x1e10(from: "USD", to: to,   at: at, organization: organization)
-    # from -> to = (1 / (USD->from)) * (USD->to)
-    # In x1e10: (RATE_SCALE * usd_to) / usd_from
-    (RATE_SCALE * usd_to) / usd_from
-  rescue RateNotFound
-    raise RateNotFound.new(from: from, to: to, at: at, organization_id: organization&.id)
-  end
-
-  def self.apply(amount_cents:, from:, to:, rate_x1e10:)
-    source_dec = CurrencyConfig.decimal_places(from)
-    target_dec = CurrencyConfig.decimal_places(to)
-    diff = target_dec - source_dec
-
-    if diff >= 0
-      numerator   = amount_cents * rate_x1e10 * (10**diff)
-      denominator = RATE_SCALE
-    else
-      numerator   = amount_cents * rate_x1e10
-      denominator = RATE_SCALE * (10**(-diff))
-    end
-
-    half_even_div(numerator, denominator)
+    [ nil, nil ]
   end
 
   # Integer half-even ("banker's") rounding division.
