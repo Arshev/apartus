@@ -454,7 +454,9 @@
       "email": "Email",
       "phone": "Телефон",
       "commissionPct": "Комиссия (%)",
-      "notes": "Заметки"
+      "notes": "Заметки",
+      "preferredCurrency": "Валюта отчёта",
+      "preferredCurrencyAuto": "Авто — валюта организации"
     },
     "emptyState": {
       "title": "Нет собственников"
@@ -478,7 +480,8 @@
         "payout": "К выплате"
       },
       "messages": {
-        "loadError": "Не удалось загрузить отчёт"
+        "loadError": "Не удалось загрузить отчёт",
+        "currencyFallbackNotice": "Конвертация недоступна — показано в валюте организации"
       }
     }
   },
