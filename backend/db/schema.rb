@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_24_173540) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_24_195403) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -178,6 +178,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_24_173540) do
     t.text "notes"
     t.bigint "organization_id", null: false
     t.string "phone", limit: 50
+    t.string "preferred_currency", limit: 3
     t.datetime "updated_at", null: false
     t.index ["organization_id"], name: "index_owners_on_organization_id"
   end

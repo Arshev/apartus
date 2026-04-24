@@ -1,0 +1,15 @@
+
+Pdf::FinancialReportPdf
+  #render_pdf
+    returns a valid PDF binary starting with %PDF
+    renders without error for empty data arrays
+    renders with zero-decimal currency (UZS)
+    renders with symbol-before currency (USD)
+
+Finished in 0.17613 seconds (files took 0.63885 seconds to load)
+4 examples, 0 failures
+
+Coverage report generated for RSpec to /Users/artshevko/dev/apartus-worktrees/FT-038/backend/coverage.
+Line Coverage: 3.23% (106 / 3279)
+Line coverage (3.23%) is below the expected minimum coverage (98.00%).
+SimpleCov failed with exit 2 due to a coverage related error

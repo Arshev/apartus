@@ -83,6 +83,41 @@ module Api
           properties: per_property
         }
 
+        # FT-038: convert to owner's preferred_currency when set and differs from org.
+        org_currency = Current.organization.currency
+        target_currency = owner.preferred_currency
+        if target_currency.present? && target_currency != org_currency
+          effective_at = [ to, Date.current ].min
+          begin
+            original_total = data[:total_revenue]
+            data[:total_revenue]  = CurrencyConverter.convert(amount_cents: data[:total_revenue],  from: org_currency, to: target_currency, at: effective_at, organization: Current.organization)
+            data[:total_expenses] = CurrencyConverter.convert(amount_cents: data[:total_expenses], from: org_currency, to: target_currency, at: effective_at, organization: Current.organization)
+            data[:commission]     = CurrencyConverter.convert(amount_cents: data[:commission],     from: org_currency, to: target_currency, at: effective_at, organization: Current.organization)
+            data[:net_payout]     = CurrencyConverter.convert(amount_cents: data[:net_payout],     from: org_currency, to: target_currency, at: effective_at, organization: Current.organization)
+            data[:properties] = data[:properties].map do |p|
+              {
+                property_name: p[:property_name],
+                revenue:    CurrencyConverter.convert(amount_cents: p[:revenue],    from: org_currency, to: target_currency, at: effective_at, organization: Current.organization),
+                commission: CurrencyConverter.convert(amount_cents: p[:commission], from: org_currency, to: target_currency, at: effective_at, organization: Current.organization),
+                expenses:   CurrencyConverter.convert(amount_cents: p[:expenses],   from: org_currency, to: target_currency, at: effective_at, organization: Current.organization),
+                payout:     CurrencyConverter.convert(amount_cents: p[:payout],     from: org_currency, to: target_currency, at: effective_at, organization: Current.organization)
+              }
+            end
+            data[:currency] = target_currency
+            data[:fx_rate_x1e10] = original_total.positive? ? (data[:total_revenue] * (10**10)) / original_total : nil
+            data[:currency_fallback_reason] = nil
+          rescue CurrencyConverter::RateNotFound
+            # fallback: keep original org-currency values
+            data[:currency] = org_currency
+            data[:fx_rate_x1e10] = nil
+            data[:currency_fallback_reason] = "rate_not_found"
+          end
+        else
+          data[:currency] = org_currency
+          data[:fx_rate_x1e10] = nil
+          data[:currency_fallback_reason] = nil
+        end
+
         if params[:format] == "pdf"
           pdf = Pdf::OwnerStatementPdf.new(Current.organization, data).render_pdf
           send_data pdf, filename: "statement_#{owner.name.parameterize}_#{from}_#{to}.pdf",
@@ -104,7 +139,7 @@ module Api
       end
 
       def owner_params
-        params.require(:owner).permit(:name, :email, :phone, :commission_rate, :notes)
+        params.require(:owner).permit(:name, :email, :phone, :commission_rate, :notes, :preferred_currency)
       end
 
       def owner_json(o)
@@ -117,6 +152,7 @@ module Api
           commission_rate: o.commission_rate,
           properties_count: o.properties.count,
           notes: o.notes,
+          preferred_currency: o.preferred_currency,
           created_at: o.created_at
         }
       end

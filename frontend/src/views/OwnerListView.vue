@@ -37,6 +37,14 @@
           <v-text-field v-model="form.email" :label="$t('owners.form.email')" class="mb-2" />
           <v-text-field v-model="form.phone" :label="$t('owners.form.phone')" class="mb-2" />
           <v-text-field v-model.number="form.commission_pct" :label="$t('owners.form.commissionPct')" type="number" step="0.1" class="mb-2" />
+          <v-select
+            v-model="form.preferred_currency"
+            :label="$t('owners.form.preferredCurrency')"
+            :items="preferredCurrencyOptions"
+            item-title="title"
+            item-value="value"
+            class="mb-2"
+          />
           <v-textarea v-model="form.notes" :label="$t('owners.form.notes')" rows="2" />
         </v-card-text>
         <v-card-actions>
@@ -66,9 +74,15 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useOwnersStore } from '../stores/owners'
+import { CURRENCY_LIST } from '../utils/currency'
 
 const { t } = useI18n()
 const store = useOwnersStore()
+
+const preferredCurrencyOptions = computed(() => [
+  { title: t('owners.form.preferredCurrencyAuto'), value: null },
+  ...CURRENCY_LIST.map((c) => ({ title: c.label, value: c.code })),
+])
 
 const headers = computed(() => [
   { title: t('owners.columns.name'), key: 'name' },
@@ -80,7 +94,7 @@ const headers = computed(() => [
 
 const formDialog = ref(false)
 const editing = ref(null)
-const form = ref({ name: '', email: '', phone: '', commission_pct: 0, notes: '' })
+const form = ref({ name: '', email: '', phone: '', commission_pct: 0, notes: '', preferred_currency: null })
 const formSubmitting = ref(false)
 const deleteDialog = ref(false)
 const deleting = ref(null)
@@ -90,13 +104,20 @@ const snackbarColor = ref('success')
 
 function openCreate() {
   editing.value = null
-  form.value = { name: '', email: '', phone: '', commission_pct: 0, notes: '' }
+  form.value = { name: '', email: '', phone: '', commission_pct: 0, notes: '', preferred_currency: null }
   formDialog.value = true
 }
 
 function openEdit(item) {
   editing.value = item
-  form.value = { name: item.name, email: item.email || '', phone: item.phone || '', commission_pct: (item.commission_rate || 0) / 100, notes: item.notes || '' }
+  form.value = {
+    name: item.name,
+    email: item.email || '',
+    phone: item.phone || '',
+    commission_pct: (item.commission_rate || 0) / 100,
+    notes: item.notes || '',
+    preferred_currency: item.preferred_currency || null,
+  }
   formDialog.value = true
 }
 

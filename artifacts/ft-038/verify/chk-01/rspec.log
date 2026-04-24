@@ -1,0 +1,21 @@
+
+Owner
+  validations
+    is expected to validate that :name cannot be empty/falsy
+    is expected to validate that the length of :name is at most 255
+    is expected to validate that :commission_rate looks like an integer greater than or equal to 0 and less than or equal to 10000
+  associations
+    is expected to belong to organization required: true
+    is expected to have many properties
+  preferred_currency (FT-038)
+    allows nil
+    accepts any CurrencyConfig code
+    rejects unknown codes (NEG-03)
+
+Finished in 0.0907 seconds (files took 0.86978 seconds to load)
+8 examples, 0 failures
+
+Coverage report generated for RSpec to /Users/artshevko/dev/apartus-worktrees/FT-038/backend/coverage.
+Line Coverage: 2.33% (77 / 3302)
+Line coverage (2.33%) is below the expected minimum coverage (98.00%).
+SimpleCov failed with exit 2 due to a coverage related error

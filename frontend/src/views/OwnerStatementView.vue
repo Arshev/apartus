@@ -9,6 +9,9 @@
 
     <v-progress-linear v-if="loading" indeterminate class="mb-4" />
     <v-alert v-if="error" type="error" class="mb-4">{{ error }}</v-alert>
+    <v-alert v-if="data?.currency_fallback_reason === 'rate_not_found'" type="warning" class="mb-4">
+      {{ $t('owners.statement.messages.currencyFallbackNotice') }}
+    </v-alert>
 
     <template v-if="data">
       <h2 class="text-h5 mb-4">{{ data.owner_name }} ({{ (data.commission_rate / 100).toFixed(1) }}%)</h2>
@@ -93,7 +96,10 @@ const propHeaders = computed(() => [
   { title: t('owners.statement.columns.payout'), key: 'payout' },
 ])
 
-function fmt(cents) { return formatMoney(cents, authStore.organization?.currency || 'RUB') }
+function fmt(cents) {
+  const code = data.value?.currency || authStore.organization?.currency || 'RUB'
+  return formatMoney(cents, code)
+}
 
 async function loadStatement() {
   loading.value = true

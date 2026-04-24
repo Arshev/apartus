@@ -12,12 +12,13 @@ module Pdf
 
     private
 
-    def fmt(cents)
-      value = @currency[:decimal_places].positive? ?
-        (cents / 100.0).round(@currency[:decimal_places]).to_s :
+    def fmt(cents, currency_override: nil)
+      cfg = currency_override ? CurrencyConfig.config_for(currency_override) : @currency
+      value = cfg[:decimal_places].positive? ?
+        (cents / 100.0).round(cfg[:decimal_places]).to_s :
         (cents / 100).to_s
-      @currency[:symbol_position] == :before ?
-        "#{@currency[:symbol]}#{value}" : "#{value} #{@currency[:symbol]}"
+      cfg[:symbol_position] == :before ?
+        "#{cfg[:symbol]}#{value}" : "#{value} #{cfg[:symbol]}"
     end
 
     def register_fonts
