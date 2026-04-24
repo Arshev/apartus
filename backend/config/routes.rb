@@ -47,6 +47,7 @@ Rails.application.routes.draw do
       end
 
       resources :expenses, only: [ :index, :create, :update, :destroy ]
+      resources :exchange_rates, only: [ :index, :create, :update, :destroy ]
       resources :tasks, only: [ :index, :create, :update, :destroy ]
       resources :channels, only: [ :index, :create, :update, :destroy ] do
         member do
