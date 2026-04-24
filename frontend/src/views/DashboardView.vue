@@ -8,9 +8,27 @@
       {{ authStore.organization?.name }}
     </p>
 
+    <div class="d-flex align-center mb-4">
+      <v-spacer />
+      <v-select
+        v-model="selectedCurrency"
+        :label="$t('reports.displayCurrency')"
+        :items="currencyOptions"
+        item-title="title"
+        item-value="value"
+        density="compact"
+        hide-details
+        style="max-width: 240px"
+        @update:model-value="loadDashboard"
+      />
+    </div>
+
     <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
     <v-alert v-if="error" type="error" class="mb-4" closable @click:close="error = null">
       {{ error }}
+    </v-alert>
+    <v-alert v-if="data?.currency_fallback_reason === 'rate_not_found'" type="warning" class="mb-4">
+      {{ $t('reports.messages.currencyFallbackNotice') }}
     </v-alert>
 
     <template v-if="data">
@@ -198,7 +216,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '../stores/auth'
 import * as dashboardApi from '../api/dashboard'
-import { formatMoney } from '../utils/currency'
+import { formatMoney, CURRENCY_LIST } from '../utils/currency'
 import { useRelativeDate } from '../composables/useRelativeDate'
 
 const { t } = useI18n()
@@ -209,10 +227,16 @@ const authStore = useAuthStore()
 const data = ref(null)
 const loading = ref(false)
 const error = ref(null)
+const selectedCurrency = ref(null)
 
-const currency = computed(() => authStore.organization?.currency || 'RUB')
+const currencyOptions = computed(() => [
+  { title: t('reports.displayCurrencyAuto'), value: null },
+  ...CURRENCY_LIST.map((c) => ({ title: c.label, value: c.code })),
+])
+
+const displayCurrency = computed(() => data.value?.currency || authStore.organization?.currency || 'RUB')
 function formatPrice(cents) {
-  return formatMoney(cents, currency.value)
+  return formatMoney(cents, displayCurrency.value)
 }
 
 const totalReservations = computed(() => {
@@ -246,7 +270,8 @@ async function loadDashboard() {
   loading.value = true
   error.value = null
   try {
-    data.value = await dashboardApi.get()
+    const params = selectedCurrency.value ? { currency: selectedCurrency.value } : {}
+    data.value = await dashboardApi.get(params)
   } catch (e) {
     console.error(e)
     error.value = t('dashboard.messages.loadError')
