@@ -1,0 +1,43 @@
+
+Api::V1::Reports
+  without auth
+    returns 401
+  GET /api/v1/reports/financial
+    returns all expected keys
+    defaults from/to to current month when params absent
+    defaults invalid date params to current month
+    returns zeros for empty org
+    does not include cross-org data
+    with known data
+      total_revenue sums only active reservation prices
+      total_expenses sums expenses in date range
+      net_income = total_revenue - total_expenses
+      ADR = total_revenue / occupied_nights (when occupied_nights > 0)
+      RevPAR = total_revenue / total_room_nights (when total_room_nights > 0)
+      total_room_nights = units * days in range
+      revenue_by_property breaks down per property
+      expenses_by_category groups correctly
+      occupancy_rate between 0 and 1
+  GET /api/v1/reports/financial/pdf
+    returns PDF content-type attachment
+    returns 403 for unauthorized user
+  as member without finances.view
+    returns 403
+  FT-039 — ?currency= override
+    NEG-01 — missing currency param → org currency, no significant new fields
+    NEG-01b — ?currency=<org> → no conversion
+    SC-01 — RUB org, ?currency=USD, stored rate → converted
+    NEG-02 — RateNotFound → graceful fallback
+/Users/artshevko/.local/share/mise/installs/ruby/3.4.8/lib/ruby/gems/3.4.0/gems/rspec-rails-7.1.1/lib/rspec/rails/matchers/have_http_status.rb:219: warning: Status code :unprocessable_entity is deprecated and will be removed in a future version of Rack. Please use :unprocessable_content instead.
+    NEG-03 — invalid currency → 422
+    PDF path also accepts ?currency= and returns PDF
+/Users/artshevko/.local/share/mise/installs/ruby/3.4.8/lib/ruby/gems/3.4.0/gems/rspec-rails-7.1.1/lib/rspec/rails/matchers/have_http_status.rb:219: warning: Status code :unprocessable_entity is deprecated and will be removed in a future version of Rack. Please use :unprocessable_content instead.
+    PDF path with invalid currency → 422
+
+Finished in 0.63215 seconds (files took 0.85318 seconds to load)
+25 examples, 0 failures
+
+Coverage report generated for RSpec to /Users/artshevko/dev/apartus-worktrees/FT-039/backend/coverage.
+Line Coverage: 12.86% (416 / 3236)
+Line coverage (12.85%) is below the expected minimum coverage (98.00%).
+SimpleCov failed with exit 2 due to a coverage related error

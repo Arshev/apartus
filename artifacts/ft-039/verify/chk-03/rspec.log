@@ -1,0 +1,31 @@
+
+Pdf::FinancialReportPdf
+  #render_pdf
+    returns a valid PDF binary starting with %PDF
+    renders without error for empty data arrays
+    renders with zero-decimal currency (UZS)
+    renders with symbol-before currency (USD)
+  FT-039 — currency override + fallback notice
+    renders with data[:currency] override different from org
+    renders fallback notice when currency_fallback_reason present
+    no override when data[:currency] equals org currency
+    no override when data[:currency] is nil (default path)
+
+Pdf::OwnerStatementPdf
+  #render_pdf
+    returns a valid PDF binary starting with %PDF
+    renders without error for empty properties
+  FT-038 — currency override
+    renders with display currency different from org (USD override)
+    no override when data[:currency] == org.currency
+    no override when data[:currency] is nil
+    renders fallback notice when currency_fallback_reason is present (FM-01)
+    zero-revenue (FM-06) renders without crash
+
+Finished in 0.57486 seconds (files took 0.67142 seconds to load)
+15 examples, 0 failures
+
+Coverage report generated for RSpec to /Users/artshevko/dev/apartus-worktrees/FT-039/backend/coverage.
+Line Coverage: 4.33% (145 / 3348)
+Line coverage (4.33%) is below the expected minimum coverage (98.00%).
+SimpleCov failed with exit 2 due to a coverage related error
