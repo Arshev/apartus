@@ -130,4 +130,54 @@ RSpec.describe "Api::V1::Dashboard" do
       expect(response).to have_http_status(:forbidden)
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # FT-039 — display currency via ?currency=
+  # ---------------------------------------------------------------------------
+  describe "FT-039 — ?currency= override" do
+    let(:org_rub) { create(:organization, currency: "RUB") }
+    let(:rub_user) { create(:user) }
+    let!(:rub_membership) { create(:membership, :owner, user: rub_user, organization: org_rub) }
+    let(:rub_headers) { auth_headers(rub_user, org_rub) }
+    let(:rub_property) { create(:property, organization: org_rub) }
+    let(:rub_unit) { create(:unit, property: rub_property) }
+
+    it "NEG-01 — missing param → org currency, additive fields null" do
+      get "/api/v1/dashboard", headers: rub_headers
+      body = response.parsed_body
+      expect(body["currency"]).to eq("RUB")
+      expect(body["fx_rate_x1e10"]).to be_nil
+      expect(body["currency_fallback_reason"]).to be_nil
+    end
+
+    it "SC-02 — RUB org, ?currency=USD → revenue_this_month converted" do
+      create(:reservation, unit: rub_unit, check_in: Date.current, check_out: Date.current + 1,
+             status: :confirmed, total_price_cents: 1_000_000)
+      create(:exchange_rate, source: "api", organization_id: nil,
+             base_currency: "USD", quote_currency: "RUB",
+             rate_x1e10: 1_000_000_000_000, effective_date: Date.current)
+
+      get "/api/v1/dashboard?currency=USD", headers: rub_headers
+      body = response.parsed_body
+      expect(body["currency"]).to eq("USD")
+      expect(body["revenue_this_month"]).to eq(10_000)
+      expect(body["fx_rate_x1e10"]).to eq(100_000_000)
+    end
+
+    it "NEG-02 — RateNotFound fallback" do
+      create(:reservation, unit: rub_unit, check_in: Date.current, check_out: Date.current + 1,
+             status: :confirmed, total_price_cents: 1_000_000)
+      get "/api/v1/dashboard?currency=USD", headers: rub_headers
+      body = response.parsed_body
+      expect(response).to have_http_status(:ok)
+      expect(body["currency"]).to eq("RUB")
+      expect(body["currency_fallback_reason"]).to eq("rate_not_found")
+      expect(body["revenue_this_month"]).to eq(1_000_000)
+    end
+
+    it "NEG-03 — invalid currency → 422" do
+      get "/api/v1/dashboard?currency=XYZ", headers: rub_headers
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
 end
