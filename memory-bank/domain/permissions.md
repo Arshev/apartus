@@ -28,7 +28,6 @@ canonical_for:
 
 > Note: `permissions.md` ранее заявлял 20, но `ALL_PERMISSIONS` в `app/models/concerns/permissions.rb` до FT-037 содержал 18. После FT-037 — 19 (+ `currency_rates.manage`). Рассогласование 20↔18 в pre-FT-037 доке — out of scope FT-037.
 
-
 | Code | Semantics | UI Features Gated |
 |------|-----------|-------------------|
 | organizations.manage | Update org settings | Settings → General save, currency change |

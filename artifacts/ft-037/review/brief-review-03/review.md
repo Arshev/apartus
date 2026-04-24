@@ -8,13 +8,15 @@
 ## Подтверждено
 
 Все 5 замечаний review #2 закрыты:
-1. ADR filenames — renamed в 4 точках ✓
-2. REQ-05 permission model — grounded в permissions.md (admin preset, owner bypass) ✓
-3. CON-03 — read/mutate scope разнесён; 404 для чужой org, 403 для NULL row ✓
-4. CON-06 + DEC-04 — DB CHECK constraint вместо thread-local; residual упоминания только в "rejected alternative" контексте ✓
-5. MET-01 — переформулировано: 10 stored + runtime inverse + triangulation без persist ✓
+
+- ADR filenames — renamed в 4 точках ✓
+- REQ-05 permission model — grounded в permissions.md (admin preset, owner bypass) ✓
+- CON-03 — read/mutate scope разнесён; 404 для чужой org, 403 для NULL row ✓
+- CON-06 + DEC-04 — DB CHECK constraint вместо thread-local; residual упоминания только в "rejected alternative" контексте ✓
+- MET-01 — переформулировано: 10 stored + runtime inverse + triangulation без persist ✓
 
 Дополнительно добавлено:
+
 - NEG-09 (FM-02 401), NEG-10 (FM-03 partial), NEG-11 (DEC-04 DB guard)
 - Change Surface: preset_roles seed + planned ADR-NNN
 - Traceability matrix обновлён

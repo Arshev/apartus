@@ -8,6 +8,7 @@
 ## Подтверждено
 
 Все 8 замечаний review #1 закрыты:
+
 - W1 P0: OQ-07 + AG-05 + ER-08 для webmock escalation ✓
 - W2 P1: STEP-14 → 14a/14b/14c ✓
 - W3 P1: STEP-01 deterministic check ✓

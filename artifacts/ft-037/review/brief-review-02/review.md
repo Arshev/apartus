@@ -7,17 +7,17 @@
 
 ## P0
 
-1. **Broken ADR filenames** — `ADR-004-money-as-cents.md` / `ADR-012-authorization.md` не существуют. Реальные: `ADR-004-integer-cents-for-money.md`, `ADR-012-class-level-authorize-nested-controllers.md`. 4 точки (frontmatter ×2 + ADR Dependencies ×2).
-2. **REQ-05 permission model неверна** — нет preset `owner`; `role_enum: :owner` bypass'ит через `Membership#can?`. Preset roles: `admin` (ALL), `manager` (subset), `viewer` (*.view).
-3. **403 vs 404 противоречие** — нужно разнести read scope (`global ∪ own-org`) и mutate scope (`own-org manual only`): чужая org → 404, NULL API row → 403.
+- **Broken ADR filenames** — `ADR-004-money-as-cents.md` / `ADR-012-authorization.md` не существуют. Реальные: `ADR-004-integer-cents-for-money.md`, `ADR-012-class-level-authorize-nested-controllers.md`. 4 точки (frontmatter ×2 + ADR Dependencies ×2).
+- **REQ-05 permission model неверна** — нет preset `owner`; `role_enum: :owner` bypass'ит через `Membership#can?`. Preset roles: `admin` (ALL), `manager` (subset), `viewer` (*.view).
+- **403 vs 404 противоречие** — нужно разнести read scope (`global ∪ own-org`) и mutate scope (`own-org manual only`): чужая org → 404, NULL API row → 403.
 
 ## P1
 
-4. **CON-06 `Current.api_context` thread-local fragile** — Solid Queue workers в pool, raise может оставить set-ный флаг для следующей job. Альтернатива: DB CHECK constraint + policy guard (DEC-04), без thread-local.
+- **CON-06 `Current.api_context` thread-local fragile** — Solid Queue workers в pool, raise может оставить set-ный флаг для следующей job. Альтернатива: DB CHECK constraint + policy guard (DEC-04), без thread-local.
 
 ## P2
 
-5. **MET-01 formulation двусмысленна** — "100% direct USD↔X" не ясно про runtime inverse.
+- **MET-01 formulation двусмысленна** — "100% direct USD↔X" не ясно про runtime inverse.
 
 ## Также отмечено (не блокер)
 
@@ -35,6 +35,7 @@
 ## Iteration 2 response (автор)
 
 Исправлены все 5 замечаний в одном проходе:
+
 - ADR filenames renamed (4 точки).
 - REQ-05 переписан: permission включается в `admin` preset, `owner` bypass через `Membership#can?`.
 - CON-03 разделён на read/mutate scope с явными 403/404 кейсами.

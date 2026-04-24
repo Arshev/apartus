@@ -71,19 +71,23 @@ must_not_define:
 - `ASM-03` `CurrencyConfig` предоставляет `decimals(code)` как публичный API (подтвердить до implementation; если нет — добавить в change surface).
 - `CON-01` ADR-004 invariant: все суммы — integer minor units в своей валюте. Конвертация compute-only, не пишет в исходные `*_cents`.
 - `CON-02` Rate storage — integer `rate_x1e10` (= `major_target_per_major_source * 10**10`). Формула с учётом разницы decimals (source=`s`, target=`t`):
-  ```
+
+  ```text
   numerator   = amount_minor * rate_x1e10 * (10 ** max(t - s, 0))
   denominator = (10 ** 10) * (10 ** max(s - t, 0))
   result_minor = half_even_div(numerator, denominator)   # integer-only
   ```
+
   где `half_even_div(n, d)`:
-  ```
+
+  ```text
   q, r = n.divmod(d)
   double_r = 2 * r
   return q if double_r < d
   return q + 1 if double_r > d
   q.even? ? q : q + 1                # banker's rounding on exact .5
   ```
+
   Всё integer — соблюдает ADR-004.
 - `CON-03` Multi-tenant: `organization_id IS NULL` → global API rate (shared resource, visible всем); `organization_id = X` → manual override только для org X. Два scope'а:
   - **Read scope** (`ExchangeRatePolicy::Scope#resolve`): `global OR own-org` — глобальные API rates видны для reference, manual overrides — только свои.
