@@ -203,6 +203,111 @@ RSpec.describe "Api::V1::Owners" do
       body = response.parsed_body
       expect(body["from"]).to eq(Date.current.beginning_of_month.to_s)
     end
+
+    # -------------------------------------------------------------------------
+    # FT-038: Owner statement in owner's currency
+    # -------------------------------------------------------------------------
+    describe "currency conversion (FT-038)" do
+      let(:org_rub) { create(:organization, currency: "RUB") }
+      let(:rub_user) { create(:user) }
+      let!(:rub_owner_membership) { create(:membership, :owner, user: rub_user, organization: org_rub) }
+      let(:rub_headers) { auth_headers(rub_user, org_rub) }
+
+      it "EC-03 — no preferred_currency → pre-FT-038 behaviour (no conversion fields significant)" do
+        o = create(:owner, organization: org_rub, commission_rate: 2000, preferred_currency: nil)
+        get "/api/v1/owners/#{o.id}/statement", headers: rub_headers
+        body = response.parsed_body
+        expect(body["currency"]).to eq("RUB")
+        expect(body["fx_rate_x1e10"]).to be_nil
+        expect(body["currency_fallback_reason"]).to be_nil
+      end
+
+      it "EC-03 — preferred_currency == org.currency → no conversion" do
+        o = create(:owner, organization: org_rub, commission_rate: 2000, preferred_currency: "RUB")
+        get "/api/v1/owners/#{o.id}/statement", headers: rub_headers
+        body = response.parsed_body
+        expect(body["currency"]).to eq("RUB")
+        expect(body["fx_rate_x1e10"]).to be_nil
+      end
+
+      it "SC-01 — RUB org, USD owner, stored USD→RUB rate → conversion applied" do
+        o = create(:owner, organization: org_rub, commission_rate: 2000, preferred_currency: "USD")
+        prop = create(:property, organization: org_rub, owner: o)
+        unit = create(:unit, property: prop)
+        create(:reservation, unit: unit, check_in: Date.current, check_out: Date.current + 1,
+               status: :confirmed, total_price_cents: 1_000_000) # 10 000 RUB
+        create(:exchange_rate, source: "api", organization_id: nil,
+               base_currency: "USD", quote_currency: "RUB",
+               rate_x1e10: 1_000_000_000_000, effective_date: Date.current) # 100 RUB per USD
+
+        get "/api/v1/owners/#{o.id}/statement", headers: rub_headers
+        body = response.parsed_body
+        expect(body["currency"]).to eq("USD")
+        expect(body["total_revenue"]).to eq(10_000) # 1_000_000 RUB cents → 10_000 USD cents
+        expect(body["fx_rate_x1e10"]).to eq(100_000_000) # effective forward RUB→USD per DEC-01
+        expect(body["currency_fallback_reason"]).to be_nil
+      end
+
+      it "NEG-01 — RateNotFound → graceful fallback to org currency" do
+        o = create(:owner, organization: org_rub, commission_rate: 2000, preferred_currency: "USD")
+        prop = create(:property, organization: org_rub, owner: o)
+        unit = create(:unit, property: prop)
+        create(:reservation, unit: unit, check_in: Date.current, check_out: Date.current + 1,
+               status: :confirmed, total_price_cents: 1_000_000)
+        # No ExchangeRate row seeded — RateNotFound expected
+
+        get "/api/v1/owners/#{o.id}/statement", headers: rub_headers
+        expect(response).to have_http_status(:ok)
+        body = response.parsed_body
+        expect(body["currency"]).to eq("RUB")
+        expect(body["fx_rate_x1e10"]).to be_nil
+        expect(body["currency_fallback_reason"]).to eq("rate_not_found")
+        expect(body["total_revenue"]).to eq(1_000_000) # original org-currency value preserved
+      end
+
+      it "NEG-02 — future period clamped to today (FM-02/CON-02)" do
+        o = create(:owner, organization: org_rub, commission_rate: 2000, preferred_currency: "USD")
+        prop = create(:property, organization: org_rub, owner: o)
+        unit = create(:unit, property: prop)
+        future_to = Date.current + 60
+        create(:reservation, unit: unit, check_in: Date.current, check_out: Date.current + 1,
+               status: :confirmed, total_price_cents: 1_000_000)
+        # Rate stored only on today; future_to would be RateNotFound without clamp
+        create(:exchange_rate, source: "api", organization_id: nil,
+               base_currency: "USD", quote_currency: "RUB",
+               rate_x1e10: 1_000_000_000_000, effective_date: Date.current)
+
+        get "/api/v1/owners/#{o.id}/statement",
+            params: { from: Date.current.to_s, to: future_to.to_s }, headers: rub_headers
+        body = response.parsed_body
+        expect(body["currency"]).to eq("USD")
+        expect(body["currency_fallback_reason"]).to be_nil
+      end
+
+      it "NEG-03 — PATCH with invalid preferred_currency → 422, not persisted" do
+        o = create(:owner, organization: org_rub, commission_rate: 2000)
+        patch "/api/v1/owners/#{o.id}",
+              params: { owner: { preferred_currency: "XYZ" } }, headers: rub_headers
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(o.reload.preferred_currency).to be_nil
+      end
+
+      it "NEG-04 — foreign org owner → 404 on statement (PCON-01)" do
+        other_org = create(:organization)
+        other_owner = create(:owner, organization: other_org, preferred_currency: "USD")
+        get "/api/v1/owners/#{other_owner.id}/statement", headers: rub_headers
+        expect(response).to have_http_status(:not_found)
+      end
+
+      it "JSON owner PATCH accepts preferred_currency and persists" do
+        o = create(:owner, organization: org_rub, commission_rate: 2000)
+        patch "/api/v1/owners/#{o.id}",
+              params: { owner: { preferred_currency: "EUR" } }, headers: rub_headers
+        expect(response).to have_http_status(:ok)
+        expect(response.parsed_body["preferred_currency"]).to eq("EUR")
+        expect(o.reload.preferred_currency).to eq("EUR")
+      end
+    end
   end
 
   context "cross-org isolation" do
