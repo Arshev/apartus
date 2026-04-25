@@ -80,16 +80,6 @@ module Api
 
       private
 
-      def validated_target_currency
-        return nil if params[:currency].blank?
-        code = params[:currency]
-        unless CurrencyConfig.codes.include?(code)
-          render json: { error: [ "Invalid currency code: #{code}" ] }, status: :unprocessable_entity
-          return nil
-        end
-        code
-      end
-
       # FT-039: dashboard conversion — only revenue_this_month is cents.
       # effective_at = Date.current (snapshot, no from/to).
       def apply_currency_conversion!(data, target:)

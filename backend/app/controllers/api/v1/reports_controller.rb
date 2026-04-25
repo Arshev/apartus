@@ -25,16 +25,6 @@ module Api
 
       private
 
-      def validated_target_currency
-        return nil if params[:currency].blank?
-        code = params[:currency]
-        unless CurrencyConfig.codes.include?(code)
-          render json: { error: [ "Invalid currency code: #{code}" ] }, status: :unprocessable_entity
-          return nil
-        end
-        code
-      end
-
       def build_financial_data(from, to, target: nil)
         days = (to - from).to_i + 1
         org = Current.organization
