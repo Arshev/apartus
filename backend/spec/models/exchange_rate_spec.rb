@@ -121,4 +121,28 @@ RSpec.describe ExchangeRate, type: :model do
       end
     end
   end
+
+  describe "FK on_delete: :cascade (PG metadata)" do
+    it "exchange_rates → organizations FK has ON DELETE CASCADE" do
+      row = ActiveRecord::Base.connection.select_one(<<~SQL)
+        SELECT confdeltype FROM pg_constraint
+        WHERE conrelid = 'exchange_rates'::regclass
+          AND confrelid = 'organizations'::regclass
+          AND contype = 'f'
+        LIMIT 1
+      SQL
+      # 'c' = CASCADE, 'a' = NO ACTION (default), 'r' = RESTRICT
+      expect(row).to be_present
+      expect(row["confdeltype"]).to eq("c")
+    end
+
+    it "destroying organization removes its manual overrides (AR dependent: :destroy)" do
+      org = create(:organization)
+      rate = create(:exchange_rate, :manual, organization: org,
+                    base_currency: "USD", quote_currency: "RUB",
+                    effective_date: Date.current)
+      org.destroy
+      expect(ExchangeRate.where(id: rate.id)).to be_empty
+    end
+  end
 end
