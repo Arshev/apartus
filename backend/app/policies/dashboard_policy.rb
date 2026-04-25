@@ -1,5 +1,5 @@
 class DashboardPolicy < ApplicationPolicy
   def show?
-    Current.membership&.can?("finances.view")
+    Current.membership&.can?("finance.view")
   end
 end

@@ -1,5 +1,5 @@
 class ReportPolicy < ApplicationPolicy
   def financial?
-    Current.membership&.can?("finances.view")
+    Current.membership&.can?("finance.view")
   end
 end
