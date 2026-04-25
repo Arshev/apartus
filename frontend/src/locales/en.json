@@ -42,7 +42,8 @@
       "maxLength5000": "Maximum 5000 characters",
       "capacityRange": "From 1 to 100",
       "minLength8": "Minimum 8 characters",
-      "passwordsMismatch": "Passwords do not match"
+      "passwordsMismatch": "Passwords do not match",
+      "positiveNumber": "Must be greater than 0"
     },
     "messages": {
       "saved": "Saved",
@@ -779,6 +780,9 @@
       "effectiveDate": "Date",
       "note": "Note",
       "actions": "Actions"
+    },
+    "validation": {
+      "quoteDiffersFromBase": "Quote currency must differ from base"
     }
   }
 }

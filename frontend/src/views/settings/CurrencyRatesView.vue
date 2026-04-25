@@ -44,8 +44,21 @@
         {{ store.rateAsMajorUnit(item.rate_x1e10) }}
       </template>
       <template #item.actions="{ item }">
-        <v-btn icon="mdi-pencil" variant="text" size="small" @click="openEdit(item)" />
-        <v-btn icon="mdi-delete" variant="text" size="small" color="error" @click="confirmDelete(item)" />
+        <v-btn
+          icon="mdi-pencil"
+          variant="text"
+          size="small"
+          :aria-label="$t('common.edit')"
+          @click="openEdit(item)"
+        />
+        <v-btn
+          icon="mdi-delete"
+          variant="text"
+          size="small"
+          color="error"
+          :aria-label="$t('common.delete')"
+          @click="confirmDelete(item)"
+        />
       </template>
     </v-data-table>
 
@@ -54,45 +67,56 @@
         <v-card-title>
           {{ editing ? $t('currencyRates.editTitle') : $t('currencyRates.createTitle') }}
         </v-card-title>
-        <v-card-text>
-          <v-select
-            v-model="form.base_currency"
-            :label="$t('currencyRates.form.baseCurrency')"
-            :items="currencyCodes"
-            class="mb-2"
-          />
-          <v-select
-            v-model="form.quote_currency"
-            :label="$t('currencyRates.form.quoteCurrency')"
-            :items="currencyCodes"
-            class="mb-2"
-          />
-          <v-text-field
-            v-model.number="form.rate"
-            :label="$t('currencyRates.form.rate')"
-            type="number"
-            step="0.0001"
-            class="mb-2"
-          />
-          <v-text-field
-            v-model="form.effective_date"
-            :label="$t('currencyRates.form.effectiveDate')"
-            type="date"
-            class="mb-2"
-          />
-          <v-textarea
-            v-model="form.note"
-            :label="$t('currencyRates.form.note')"
-            rows="2"
-          />
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn @click="formDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :loading="formSubmitting" @click="handleSubmit">
-            {{ editing ? $t('common.save') : $t('common.add') }}
-          </v-btn>
-        </v-card-actions>
+        <v-form v-model="formValid" @submit.prevent="handleSubmit">
+          <v-card-text>
+            <v-select
+              v-model="form.base_currency"
+              :label="$t('currencyRates.form.baseCurrency')"
+              :items="currencyCodes"
+              :rules="[required]"
+              class="mb-2"
+            />
+            <v-select
+              v-model="form.quote_currency"
+              :label="$t('currencyRates.form.quoteCurrency')"
+              :items="currencyCodes"
+              :rules="[required, differsFromBase]"
+              class="mb-2"
+            />
+            <v-text-field
+              v-model.number="form.rate"
+              :label="$t('currencyRates.form.rate')"
+              type="number"
+              step="0.0001"
+              :rules="[required, positiveNumber]"
+              class="mb-2"
+            />
+            <v-text-field
+              v-model="form.effective_date"
+              :label="$t('currencyRates.form.effectiveDate')"
+              type="date"
+              :rules="[required]"
+              class="mb-2"
+            />
+            <v-textarea
+              v-model="form.note"
+              :label="$t('currencyRates.form.note')"
+              rows="2"
+            />
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn @click="formDialog = false">{{ $t('common.cancel') }}</v-btn>
+            <v-btn
+              type="submit"
+              color="primary"
+              :loading="formSubmitting"
+              :disabled="!formValid"
+            >
+              {{ editing ? $t('common.save') : $t('common.add') }}
+            </v-btn>
+          </v-card-actions>
+        </v-form>
       </v-card>
     </v-dialog>
 
@@ -139,9 +163,14 @@ const manualHeaders = computed(() => [
 const formDialog = ref(false)
 const deleteDialog = ref(false)
 const formSubmitting = ref(false)
+const formValid = ref(false)
 const editing = ref(null)
 const toDelete = ref(null)
 const form = ref(defaultForm())
+
+const required = (v) => (v !== null && v !== undefined && v !== '') || t('common.validation.required')
+const positiveNumber = (v) => (typeof v === 'number' && v > 0) || t('common.validation.positiveNumber')
+const differsFromBase = (v) => v !== form.value.base_currency || t('currencyRates.validation.quoteDiffersFromBase')
 
 function defaultForm() {
   return {
