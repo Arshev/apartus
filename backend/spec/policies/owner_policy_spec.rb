@@ -16,8 +16,8 @@ RSpec.describe OwnerPolicy, type: :policy do
     end
   end
 
-  context "as member with finances.view" do
-    let(:role) { create(:role, organization: organization, permissions: %w[finances.view]) }
+  context "as member with finance.view" do
+    let(:role) { create(:role, organization: organization, permissions: %w[finance.view]) }
     let(:membership) { create(:membership, user: user, organization: organization, role: role, role_enum: :member) }
     before { stub_membership(membership) }
 
@@ -27,6 +27,20 @@ RSpec.describe OwnerPolicy, type: :policy do
 
     %i[create update destroy].each do |action|
       it { expect(subject.public_send(:"#{action}?")).to be false }
+    end
+  end
+
+  # Regression — reproduces the production bug where policy checked the
+  # plural code "finances.view" while Permissions::ALL_PERMISSIONS defines
+  # the singular "finance.view". Admin preset member could not access
+  # finance endpoints; only role_enum :owner worked via bypass.
+  context "as member with admin preset role" do
+    let(:role) { create(:role, organization: organization, permissions: Permissions::PRESET_ROLES[:admin][:permissions]) }
+    let(:membership) { create(:membership, user: user, organization: organization, role: role, role_enum: :member) }
+    before { stub_membership(membership) }
+
+    %i[index show create update destroy statement].each do |action|
+      it { expect(subject.public_send(:"#{action}?")).to be true }
     end
   end
 

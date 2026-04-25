@@ -13,8 +13,8 @@ RSpec.describe ReportPolicy, type: :policy do
     it { expect(subject.financial?).to be true }
   end
 
-  context "as member with finances.view" do
-    let(:role) { create(:role, organization: organization, permissions: %w[finances.view]) }
+  context "as member with finance.view" do
+    let(:role) { create(:role, organization: organization, permissions: %w[finance.view]) }
     let(:membership) { create(:membership, user: user, organization: organization, role: role, role_enum: :member) }
     before { stub_membership(membership) }
 
