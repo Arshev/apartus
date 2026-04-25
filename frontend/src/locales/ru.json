@@ -42,7 +42,8 @@
       "maxLength5000": "Максимум 5000 символов",
       "capacityRange": "От 1 до 100",
       "minLength8": "Минимум 8 символов",
-      "passwordsMismatch": "Пароли не совпадают"
+      "passwordsMismatch": "Пароли не совпадают",
+      "positiveNumber": "Должно быть больше 0"
     },
     "messages": {
       "saved": "Сохранено",
@@ -779,6 +780,9 @@
       "effectiveDate": "Дата",
       "note": "Примечание",
       "actions": "Действия"
+    },
+    "validation": {
+      "quoteDiffersFromBase": "Котируемая валюта должна отличаться от базовой"
     }
   }
 }
